@@ -1,0 +1,863 @@
+//
+global const asset CHARACTER_RANDOM = $"settings/itemflav/character/random.rpak"
+//
+//
+//
+global const array<asset> CHARACTER_ASSETS = [
+	//
+	$"settings/itemflav/character/bangalore.rpak", //
+	$"settings/itemflav/character/bloodhound.rpak", //
+	$"settings/itemflav/character/caustic.rpak", //
+	$"settings/itemflav/character/gibraltar.rpak", //
+	$"settings/itemflav/character/lifeline.rpak", //
+	$"settings/itemflav/character/mirage.rpak", //
+	$"settings/itemflav/character/octane.rpak", //
+	$"settings/itemflav/character/pathfinder.rpak", //
+	$"settings/itemflav/character/wraith.rpak", //
+	$"settings/itemflav/character/wattson.rpak", //
+	$"settings/itemflav/character/crypto.rpak", //
+	$"settings/itemflav/character/revenant.rpak", //
+	$"settings/itemflav/character/loba.rpak", //
+
+	//
+                 
+                                                  
+       
+                
+                                                 
+       
+                 
+                                                  
+       
+                
+                                                 
+       
+              
+                                               
+       
+                
+                                                 
+       
+	$"settings/itemflav/character/rampart.rpak", //
+                
+                                                 
+       
+                 
+                                                  
+       
+             
+                                              
+       
+              
+                                               
+       
+                
+                                                 
+       
+                 
+                                                  
+       
+              
+                                               
+       
+                   
+                                                    
+       
+                    
+                                                     
+       
+	#if(true)
+		$"settings/itemflav/character/dummie.rpak", //
+	#endif
+	#if(true)
+		CHARACTER_RANDOM, //
+	#endif
+            
+                                             
+       
+                  
+                                                   
+       
+              
+                                               
+       
+               
+                                                
+       
+                                        
+                                                                         
+       
+                                        
+                                                                         
+       
+                                        
+                                                                         
+       
+                                        
+                                                                         
+       
+                                        
+                                                                         
+       
+                                        
+                                                                         
+       
+                                        
+                                                                         
+       
+                                        
+                                                                         
+       
+                                        
+                                                                         
+       
+
+	$"settings/itemflav/character/horizon.rpak", //
+             
+		$"settings/itemflav/character/fuse.rpak", //
+       
+               
+                                                
+       
+
+                                        
+                                                                         
+       
+               
+                                                
+       
+                                      
+                                                                    
+       
+
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+]
+
+global const array<asset> CAL_EVENT_ASSET_LIST =
+[
+	$"settings/itemflav/calevent/season01.rpak",
+	$"settings/itemflav/calevent/season02.rpak",
+	$"settings/itemflav/calevent/season03.rpak",
+	$"settings/itemflav/calevent/season04.rpak",
+	$"settings/itemflav/calevent/season05.rpak",
+	$"settings/itemflav/calevent/season06.rpak",
+	$"settings/itemflav/calevent/season07.rpak",
+                    
+		$"settings/itemflav/calevent/season08.rpak",
+          
+	$"settings/itemflav/calevent/rankedseason02.rpak", //
+	$"settings/itemflav/calevent/rankedseason03.rpak", //
+	$"settings/itemflav/calevent/rankedseason04.rpak", //
+	$"settings/itemflav/calevent/rankedseason05.rpak", //
+	$"settings/itemflav/calevent/rankedseason06.rpak", //
+	$"settings/itemflav/calevent/rankedseason07.rpak", //
+                    
+		$"settings/itemflav/calevent/rankedseason08.rpak",
+          
+	$"settings/itemflav/calevent/s03e02.rpak",
+	$"settings/itemflav/calevent/s03e03_buffet.rpak",
+	$"settings/itemflav/calevent/s03e03_themedshop.rpak",
+	$"settings/itemflav/calevent/anniversary2020.rpak",
+	$"settings/itemflav/calevent/valentines2020.rpak",
+	$"settings/itemflav/calevent/s04e01.rpak",
+	$"settings/itemflav/calevent/s04e01_buffet.rpak",
+	$"settings/itemflav/calevent/s04e02_login.rpak",
+	$"settings/itemflav/calevent/s04e02_buffet.rpak",
+	$"settings/itemflav/calevent/s04e02_themedshop.rpak",
+	$"settings/itemflav/calevent/s05e01_collection.rpak",
+	$"settings/itemflav/calevent/s05e01_buffet.rpak",
+	$"settings/itemflav/calevent/s05e01_themedshop.rpak",
+	//
+	$"settings/itemflav/calevent/s06e01_collection.rpak",
+	$"settings/itemflav/calevent/s06e01_buffet.rpak",
+	$"settings/itemflav/calevent/s06e01_themedshop.rpak",
+	$"settings/itemflav/calevent/s06e02_login.rpak",
+	$"settings/itemflav/calevent/s06e02_buffet.rpak",
+	$"settings/itemflav/calevent/s06e02_themedshop.rpak",
+	$"settings/itemflav/calevent/s07e01_buffet.rpak",
+	$"settings/itemflav/calevent/s07e01_login.rpak",
+	$"settings/itemflav/calevent/login_medal_of_honor.rpak",
+                    
+		$"settings/itemflav/calevent/s07e02_buffet.rpak",
+		$"settings/itemflav/calevent/s07e02_collection.rpak",
+		$"settings/itemflav/calevent/s07e02_themedshop.rpak",
+          
+                     
+		$"settings/itemflav/calevent/login_steam_launch.rpak",
+       
+                    
+		$"settings/itemflav/calevent/s08ace_collection.rpak",
+		$"settings/itemflav/calevent/s08ace_buffet.rpak",
+		$"settings/itemflav/calevent/s08_anniversary_challenges.rpak",
+		$"settings/itemflav/calevent/sku_timed_s8.rpak",
+          
+]
+
+global const array<asset> LOADSCREEN_ASSET_LIST =
+[
+	$"settings/itemflav/loadscreen/favorite.rpak",
+	$"settings/itemflav/loadscreen/default.rpak",
+	$"settings/itemflav/loadscreen/random.rpak",
+	$"settings/itemflav/loadscreen/kings_canyon_og.rpak",
+	$"settings/itemflav/loadscreen/kings_canyon_mu1.rpak",
+	$"settings/itemflav/loadscreen/kings_canyon_mu2.rpak",
+	$"settings/itemflav/loadscreen/001.rpak",
+	$"settings/itemflav/loadscreen/002.rpak",
+	$"settings/itemflav/loadscreen/003.rpak",
+	$"settings/itemflav/loadscreen/004.rpak",
+	$"settings/itemflav/loadscreen/005.rpak",
+	$"settings/itemflav/loadscreen/006.rpak",
+	$"settings/itemflav/loadscreen/007.rpak",
+	$"settings/itemflav/loadscreen/008.rpak",
+	$"settings/itemflav/loadscreen/009.rpak",
+	$"settings/itemflav/loadscreen/010.rpak",
+	$"settings/itemflav/loadscreen/011.rpak",
+	$"settings/itemflav/loadscreen/s03bp_01.rpak",
+	$"settings/itemflav/loadscreen/s03bp_02.rpak",
+	$"settings/itemflav/loadscreen/s03bp_03.rpak",
+	$"settings/itemflav/loadscreen/s03bp_04.rpak",
+	$"settings/itemflav/loadscreen/s03bp_05.rpak",
+	$"settings/itemflav/loadscreen/s03bp_06.rpak",
+	$"settings/itemflav/loadscreen/s03bp_07.rpak",
+	$"settings/itemflav/loadscreen/s03bp_08.rpak",
+	$"settings/itemflav/loadscreen/s03bp_09.rpak",
+	$"settings/itemflav/loadscreen/s03bp_10.rpak",
+	$"settings/itemflav/loadscreen/s03bp_11.rpak",
+	$"settings/itemflav/loadscreen/s03e02_01.rpak",
+	$"settings/itemflav/loadscreen/s03e03_01.rpak",
+	$"settings/itemflav/loadscreen/s04bp_10.rpak",
+	$"settings/itemflav/loadscreen/s04bp_04.rpak",
+	$"settings/itemflav/loadscreen/s04bp_05.rpak",
+	$"settings/itemflav/loadscreen/s04bp_03.rpak",
+	$"settings/itemflav/loadscreen/s04bp_01.rpak",
+	$"settings/itemflav/loadscreen/s04bp_02.rpak",
+	$"settings/itemflav/loadscreen/s04bp_07.rpak",
+	$"settings/itemflav/loadscreen/s04bp_08.rpak",
+	$"settings/itemflav/loadscreen/s04bp_06.rpak",
+	$"settings/itemflav/loadscreen/s04bp_09.rpak",
+	$"settings/itemflav/loadscreen/s04e01_01.rpak",
+	$"settings/itemflav/loadscreen/s04e02_01.rpak",
+	$"settings/itemflav/loadscreen/s05bp_01.rpak",
+	$"settings/itemflav/loadscreen/s05bp_02.rpak",
+	$"settings/itemflav/loadscreen/s05bp_03.rpak",
+	$"settings/itemflav/loadscreen/s05bp_04.rpak",
+	$"settings/itemflav/loadscreen/s05bp_05.rpak",
+	$"settings/itemflav/loadscreen/s05bp_06.rpak",
+	$"settings/itemflav/loadscreen/s05bp_07.rpak",
+	$"settings/itemflav/loadscreen/s05bp_08.rpak",
+	$"settings/itemflav/loadscreen/s05bp_09.rpak",
+	$"settings/itemflav/loadscreen/s05bp_10.rpak",
+	$"settings/itemflav/loadscreen/s05e01_01.rpak",
+	$"settings/itemflav/loadscreen/s06bp_01.rpak",
+	$"settings/itemflav/loadscreen/s06bp_02.rpak",
+	$"settings/itemflav/loadscreen/s06bp_03.rpak",
+	$"settings/itemflav/loadscreen/s06bp_04.rpak",
+	$"settings/itemflav/loadscreen/s06bp_05.rpak",
+	$"settings/itemflav/loadscreen/s06e01_01.rpak",
+	$"settings/itemflav/loadscreen/s07bp_01.rpak",
+	$"settings/itemflav/loadscreen/s07bp_02.rpak",
+	$"settings/itemflav/loadscreen/s07bp_03.rpak",
+	$"settings/itemflav/loadscreen/s07bp_04.rpak",
+	$"settings/itemflav/loadscreen/s07bp_05.rpak",
+	$"settings/itemflav/loadscreen/s07bp_06.rpak",
+	$"settings/itemflav/loadscreen/s07bp_07.rpak",
+	$"settings/itemflav/loadscreen/s07bp_08.rpak",
+	$"settings/itemflav/loadscreen/s07bp_09.rpak",
+	$"settings/itemflav/loadscreen/s07bp_10.rpak",
+	$"settings/itemflav/loadscreen/s07e02_01.rpak",
+	$"settings/itemflav/loadscreen/s07e02_02.rpak",
+
+                    
+		$"settings/itemflav/loadscreen/s08bp_01.rpak",
+		$"settings/itemflav/loadscreen/s08bp_02.rpak",
+		$"settings/itemflav/loadscreen/s08bp_03.rpak",
+		$"settings/itemflav/loadscreen/s08bp_04.rpak",
+		$"settings/itemflav/loadscreen/s08bp_05.rpak",
+		$"settings/itemflav/loadscreen/s08bp_06.rpak",
+		$"settings/itemflav/loadscreen/s08bp_07.rpak",
+		$"settings/itemflav/loadscreen/s08bp_08.rpak",
+		$"settings/itemflav/loadscreen/s08bp_09.rpak",
+		$"settings/itemflav/loadscreen/s08bp_10.rpak",
+          
+]
+
+global const array<asset> MUSIC_PACK_ASSET_LIST =
+[
+	$"settings/itemflav/musicpack/favorite.rpak",
+	$"settings/itemflav/musicpack/default.rpak",
+	$"settings/itemflav/musicpack/random.rpak",
+	$"settings/itemflav/musicpack/season02_event01.rpak",
+	$"settings/itemflav/musicpack/s03e01.rpak",
+	$"settings/itemflav/musicpack/bangalore.rpak",
+	$"settings/itemflav/musicpack/bloodhound.rpak",
+	$"settings/itemflav/musicpack/caustic.rpak",
+	$"settings/itemflav/musicpack/lifeline.rpak",
+	$"settings/itemflav/musicpack/mirage.rpak",
+	$"settings/itemflav/musicpack/octane.rpak",
+	$"settings/itemflav/musicpack/pathfinder.rpak",
+	$"settings/itemflav/musicpack/wattson.rpak",
+	$"settings/itemflav/musicpack/wraith.rpak",
+	$"settings/itemflav/musicpack/s03bp_crypto.rpak",
+	$"settings/itemflav/musicpack/s03bp_gibraltar.rpak",
+	$"settings/itemflav/musicpack/s03e02.rpak",
+	$"settings/itemflav/musicpack/s04bp_revenant.rpak",
+	$"settings/itemflav/musicpack/s04bp_assimilation.rpak",
+	$"settings/itemflav/musicpack/s04e01.rpak",
+	$"settings/itemflav/musicpack/s04e02.rpak",
+	$"settings/itemflav/musicpack/s05bp_loba.rpak",
+	$"settings/itemflav/musicpack/s05bp_season5.rpak",
+	$"settings/itemflav/musicpack/s05e01.rpak",
+	$"settings/itemflav/musicpack/s06bp_rampart.rpak",
+	$"settings/itemflav/musicpack/s06bp_season6.rpak",
+	$"settings/itemflav/musicpack/s06e01.rpak",
+	$"settings/itemflav/musicpack/s06e02.rpak",
+	$"settings/itemflav/musicpack/s07bp_horizon.rpak",
+	$"settings/itemflav/musicpack/s07bp_season7.rpak",
+]
+
+
+global const array<asset> SKYDIVE_TRAIL_ASSET_LIST = [
+	$"settings/itemflav/skydive_trail/default.rpak",
+	$"settings/itemflav/skydive_trail/s02_diamond.rpak",
+	$"settings/itemflav/skydive_trail/s02_apex_predator.rpak",
+	$"settings/itemflav/skydive_trail/shadow_default.rpak",
+	$"settings/itemflav/skydive_trail/s03_diamond.rpak",
+	$"settings/itemflav/skydive_trail/s03_apex_predator.rpak",
+	$"settings/itemflav/skydive_trail/s04_master.rpak",
+	$"settings/itemflav/skydive_trail/s04_apex_predator.rpak",
+	$"settings/itemflav/skydive_trail/s05_apex_predator.rpak",
+	$"settings/itemflav/skydive_trail/s05_master.rpak",
+	$"settings/itemflav/skydive_trail/s06_apex_predator.rpak",
+	$"settings/itemflav/skydive_trail/s06_master.rpak",
+	$"settings/itemflav/skydive_trail/s07_apex_predator.rpak",
+	$"settings/itemflav/skydive_trail/s07_master.rpak",
+                    
+		$"settings/itemflav/skydive_trail/s04_diamond.rpak",
+		$"settings/itemflav/skydive_trail/s05_diamond.rpak",
+		$"settings/itemflav/skydive_trail/s06_diamond.rpak",
+		$"settings/itemflav/skydive_trail/s07_diamond.rpak",
+       
+
+]
+
+
+//
+//
+global const array<asset> ENTITLEMENT_ASSETS = [
+	//
+	$"settings/itemflav/entitlement/CHAMPION_SKU_PACK.rpak",
+                    
+                                                        
+       
+                    
+		$"settings/itemflav/entitlement/MAYHEM_PACK_FUSE.rpak",
+       
+	$"settings/itemflav/entitlement/ASCENSION_PACK_HORIZON.rpak",
+	$"settings/itemflav/entitlement/BOOSTED_PACK_RAMPART.rpak",
+	$"settings/itemflav/entitlement/THUNT_PACK_LOBA.rpak",
+	$"settings/itemflav/entitlement/ASSIMILATION_PACK_REVENANT.rpak",
+	$"settings/itemflav/entitlement/PATHFINDER_SKU_PACK.rpak",
+	$"settings/itemflav/entitlement/OCTANE_SKU_PACK.rpak",
+	$"settings/itemflav/entitlement/LIFELINE_SKU_PACK.rpak",
+	$"settings/itemflav/entitlement/BLOODHOUND_SKU_PACK.rpak",
+	$"settings/itemflav/entitlement/BLOODHOUND_LIFELINE_SKU_PACK.rpak",
+	
+                    
+		$"settings/itemflav/entitlement/GIBRALTAR_SKU_PACK.rpak"
+       
+
+                    
+                                                      
+       
+                    
+		$"settings/itemflav/entitlement/PSPLUS_PACK_09.rpak",
+       
+	$"settings/itemflav/entitlement/PSPLUS_PACK_08.rpak",
+	$"settings/itemflav/entitlement/PSPLUS_PACK_07.rpak",
+	$"settings/itemflav/entitlement/PSPLUS_PACK_06.rpak",
+	$"settings/itemflav/entitlement/PSPLUS_PACK_05.rpak",
+	$"settings/itemflav/entitlement/PSPLUS_PACK_04.rpak",
+	$"settings/itemflav/entitlement/PSPLUS_PACK_03.rpak",
+	$"settings/itemflav/entitlement/PSPLUS_PACK_02.rpak",
+	$"settings/itemflav/entitlement/PSPLUS_PACK_01.rpak",
+
+                    
+                                                             
+       
+                    
+		$"settings/itemflav/entitlement/amazon_octane_skin1.rpak",
+		$"settings/itemflav/entitlement/amazon_fuse_skin1.rpak",
+       
+                    
+		$"settings/itemflav/entitlement/twitch_wraith_skin2.rpak",
+       
+	$"settings/itemflav/entitlement/twitch_horizon_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_lifeline_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_bloodhound_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_charm2.rpak",
+	$"settings/itemflav/entitlement/twitch_rampart_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_charm1.rpak",
+	$"settings/itemflav/entitlement/twitch_pathfinder_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_gibraltar_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_loba_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_wraith_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_mirage_skin2.rpak",
+	$"settings/itemflav/entitlement/twitch_revenant_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_caustic_skin2.rpak",
+	$"settings/itemflav/entitlement/twitch_crypto_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_wattson_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_octane_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_mirage_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_launch_promo.rpak",
+	$"settings/itemflav/entitlement/twitch_caustic_skin1.rpak",
+	$"settings/itemflav/entitlement/twitch_bangalore_skin1.rpak",
+
+	//
+                   
+                                                              
+                                                             
+                                                                
+                                                              
+      
+]
+
+
+global const array<asset> WEAPON_CATEGORY_ASSETS =
+[
+	$"settings/itemflav/weapon_category/ar.rpak",
+	$"settings/itemflav/weapon_category/smg.rpak",
+	$"settings/itemflav/weapon_category/lmg.rpak",
+	$"settings/itemflav/weapon_category/sniper.rpak",
+	$"settings/itemflav/weapon_category/shotgun.rpak",
+	$"settings/itemflav/weapon_category/pistol.rpak",
+                      
+                                                     
+       
+]
+
+
+//
+global const array<asset> WEAPON_ASSETS =
+[
+	//
+	$"settings/itemflav/loot/main_weapon/alternator.rpak",
+	$"settings/itemflav/loot/main_weapon/autopistol.rpak",
+	$"settings/itemflav/loot/main_weapon/devotion.rpak",
+	$"settings/itemflav/loot/main_weapon/dmr.rpak",
+	$"settings/itemflav/loot/main_weapon/eva.rpak",
+	$"settings/itemflav/loot/main_weapon/flatline.rpak",
+	$"settings/itemflav/loot/main_weapon/g7.rpak",
+	$"settings/itemflav/loot/main_weapon/hemlok.rpak",
+	$"settings/itemflav/loot/main_weapon/kraber.rpak",
+	$"settings/itemflav/loot/main_weapon/mastiff.rpak",
+	$"settings/itemflav/loot/main_weapon/mozambique.rpak",
+	$"settings/itemflav/loot/main_weapon/pdw.rpak",
+	$"settings/itemflav/loot/main_weapon/peacekeeper.rpak",
+	$"settings/itemflav/loot/main_weapon/r97.rpak",
+	$"settings/itemflav/loot/main_weapon/r301.rpak",
+	$"settings/itemflav/loot/main_weapon/semipistol.rpak",
+	$"settings/itemflav/loot/main_weapon/spitfire.rpak",
+	$"settings/itemflav/loot/main_weapon/tripletake.rpak",
+	$"settings/itemflav/loot/main_weapon/wingman.rpak",
+	$"settings/itemflav/loot/main_weapon/energy_ar.rpak",
+	$"settings/itemflav/loot/main_weapon/lstar.rpak",
+	$"settings/itemflav/loot/main_weapon/chargerifle.rpak",
+	$"settings/itemflav/loot/main_weapon/sentinel.rpak",
+
+	//
+                    
+		$"settings/itemflav/loot/main_weapon/3030repeater.rpak",
+       
+                        
+                                                      
+       
+	$"settings/itemflav/loot/main_weapon/volt_smg.rpak",
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+                      
+              
+       
+]
+
+
+global const array<asset> PING_ASSETS =
+[
+	$"settings/itemflav/ping/ping_i_go.rpak",
+	$"settings/itemflav/ping/ping_area_visited.rpak",
+	$"settings/itemflav/ping/ping_attacking.rpak",
+	$"settings/itemflav/ping/ping_defending.rpak",
+	$"settings/itemflav/ping/ping_enemy.rpak",
+	$"settings/itemflav/ping/ping_looting.rpak",
+	$"settings/itemflav/ping/ping_watching.rpak",
+	$"settings/itemflav/ping/ping_my_banner.rpak",
+	$"settings/itemflav/ping/ping_respawn_beacon.rpak",
+]
+
+
+global const array<asset> GRX_PACK_ASSETS =
+[
+	$"settings/itemflav/pack/cosmetic_rare.rpak",
+	$"settings/itemflav/pack/cosmetic_epic.rpak",
+	$"settings/itemflav/pack/cosmetic_legendary.rpak",
+	$"settings/itemflav/pack/battle_pass_season1_basic.rpak",
+	$"settings/itemflav/pack/battle_pass_season1_bundle.rpak",
+	$"settings/itemflav/pack/cosmetic_event_season02_event01.rpak",
+	$"settings/itemflav/pack/bloodhound_heirloom.rpak",
+	$"settings/itemflav/pack/hardcoded_character_skin_mirage_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_character_skin_wattson_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_character_skin_bloodhound_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_weapon_skin_g7_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_weapon_skin_alternator_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_weapon_skin_autopistol_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_character_skin_pathfinder_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_weapon_skin_r97_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_character_skin_wraith_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_character_skin_lifeline_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_weapon_skin_peacekeeper_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/hardcoded_character_skin_gibraltar_season02_event01_legendary_01.rpak",
+	$"settings/itemflav/pack/cosmetic_event_s03e01.rpak",
+	$"settings/itemflav/pack/lifeline_heirloom.rpak",
+	$"settings/itemflav/pack/cosmetic_event_s03e02.rpak",
+	$"settings/itemflav/pack/pathfinder_heirloom.rpak",
+	$"settings/itemflav/pack/cosmetic_event_s04e01.rpak",
+	$"settings/itemflav/pack/octane_heirloom.rpak",
+	$"settings/itemflav/pack/wraith_heirloom.rpak",
+	$"settings/itemflav/pack/cosmetic_event_s05e01.rpak",
+	$"settings/itemflav/pack/mirage_heirloom.rpak",
+	$"settings/itemflav/pack/cosmetic_event_s06e01.rpak",
+	$"settings/itemflav/pack/caustic_heirloom.rpak",
+	$"settings/itemflav/pack/cosmetic_event_s07e02.rpak",
+	$"settings/itemflav/pack/gibraltar_heirloom.rpak",
+	$"settings/itemflav/pack/cosmetic_event_s08ace.rpak",
+]
+
+
+global const array<asset> GRX_CURRENCY_BUNDLE_ASSETS =
+[
+	$"settings/itemflav/currency_bundle/crafting_common.rpak",
+	$"settings/itemflav/currency_bundle/crafting_rare.rpak",
+	$"settings/itemflav/currency_bundle/crafting_epic.rpak",
+	$"settings/itemflav/currency_bundle/crafting_legendary.rpak",
+	$"settings/itemflav/currency_bundle/heirloom.rpak",
+]
+
+
+global const array<asset> VOUCHER_ASSETS =
+[
+	$"settings/itemflav/xp_boost/battlepass_season01.rpak",
+	$"settings/itemflav/xp_boost/battlepass_season02.rpak",
+	$"settings/itemflav/xp_boost/battlepass_season03.rpak",
+	$"settings/itemflav/xp_boost/battlepass_season04.rpak",
+	$"settings/itemflav/xp_boost/battlepass_season05.rpak",
+	$"settings/itemflav/xp_boost/battlepass_season06.rpak",
+	$"settings/itemflav/xp_boost/battlepass_season07.rpak",
+
+	$"settings/itemflav/voucher/challenge_reward_bp_levels_1.rpak",
+	$"settings/itemflav/voucher/challenge_reward_bp_points_1000.rpak",
+	$"settings/itemflav/voucher/challenge_reward_bp_points_3000.rpak",
+	$"settings/itemflav/voucher/challenge_reward_bp_points_6000.rpak",
+	$"settings/itemflav/voucher/challenge_reward_bp_points_5000.rpak",
+	$"settings/itemflav/voucher/challenge_reward_bp_points_10000.rpak",
+
+	$"settings/itemflav/voucher/challenge_reward_stars_1.rpak",
+	$"settings/itemflav/voucher/challenge_reward_stars_2.rpak",
+	$"settings/itemflav/voucher/challenge_reward_stars_3.rpak",
+	$"settings/itemflav/voucher/challenge_reward_stars_5.rpak",
+
+	$"settings/itemflav/voucher/s03e03_buffet_points_easy.rpak",
+	$"settings/itemflav/voucher/s03e03_buffet_points_medium.rpak",
+	$"settings/itemflav/voucher/s03e03_buffet_points_hard.rpak",
+	$"settings/itemflav/voucher/s03e03_buffet_points_bonus_easy.rpak",
+	$"settings/itemflav/voucher/s03e03_buffet_points_bonus_hard.rpak",
+
+	$"settings/itemflav/voucher/s04e01_buffet_points_200.rpak",
+	$"settings/itemflav/voucher/s04e02_buffet_points_200.rpak",
+	$"settings/itemflav/voucher/s05e01_buffet_points_200.rpak",
+	$"settings/itemflav/voucher/s06e01_buffet_points_200.rpak",
+	$"settings/itemflav/voucher/s06e02_buffet_points_200.rpak",
+	$"settings/itemflav/voucher/s07e01_buffet_points_200.rpak",
+	$"settings/itemflav/voucher/s07e02_buffet_points_200.rpak",
+                    
+		$"settings/itemflav/voucher/s08ace_buffet_points_200.rpak",
+          
+
+	$"settings/itemflav/voucher/s05_quest_piece.rpak",
+	$"settings/itemflav/voucher/s05_quest_reward_bp_points_3000.rpak",
+
+	$"settings/itemflav/voucher/s06_quest_piece.rpak",
+	$"settings/itemflav/voucher/s06_quest_reward_bp_points_5000.rpak",
+
+	$"settings/itemflav/voucher/s06_story_event_reward_first_challenges.rpak",
+	$"settings/itemflav/voucher/s06_story_event_reward_second_challenges.rpak",
+
+	$"settings/itemflav/voucher/s07_quest_piece.rpak",
+	$"settings/itemflav/voucher/s07_quest_reward_stars_1.rpak",
+]
+
+global const array<asset> CLUB_LOGO_LAYER_ELEMENTS =
+[
+	//
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_primitive_circle.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_primitive_circle_half.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_primitive_square.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_primitive_square_rounded.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_primitive_triangle.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_primitive_chevron.rpak"
+
+	//
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_shield_01.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_shield_02.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_shield_03.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_shield_04.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_shield_05.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_shield_06.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_triangle_01.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_triangle_02.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_octagon_01.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_frame_octagon_02.rpak"
+
+	//
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_ares.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_axealien.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_combatmedic.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_crafting.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_crow.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_crypto.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_evildice.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_fist.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_g10.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_halo.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_hammond.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_hunterstrophy.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_imc.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_kunai.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_lionhead.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_lionrampant.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_losttreasures.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_militarylogo01.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_nessycrosshair.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_pilot.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_respawn_logo.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_star01.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_wingmen.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_wolf.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_emblem_yinyang.rpak"
+
+	//
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_reticle01.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_stripes_diagonal.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_waves.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_drips01.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_cross.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_diamondlong.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_diamondwide.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_fourpoints.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_twosided.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_12star.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_ace.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_ascend.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_circle01.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_circle02.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_diagonal.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_ex.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_flag.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_gear.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_pyramid.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_sun.rpak"
+	$"settings/itemflav/club_logo_element/itemtype_clublogo_element_background_victory.rpak"
+]
+
+global const array<asset> CLUB_SEARCH_TAGS =
+[
+	//
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_gamemode_ranked.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_gamemode_unranked.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_gamemode_duos.rpak"
+                        
+                                                                                    
+       
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_gamemode_all.rpak"
+
+	//
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_playstyle_competitive.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_playstyle_casual.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_playstyle_allstyles.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_playstyle_lonewolves.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_playstyle_teamplayersonly.rpak"
+
+	//
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_experiencelevel_beginners.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_experiencelevel_help_beginners.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_experiencelevel_experienced.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_experiencelevel_allskills.rpak"
+
+	//
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_communication_micsonly.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_communication_micsoptional.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_communication_micsno.rpak"
+
+	//
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_social_familyfriendly.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_social_mature.rpak"
+	//
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_social_lgbt.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_social_disabledgamers.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_social_swearing_ok.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_social_swearing_no.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_social_trashtalk_ok.rpak"
+	$"settings/itemflav/club_search_tag/itemtype_club_search_tag_social_trashtalk_no.rpak"
+]
+
+global const array<asset> SKU_APEX_COIN_AMOUNTS =
+[
+	$"settings/itemflav/apex_coins/coins_600.rpak"
+	$"settings/itemflav/apex_coins/coins_1000.rpak"
+	$"settings/itemflav/apex_coins/coins_2150.rpak"
+]

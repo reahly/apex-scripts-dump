@@ -1,0 +1,58 @@
+//
+
+#if(CLIENT)
+global function EmitUISound
+global function StopUISoundByName
+#endif
+
+#if(UI)
+global function ClientToUI_EmitUISound
+global function ClientToUI_StopUISoundByName
+#endif
+
+
+//
+//
+//
+//
+//
+
+#if(CLIENT)
+void function EmitUISound( string soundName )
+{
+	RunUIScript( "ClientToUI_EmitUISound", soundName )
+}
+#endif
+
+
+#if(CLIENT)
+void function StopUISoundByName( string soundName )
+{
+	RunUIScript( "ClientToUI_StopUISoundByName", soundName )
+}
+#endif
+
+
+
+//
+//
+//
+//
+//
+
+#if(UI)
+void function ClientToUI_EmitUISound( string soundName )
+{
+	EmitUISound( soundName )
+}
+#endif
+
+#if(UI)
+
+void function ClientToUI_StopUISoundByName( string soundName )
+{
+	StopUISoundByName( soundName )
+}
+#endif
+
+

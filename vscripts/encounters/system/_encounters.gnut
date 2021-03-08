@@ -1,0 +1,85 @@
+global function EncounterSystem_Init
+
+#if(false)
+
+
+#endif //
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+#endif //
+
+
+void function InitEncounterTypes()
+{
+                   
+                                    
+         
+
+                  
+                                 
+         
+}
+
+void function EncounterSystem_Init()
+{
+	InitEncounterTypes()
+}
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+#endif //

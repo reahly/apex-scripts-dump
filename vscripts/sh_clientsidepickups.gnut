@@ -1,0 +1,99 @@
+global function ClientSidePickups_Init
+
+#if(CLIENT)
+global function ClientCodeCallback_OnClientSideItemPickup
+#endif //
+
+#if(false)
+
+#endif //
+
+
+global enum eCSPU
+{
+	MATCHCANDY_10,
+	MATCHCANDY_100,
+	MATCHCANDY_1000,
+
+	INSTANT_HEALTH_SMALL,
+
+	_count
+}
+
+//
+//
+//
+//
+//
+
+const asset MATCHCANDY_PICKUP_FX_1 = $"P_matchcandy_pickup_1"
+const asset MATCHCANDY_PICKUP_FX_10 = $"P_matchcandy_pickup_10"
+const asset MATCHCANDY_PICKUP_FX_100 = $"P_matchcandy_pickup_100"
+const asset INVISIBLE_GRENADE_MDL = $"mdl/weapons/grenades/invisible_grenade_projectile.rmdl"
+
+void function ClientSidePickups_Init()
+{
+	if ( !IsPVEMode() )
+		return
+
+	ClientSidePickups_InitType( eCSPU.MATCHCANDY_10,	INVISIBLE_GRENADE_MDL,	MATCHCANDY_PICKUP_FX_1 )
+	ClientSidePickups_InitType( eCSPU.MATCHCANDY_100,	INVISIBLE_GRENADE_MDL,	MATCHCANDY_PICKUP_FX_10 )
+	ClientSidePickups_InitType( eCSPU.MATCHCANDY_1000,	INVISIBLE_GRENADE_MDL,	MATCHCANDY_PICKUP_FX_100 )
+
+	ClientSidePickups_InitType( eCSPU.INSTANT_HEALTH_SMALL,	INVISIBLE_GRENADE_MDL, $"P_health_pickup_5" )
+}
+
+
+#if(CLIENT)
+void function ClientCodeCallback_OnClientSideItemPickup( int pickupType, int CSPUFLAGflags, int customFlags )
+{
+	entity player = GetLocalViewPlayer()
+	if ( !IsValid( player ) || !IsLocalClientPlayer( player ) )
+		return
+
+	if ( !IsPVEMode() )
+		return
+
+	switch ( pickupType )
+	{
+		case eCSPU.MATCHCANDY_10:
+		case eCSPU.MATCHCANDY_100:
+		case eCSPU.MATCHCANDY_1000:
+			MatchCandy_HandleClientSideItemPickup( player, pickupType, CSPUFLAGflags, customFlags )
+			break
+
+		case eCSPU.INSTANT_HEALTH_SMALL:
+			InstantHealthPickup_HandleClientSideItemPickup( player, pickupType, CSPUFLAGflags, customFlags )
+			break
+
+		default:
+			Warning( "ClientCodeCallback_OnClientSideItemPickup() - Unhandled item pickupType: " + pickupType )
+	}
+}
+#endif //
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
+

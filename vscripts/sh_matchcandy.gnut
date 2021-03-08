@@ -1,0 +1,508 @@
+global function MatchCandy_IsEnabled
+#if(CLIENT)
+global function MatchCandy_RegisterNetworking
+global function MatchCandy_GetTotalCreditsForPlayer
+global function MatchCandy_GetThisMatchCreditsForPlayer
+#else //
+global function MatchCandy_GetTotalCreditsForUI
+#endif //
+
+#if(CLIENT)
+global function MatchCandy_RUITrackForPlayer
+global function MatchCandy_HandleClientSideItemPickup
+#endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+//
+#endif //
+
+//
+
+#if(false)
+
+
+
+
+
+
+#endif //
+
+#if(CLIENT)
+const string NV_MATCHCANDY = "MATCHCANDY_points"
+void function MatchCandy_RegisterNetworking()
+{
+	if ( !MatchCandy_IsEnabled() )
+		return
+	RegisterNetworkedVariable( NV_MATCHCANDY, SNDC_PLAYER_EXCLUSIVE, SNVT_BIG_INT, 0 )
+}
+
+int function MatchCandy_GetTotalCreditsForPlayer( entity player )
+{
+	return player.GetPersistentVarAsInt( "pve.currency" )
+}
+
+int function MatchCandy_GetThisMatchCreditsForPlayer( entity player )
+{
+	if ( !MatchCandy_IsEnabled() )
+		return 0
+
+	Assert( !Freelance_IsHubLevel() )
+	return player.GetPlayerNetInt( NV_MATCHCANDY )
+}
+#else //
+
+int function MatchCandy_GetTotalCreditsForUI()
+{
+	return GetPersistentVarAsInt( "pve.currency" )
+}
+
+#endif //
+
+bool function IsEnabledFromPlaylist()
+{
+	return GetCurrentPlaylistVarBool( "freelance_matchcandy_enabled", false )
+}
+
+#if(UI)
+bool function MatchCandy_IsEnabled()
+{
+	return IsEnabledFromPlaylist()
+}
+#else
+bool s_isEnabledGot = false
+bool s_isEnabled = false
+bool function MatchCandy_IsEnabled()
+{
+	if ( !s_isEnabledGot )
+	{
+		s_isEnabled = IsEnabledFromPlaylist()
+		s_isEnabledGot = true
+	}
+	return s_isEnabled
+}
+#endif
+
+#if(CLIENT)
+void function MatchCandy_RUITrackForPlayer( var rui, string varName, entity player )
+{
+	if ( !MatchCandy_IsEnabled() )
+		return
+	RuiTrackInt( rui, varName, player, RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( NV_MATCHCANDY ) )
+}
+
+float s_nextTimeAllowedFlash1 = 0.0
+float s_nextTimeAllowedFlash10 = 0.0
+void function MatchCandy_HandleClientSideItemPickup( entity player, int pickupType, int CSPUFLAGflags, int customFlags )
+{
+	float timeNow = Time()
+	switch ( pickupType )
+	{
+		case eCSPU.MATCHCANDY_10:
+		{
+			EmitSoundOnEntity( player, "hud_boost_card_radar_jammer_redtextbeep_1p" )
+			if ( s_nextTimeAllowedFlash1 <= timeNow )
+				ScreenFlash( 1.6, 1.6, 1.6, 0.15, 0.6 )
+				//
+		}
+		break
+		case eCSPU.MATCHCANDY_100:
+		{
+			EmitSoundOnEntity( player, "ui_ingame_challengecompleted" )
+			if ( s_nextTimeAllowedFlash10 <= timeNow )
+			{
+				//
+				ScreenFlash( 1.7, 1.6, 1.3, 0.15, 0.6 )
+				s_nextTimeAllowedFlash1 = (timeNow + 0.4)
+			}
+		}
+		break
+		case eCSPU.MATCHCANDY_1000:
+		{
+			EmitSoundOnEntity( player, "ui_ingame_starearned_third" )
+			//
+			ScreenFlash( 1.5, 1.5, 2.0, 0.25, 0.6 )
+			s_nextTimeAllowedFlash10 = (timeNow + 0.5)
+			s_nextTimeAllowedFlash1 = (timeNow + 0.5)
+		}
+		break
+		default:
+		{
+			printt( "MatchCandy_HandleClientSideItemPickup() - Unhandled item pickupType:", pickupType )
+		}
+	}
+}
+
+#endif //
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+//
+
+//
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+#endif //

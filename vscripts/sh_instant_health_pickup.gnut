@@ -1,0 +1,88 @@
+
+#if(CLIENT)
+global function InstantHealthPickup_HandleClientSideItemPickup
+#endif //
+
+#if(false)
+
+
+
+
+
+
+//
+#endif //
+
+//
+
+#if(CLIENT)
+void function InstantHealthPickup_HandleClientSideItemPickup( entity player, int pickupType, int CSPUFLAGflags, int customFlags )
+{
+	float timeNow = Time()
+	switch ( pickupType )
+	{
+		case eCSPU.INSTANT_HEALTH_SMALL:
+		{
+			//
+			if ( RandomFloat( 1.0 ) < 0.8 )
+				EmitSoundOnEntity( player, "hud_boost_card_radar_jammer_redtextbeep_1p" )
+			else
+				EmitSoundOnEntity( player, "ui_ingame_challengecompleted" )
+			ScreenFlash( 1, 2, 1, 0.15, 0.6 )
+		}
+		break
+		default:
+			Warning( "%s() - Unhandled item pickupType: %d", FUNC_NAME(), pickupType )
+	}
+}
+#endif //
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+#endif //

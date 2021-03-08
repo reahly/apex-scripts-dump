@@ -1,0 +1,92 @@
+//
+
+#if CLIENT || UI 
+global function Realms_LevelInit
+#endif
+
+#if(CLIENT)
+global function CopyRealmsFromTo
+#endif
+
+#if(false)
+
+#endif
+
+
+#if(CLIENT)
+global const int REALM_COUNT = 64
+global enum eRealms
+{
+	//
+	DEFAULT = 0,
+	PROTO_ABILITY_HAUNT = 1,
+
+	//
+	//
+	//
+
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	STAGING_REALM_PLAYERS_START = 2,
+	STAGING_REALM_PLAYERS_END = (REALM_COUNT - 1),
+
+	_count = REALM_COUNT
+}
+#endif
+
+
+#if CLIENT || UI 
+struct FileStruct_LifetimeLevel
+{
+	//
+}
+#endif
+#if(CLIENT)
+FileStruct_LifetimeLevel fileLevel //
+#elseif(UI)
+FileStruct_LifetimeLevel& fileLevel //
+
+struct {
+	//
+} fileVM //
+#endif
+
+
+
+#if CLIENT || UI 
+void function Realms_LevelInit()
+{
+	#if(UI)
+		FileStruct_LifetimeLevel newFileLevel
+		fileLevel = newFileLevel
+	#endif
+
+
+}
+#endif
+
+
+#if(CLIENT)
+void function CopyRealmsFromTo( entity source, entity target )
+{
+	target.RemoveFromAllRealms()
+	target.AddToOtherEntitysRealms( source )
+}
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+#endif
+
+

@@ -1,0 +1,706 @@
+global function Sh_JumpPad_Init
+
+#if(CLIENT)
+global function ServerCallback_DisplayJumpPadHint
+#endif
+
+global function JumpPad_GiveDoubleJump
+
+#if(false)
+
+
+
+
+
+
+//
+//
+//
+
+//
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+//
+
+const TEAM_JUMPJET_DBL = $"P_team_jump_jet_ON_trails"
+const ENEMY_JUMPJET_DBL = $"P_enemy_jump_jet_ON_trails"
+const asset JUMP_PAD_MODEL = $"mdl/props/octane_jump_pad/octane_jump_pad.rmdl"
+const asset JUMP_PAD_LAUNCH_FX = $"P_launchpad_launch"
+const JUMP_PAD_DESTRUCTION = "jump_pad_destruction"
+
+void function Sh_JumpPad_Init()
+{
+	#if(false)
+
+
+#endif
+
+	PrecacheModel( JUMP_PAD_MODEL )
+	PrecacheImpactEffectTable( JUMP_PAD_DESTRUCTION )
+
+	RegisterSignal( "NewJumpPadThread" )
+	RegisterSignal( "JumpPadStart" )
+	RegisterSignal( "JumpPad_GiveDoubleJump" )
+
+	PrecacheParticleSystem( TEAM_JUMPJET_DBL )
+	PrecacheParticleSystem( ENEMY_JUMPJET_DBL )
+	PrecacheParticleSystem( JUMP_PAD_LAUNCH_FX )
+
+	#if(CLIENT)
+		AddCreateCallback( "trigger_cylinder_heavy", OnJumpPadCreated )
+	#endif
+}
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+//
+//
+
+//
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+//
+
+//
+//
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+//
+
+//
+
+#endif //
+
+#if(CLIENT)
+void function ServerCallback_DisplayJumpPadHint()
+{
+	thread _DisplayJumpPadHint()
+}
+
+void function _DisplayJumpPadHint()
+{
+	entity player = GetLocalViewPlayer()
+
+	if ( !IsValid( player ) )
+		return
+
+	if ( player.IsOnGround() )
+		return
+
+	EndSignal( player, "OnDeath" )
+
+	AddPlayerHint( 3.0, 0.25, $"", "#JUMP_PAD_DOUBLE_JUMP_HINT" )
+
+	OnThreadEnd(
+		function() : ()
+		{
+			HidePlayerHint( "#JUMP_PAD_DOUBLE_JUMP_HINT" )
+		}
+	)
+
+	while ( !player.IsOnGround() && !player.IsZiplining() )
+	{
+		WaitFrame()
+	}
+}
+#endif //
+
+
+void function JumpPad_GiveDoubleJump( entity player )
+{
+	Assert( player.IsPlayer() )
+
+	if ( !GetCurrentPlaylistVarBool( "octane_jump_pad_give_double_jump", true ) )
+		return
+
+	player.EndSignal( "OnDeath" )
+	player.Signal( "JumpPad_GiveDoubleJump" )
+	player.EndSignal( "JumpPad_GiveDoubleJump" )
+
+	wait 0.1
+
+	if ( !player.IsOnGround() )
+	{
+		GivePlayerSettingsMods( player, [ "enable_doublejump" ] )
+
+		#if(false)
+
+
+#endif
+
+		OnThreadEnd(
+			function() : ( player )
+			{
+				if ( IsValid( player ) )
+				{
+					TakePlayerSettingsMods( player, [ "enable_doublejump" ] )
+
+					#if(false)
+
+#endif
+				}
+			}
+		)
+
+		while ( !player.IsOnGround() && !player.IsZiplining() )
+		{
+			WaitFrame()
+		}
+	}
+}
+
+#if(false)
+
+
+
+
+#endif //
+
+#if(CLIENT)
+void function OnJumpPadCreated( entity trigger )
+{
+	if ( trigger.GetTriggerType() != TT_JUMP_PAD )
+		return
+
+	if ( trigger.GetTargetName() == "geyser_trigger" )
+		return
+
+	if ( trigger.GetTargetName() == "skydive_launcher_trigger" )
+		return
+
+	trigger.SetClientEnterCallback( JumpPad_OnTouchTrigger_Client )
+}
+
+void function JumpPad_OnTouchTrigger_Client( entity trigger, entity player )
+{
+	entity localViewPlayer = GetLocalViewPlayer()
+	if ( player != localViewPlayer )
+		return
+
+	if ( !IsPilot( player ) )
+		return
+
+	EmitSoundOnEntity( player, "JumpPad_LaunchPlayer_1p" )
+	EmitSoundOnEntity( player, "JumpPad_Ascent_Windrush" )
+
+	thread JumpPad_GiveDoubleJump( player )
+
+	Chroma_UsedJumpPad()
+}
+#endif //

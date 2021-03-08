@@ -1,0 +1,60 @@
+
+global function GameModes_Init_SV_CL
+
+void function GameModes_Init_SV_CL()
+{
+	string gameMode
+
+	gameMode = TEAM_DEATHMATCH
+#if(false)
+
+
+
+#endif
+#if(!UI)
+	GameMode_AddSharedInit( gameMode, GamemodeTdmShared_Init )
+
+	#if(false)
+
+#endif
+#endif
+
+	gameMode = SURVIVAL
+#if(false)
+
+
+
+
+#elseif(CLIENT)
+	GameMode_AddClientInit( gameMode, ClGamemodeSurvival_Init )
+#endif
+#if(!UI)
+	GameMode_AddSharedInit( gameMode, GamemodeSurvivalShared_Init )
+
+	#if(false)
+
+#endif
+#endif
+
+	gameMode = GAMEMODE_FREELANCE
+#if(false)
+
+
+
+#endif
+#if(CLIENT)
+	GameMode_AddClientInit( gameMode, ClientInit_Freelance )
+#endif
+#if(!UI)
+	GameMode_AddSharedInit( gameMode, SharedInit_Freelance )
+
+	#if(false)
+
+#endif
+#endif
+
+                   
+                            
+       
+
+}

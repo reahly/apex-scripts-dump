@@ -1,0 +1,3472 @@
+global function Sh_Ranked_Init
+global function Sh_Ranked_ItemRegistrationInit
+global function GetCurrentRankedDivisionFromScoreAndLadderPosition
+global function GetCurrentRankedDivisionFromScore
+global function GetNextRankedDivisionFromScore
+//
+global function GetPlayerRankScore
+global function IsRankedPersistenceValid
+global function IsRankedInSeason
+global function GetRankedPersistenceData
+
+global function Ranked_GetTiers
+global function Ranked_GetCostForEntry
+global function Ranked_GetPointsPerKillForPlacement
+global function Ranked_GetPointsForKills
+global function Ranked_GetPointsForAssists
+global function Ranked_GetKillsAndAssistsPointCap
+global function Ranked_GetPointsForPlacement
+global function Ranked_GetPenaltyPointsForAbandon
+global function Ranked_GetIconForRank
+global function Ranked_GetRankedDivisionDataForTier
+global function Ranked_GetNextTierData
+global function Ranked_GetPrevTierData
+global function Ranked_GetLadderPosition
+global function Ranked_GetTopRankedDivision
+
+global function Ranked_GetHistoricalRankScore
+global function Ranked_GetHistoricalFirstSplitRankScore
+global function Ranked_GetHistoricalRankedDivisionFromScore
+
+global function Ranked_GetHighestHistoricalRankedTierData
+
+global function Ranked_GetTierOfThresholdForRankedPartyDifferences
+global function Ranked_GetHistoricalRankedDivisionFromScoreAndLadderPosition
+global function Ranked_GetHistoricalLadderPosition
+global function Ranked_GetHistoricalRankedPersistenceData
+
+global function Ranked_GetHistoricalRankScoreForTopRankedDivision //
+
+global function Ranked_GetNewDivisionForNewSeasonReset
+global function Ranked_GetNewDivisionForSeasonSplitReset
+
+global function Ranked_UpdateEHIRankScore
+global function Ranked_UpdateEHIRankedLadderPosition
+global function Ranked_GetNumPlayersOnLadder
+
+global function Ranked_GetStryderLadderNameForLatestRankedPeriod
+global function Ranked_GetStryderLadderNameForHistoricalRankedPeriod
+global function Ranked_GetHighestHistoricalTierAcrossSplitsForPlayer
+
+#if CLIENT || UI 
+global function PopulateRuiWithRankedBadgeDetails
+global function PopulateRuiWithHistoricalRankedBadgeDetails //
+global function CreateNestedRankedRui
+global function Ranked_FillInRuiEmblemText
+#endif
+
+#if(CLIENT)
+global function IsRankedGame
+global function Ranked_IsPlayerAbandoning
+#endif
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+#endif
+
+#if CLIENT && DEV 
+global function Ranked_ForceClientError
+#endif
+
+#if(CLIENT)
+global function ShRanked_RegisterNetworkFunctions
+#endif
+
+#if(UI)
+global function IsRankedPlaylist
+global function Ranked_SetupMenuGladCardForUIPlayer
+global function Ranked_SetupMenuGladCardFromCommunityUserInfo
+global function Ranked_GetMatchmakingDelayFromCommunityUserInfo
+global function Ranked_GetUIPlayerMatchmakingDelay
+global function Ranked_GetMaxPartyMatchmakingDelay
+global function Ranked_HasRankedPeriodMarkedForRewardAcknowledgement
+global function Ranked_GetRankedPeriodToAcknowledgReward
+global function Ranked_NeedToNotifySplitReset
+global function Ranked_GetSplitResetAcknowledgePersistenceField
+global function Ranked_NeedToNotifyRPAdjustment
+global function PlayLobbyCharacterDialogue
+global function Ranked_ShouldUpdateWithComnunityUserInfo
+global function Ranked_PartyHasRankedLevelAccess
+global function Ranked_PartyMeetsRankedDifferenceRequirements
+global function Ranked_HasBeenInitialized
+global function ServerToUI_Ranked_NotifyRankedPeriodScoreChanged
+global function Ranked_HasNotifiedRankedRewardsGiven
+global function Ranked_MarkRankedRewardsGivenNotified
+#endif
+
+global function Ranked_GetHistoricalRankedTiers
+global function Ranked_GetHistoricalRankedDivisions
+global function Ranked_GetHistoricalLadderOnlyDivision
+global function Ranked_GetHistoricalNumPlayersOnLadder
+global function Ranked_PeriodHasLadderOnlyDivision
+
+global const RANKED_LEVEL_REQUIREMENT = ( 10 - 1 ) //
+global const RANKED_MAX_KILL_SCORE = 6
+
+global const RANKED_NUM_ABANDON_FORGIVENESS_GAMES = 3
+global const RANKED_RESET_DIVISION_COUNT = 6 //
+
+global const RANKED_INVALID_RANK_SCORE = -1
+global const RANKED_INVALID_LADDER_POSITION = -1
+global const RANKED_SPLIT_1_STRYDER_SUFFIX = "_split_1"
+global const RANKED_SPLIT_2_STRYDER_SUFFIX = "_split_2"
+
+global const RANKED_SEASON_02_GUIDSTRING = "SAID00747315762"
+global const RANKED_SEASON_03_GUIDSTRING = "SAID00091805734"
+global const RANKED_SEASON_04_GUIDSTRING = "SAID00609587000"
+global const RANKED_SEASON_05_GUIDSTRING = "SAID00638209737"
+global const RANKED_SEASON_06_GUIDSTRING = "SAID01826354644"
+global const RANKED_SEASON_07_GUIDSTRING = "SAID00461784517"
+global const RANKED_SEASON_08_GUIDSTRING = "SAID01162744308"
+
+global enum emblemDisplayMode
+{
+	DISPLAY_DIVISION,
+	DISPLAY_RP,
+	DISPLAY_LADDER_POSITION,
+	NONE,
+}
+
+global enum rankedBadgeAwardLevel
+{
+	BRONZE_STATIC,
+	BRONZE_ANIMATED,
+	SILVER_STATIC,
+	SILVER_ANIMATED,
+	GOLD_STATIC,
+	GOLD_ANIMATED,
+	PLATINUM_STATIC,
+	PLATINUM_ANIMATED,
+	DIAMOND_STATIC,
+	DIAMOND_ANIMATED,
+	MASTER_STATIC,
+	MASTER_ANIMATED,
+	APEX_STATIC,
+	APEX_ANIMATED,
+	NONE,
+}
+
+global struct RankedReward
+{
+	string previewName
+	bool   previewIconShowBox
+	asset  previewIcon
+	asset  previewImage
+	asset  rewardAsset
+}
+
+global struct RankedTierData
+{
+	string              name
+	int                 scoreMin
+	int                 index
+	asset               icon
+	asset               iconRuiAsset
+	asset               bgImage
+	asset               levelUpRuiAsset
+	int                 entryCost = 9999999
+	string				promotionAnnouncement
+	bool				isLadderOnlyTier = false
+	array<RankedReward> rewards
+	//
+}
+
+global struct RankedDivisionData
+{
+	string          divisionName
+	string          emblemText
+	RankedTierData& tier
+	int             scoreMin
+	int             index
+	int            emblemDisplayMode = emblemDisplayMode.DISPLAY_DIVISION
+	bool			isLadderOnlyDivision = false
+}
+
+global struct RankedPlacementScoreStruct
+{
+	int placementPosition
+	int placementPoints
+	int pointsPerKill
+	int pointsPerAssist
+	int sumOfKillsAndAssistsPointCap
+
+}
+
+global struct RankedPostGameScoringStruct
+{
+	bool wasAbandoned
+	bool lossForgiveness
+	int  damage
+	int  kills
+	int  assists
+	int  killsAndAssistsScore
+	int  placement
+	int  placementScore
+	int  entryCost
+	int  penaltyPointsForAbandoning
+	int  tierDerankingProtectionAdjustment
+	int  lossProtectionAdjustment
+	int  currentScore
+	int  previousScore
+}
+
+struct RankedResetStruct
+{
+	string previousDivisionName
+	string currentDivisionName
+}
+
+struct
+{
+	bool                initialized = false
+	bool				itemRegistrationInitialized = false
+	array<RankedTierData> rankedTiers
+	array<RankedDivisionData>     rankedDivisions
+	RankedDivisionData ornull ladderOnlyDivision = null
+	int numPlayersOnLadder = 0
+	table<string, int > historicalNumPlayersOnLadder
+	table<string, RankedDivisionData > historicalLadderOnlyDivision
+	table< string, array < RankedTierData > > historicalRankedTiers
+	table< string, array< RankedDivisionData > > historicalRankedDivisions
+
+	RankedDivisionData& topRankedDivisionData
+
+	array< RankedPlacementScoreStruct > placementScoringData
+
+	table<string, string > stryderLadderNameToPeriodGUIDStringTable
+
+
+	#if(false)
+
+#endif
+
+	#if(false)
+
+
+
+
+
+
+
+
+#endif
+
+	#if(UI)
+		string rankedPeriodToAcknowledgeRewards
+		string rankedSplitResetAcknowledgePersistenceField
+		table<string, bool> rankedPeriodsWithRewardsNotified
+	#endif
+
+} file
+
+void function Sh_Ranked_Init() //
+{
+	if ( !file.initialized ) //
+	{
+		//
+		Ranked_InitPlacementScoring()
+		RegisterSignal( "Ranked_NotifyRankedPeriodScoreChanged" )
+		file.initialized = true
+	}
+
+	#if(false)
+//
+
+
+
+
+
+
+
+
+#endif
+
+	#if(CLIENT)
+
+		Remote_RegisterServerFunction( "ClientCallback_rankedPeriodRewardAcknowledged", "string" )
+		Remote_RegisterServerFunction( "ClientCallback_rankedSplitResetAcknowledged" )
+		Remote_RegisterServerFunction( "ClientCallback_rankedCurrentPeriodRPAdjusted" )
+
+		Remote_RegisterUIFunction( "ServerToUI_Ranked_NotifyRankedPeriodScoreChanged" ) //
+
+		if ( !IsRankedGame() )
+			return
+
+		#if(false)
+
+#endif
+
+                        
+			#if(false)
+
+
+#endif //
+           
+
+		#if(CLIENT)
+			AddCallback_OnScoreboardCreated( OnScoreboardCreated )
+			RegisterNetVarIntChangeCallback( "gameState", OnGameStateChanged )
+
+			Obituary_SetHorizontalOffset( -25 ) //
+			AddOnSpectatorTargetChangedCallback( Ranked_OnSpectateTargetChanged )
+		#endif
+
+	#endif
+}
+
+void function Sh_Ranked_ItemRegistrationInit() //
+{
+	if ( !file.itemRegistrationInitialized  ) //
+	{
+		AddCallback_OnItemFlavorRegistered( eItemType.calevent_rankedperiod, OnRankedPeriodRegistered )
+		AddCallbackOrMaybeCallNow_OnAllItemFlavorsRegistered( Ranked_AllItemFlavorsRegistered  )
+		file.itemRegistrationInitialized = true
+	}
+
+}
+
+void function Ranked_InitPlacementScoring()
+{
+	var dataTable = GetDataTable( $"datatable/ranked_placement_scoring.rpak" ) //
+	int numRows   = GetDatatableRowCount( dataTable )
+
+	file.placementScoringData.clear()
+
+	for ( int i = 0; i < numRows; ++i )
+	{
+		RankedPlacementScoreStruct placementScoringData
+		placementScoringData.placementPosition = GetDataTableInt( dataTable, i, GetDataTableColumnByName( dataTable, "placement" ) )
+		placementScoringData.placementPoints = GetDataTableInt( dataTable, i, GetDataTableColumnByName( dataTable, "placementPoints" ) )
+		placementScoringData.pointsPerKill = GetDataTableInt( dataTable, i, GetDataTableColumnByName( dataTable, "pointsPerKill" ) )
+		placementScoringData.pointsPerAssist = GetDataTableInt( dataTable, i, GetDataTableColumnByName( dataTable, "pointsPerAssist" ) )
+		placementScoringData.sumOfKillsAndAssistsPointCap = GetDataTableInt( dataTable, i, GetDataTableColumnByName( dataTable, "sumOfKillsAndAssistsPointCap" ) )
+
+		file.placementScoringData.append( placementScoringData  )
+	}
+
+}
+
+void function OnRankedPeriodRegistered( ItemFlavor rp )
+{
+	array< RankedTierData > tierData
+	array< RankedDivisionData  > divisionData
+
+	foreach ( var tierBlock in IterateSettingsAssetArray( ItemFlavor_GetAsset( rp ), "tiers" ) )
+	{
+		RankedTierData tier
+		tier.name = GetSettingsBlockString( tierBlock, "name" )
+		tier.entryCost = GetSettingsBlockInt( tierBlock, "entryCost" )
+		tier.icon = GetSettingsBlockAsset( tierBlock, "icon" )
+		tier.bgImage = GetSettingsBlockAsset( tierBlock, "bgImage" )
+		tier.levelUpRuiAsset = GetSettingsBlockStringAsAsset( tierBlock, "levelUpRuiAsset" )
+		tier.iconRuiAsset = GetSettingsBlockStringAsAsset( tierBlock, "iconRuiAsset" )
+		tier.promotionAnnouncement = GetSettingsBlockStringAsAsset( tierBlock, "promotionAnnouncement" )
+
+		tier.scoreMin = 99999999
+		foreach ( var divBlock in IterateSettingsArray( GetSettingsBlockArray( tierBlock, "divisions" ) ) )
+		{
+			RankedDivisionData data
+			data.divisionName = GetSettingsBlockString( divBlock, "name" )
+			data.emblemText = GetSettingsBlockString( divBlock, "emblemText" )
+			data.scoreMin = GetSettingsBlockInt( divBlock, "scoreMin" )
+			data.emblemDisplayMode = Ranked_GetEmblemDisplayModeFromEmblemText( data.emblemText )
+			data.tier = tier
+
+			if ( data.scoreMin < tier.scoreMin )
+				tier.scoreMin = data.scoreMin
+
+			divisionData.append( data )
+		}
+
+		foreach ( var rewardBlock in IterateSettingsArray( GetSettingsBlockArray( tierBlock, "rewards" ) ) )
+		{
+			RankedReward data
+			data.previewName = GetSettingsBlockString( rewardBlock, "previewName" )
+			data.previewIcon = GetSettingsBlockAsset( rewardBlock, "previewIcon" )
+			data.previewIconShowBox = GetSettingsBlockBool( rewardBlock, "previewIconShowBox" )
+			data.previewImage = GetSettingsBlockAsset( rewardBlock, "previewImage" )
+			data.rewardAsset = GetSettingsBlockAsset( rewardBlock, "flavor" )
+
+			tier.rewards.append( data )
+		}
+
+		tier.index = tierData.len()
+
+		tierData.append( tier )
+	}
+
+	divisionData.sort( CompareRankedDivision )
+	for ( int i = 0; i < divisionData.len(); i++ )
+	{
+		RankedDivisionData data = divisionData[i]
+		data.index = i
+	}
+
+	int ladderOnlyTiers = 0
+
+	foreach ( var tierBlock in IterateSettingsAssetArray( ItemFlavor_GetAsset( rp ), "ladderOnlyTier" ) ) //
+	{
+		Assert( ladderOnlyTiers == 0  ) //
+		++ladderOnlyTiers
+
+		RankedTierData ladderOnlyTier
+		ladderOnlyTier.name = GetSettingsBlockString( tierBlock, "name" )
+		ladderOnlyTier.entryCost = GetSettingsBlockInt( tierBlock, "entryCost" )
+		ladderOnlyTier.icon = GetSettingsBlockAsset( tierBlock, "icon" )
+		ladderOnlyTier.bgImage = GetSettingsBlockAsset( tierBlock, "bgImage" )
+		ladderOnlyTier.levelUpRuiAsset = GetSettingsBlockStringAsAsset( tierBlock, "levelUpRuiAsset" )
+		ladderOnlyTier.iconRuiAsset = GetSettingsBlockStringAsAsset( tierBlock, "iconRuiAsset" )
+		ladderOnlyTier.promotionAnnouncement = GetSettingsBlockStringAsAsset( tierBlock, "promotionAnnouncement" )
+		ladderOnlyTier.isLadderOnlyTier = true
+		ladderOnlyTier.index = tierData.len()
+
+		int ladderOnlyDivisions = 0
+
+		string rpGUIDString = ItemFlavor_GetGUIDString( rp )
+
+		foreach ( var divBlock in IterateSettingsArray( GetSettingsBlockArray( tierBlock, "divisions" ) ) )
+		{
+			Assert( ladderOnlyDivisions == 0  ) //
+			++ladderOnlyDivisions
+
+			RankedDivisionData data
+			data.divisionName = GetSettingsBlockString( divBlock, "name" )
+			data.emblemText = GetSettingsBlockString( divBlock, "emblemText" )
+			data.scoreMin = GetSettingsBlockInt( divBlock, "scoreMin" )
+			data.emblemDisplayMode = Ranked_GetEmblemDisplayModeFromEmblemText( data.emblemText )
+			Assert(  data.emblemDisplayMode == emblemDisplayMode.DISPLAY_LADDER_POSITION )
+			data.tier = ladderOnlyTier
+			data.isLadderOnlyDivision = true
+			data.index = divisionData.len()
+			ladderOnlyTier.scoreMin = data.scoreMin
+
+			file.historicalNumPlayersOnLadder[ rpGUIDString ]  <- GetSettingsBlockInt( divBlock, "numPlayersOnLadder" )
+			file.historicalLadderOnlyDivision[ rpGUIDString  ] <- data
+		}
+
+		Assert( ladderOnlyDivisions == 1  ) //
+
+		foreach ( var rewardBlock in IterateSettingsArray( GetSettingsBlockArray( tierBlock, "rewards" ) ) )
+		{
+			RankedReward data
+			data.previewName = GetSettingsBlockString( rewardBlock, "previewName" )
+			data.previewIcon = GetSettingsBlockAsset( rewardBlock, "previewIcon" )
+			data.previewIconShowBox = GetSettingsBlockBool( rewardBlock, "previewIconShowBox" )
+			data.previewImage = GetSettingsBlockAsset( rewardBlock, "previewImage" )
+			data.rewardAsset = GetSettingsBlockAsset( rewardBlock, "flavor" )
+
+			ladderOnlyTier.rewards.append( data )
+		}
+	}
+
+	string rankedPeriodGUID = ItemFlavor_GetGUIDString( rp )
+	file.historicalRankedTiers[ rankedPeriodGUID ] <- tierData
+	file.historicalRankedDivisions[ rankedPeriodGUID ] <- divisionData
+
+	if ( RankedPeriod_HasSplits( rp ) )
+	{
+		string stryderFirstSplitLadderName = Ranked_GetStryderLadderNameForHistoricalRankedPeriod( rp, true  )
+		file.stryderLadderNameToPeriodGUIDStringTable[ stryderFirstSplitLadderName ] <- rankedPeriodGUID
+		string stryderSecondSplitLadderName = Ranked_GetStryderLadderNameForHistoricalRankedPeriod( rp, false  )
+		file.stryderLadderNameToPeriodGUIDStringTable[ stryderSecondSplitLadderName ] <- rankedPeriodGUID
+	}
+	else
+	{
+		string stryderLadderName = Ranked_GetStryderLadderNameForHistoricalRankedPeriod( rp, false  )
+		file.stryderLadderNameToPeriodGUIDStringTable[ stryderLadderName ] <- rankedPeriodGUID
+	}
+}
+
+int function Ranked_GetEmblemDisplayModeFromEmblemText(  string emblemText  )
+{
+	switch( emblemText )
+	{
+		case "#RANKED_DIVISION_I":
+		case "#RANKED_DIVISION_II":
+		case "#RANKED_DIVISION_III":
+		case "#RANKED_DIVISION_IV":
+		{
+			return emblemDisplayMode.DISPLAY_DIVISION
+
+		}
+		case "SHOW_RP":
+		{
+			return emblemDisplayMode.DISPLAY_RP
+		}
+
+		case "LADDER_POSITION":
+		{
+			return emblemDisplayMode.DISPLAY_LADDER_POSITION
+		}
+
+		default:
+		{
+			return emblemDisplayMode.NONE
+		}
+	}
+
+	unreachable
+}
+
+void function Ranked_AllItemFlavorsRegistered()
+{
+	string latestRankedPeriodGUID = ItemFlavor_GetGUIDString ( GetLatestRankedPeriod( GetUnixTimestamp() ) )
+	file.rankedTiers = 	file.historicalRankedTiers[ latestRankedPeriodGUID ]
+	file.rankedDivisions = file.historicalRankedDivisions[ latestRankedPeriodGUID ]
+	
+	if ( latestRankedPeriodGUID in file.historicalLadderOnlyDivision  )
+	{
+		file.ladderOnlyDivision = file.historicalLadderOnlyDivision[ latestRankedPeriodGUID  ]
+		file.topRankedDivisionData = file.historicalLadderOnlyDivision[ latestRankedPeriodGUID  ]
+		file.numPlayersOnLadder =  file.historicalNumPlayersOnLadder[ latestRankedPeriodGUID ]
+	}
+	else
+	{
+		file.topRankedDivisionData = file.rankedDivisions.top()
+	}
+
+	array<ItemFlavor> rankedPeriods =  GetAllRankedPeriodFlavors()
+	rankedPeriods.sort( CompareRankedPeriodStartTime )
+
+}
+
+int function Ranked_GetNumPlayersOnLadder()
+{
+	ItemFlavor latestRankedPeriod = GetLatestRankedPeriod( GetUnixTimestamp()   )
+	string playlistOverrideVar = Ranked_GetNumPlayerOnLaddersOverridePlaylistVar( latestRankedPeriod )
+	return GetCurrentPlaylistVarInt( playlistOverrideVar, file.numPlayersOnLadder )
+}
+
+string function Ranked_GetNumPlayerOnLaddersOverridePlaylistVar( ItemFlavor rankedPeriod )
+{
+	return ItemFlavor_GetHumanReadableRef( rankedPeriod ) + "_num_players_on_ladder"
+}
+
+RankedTierData function Ranked_GetHighestHistoricalTierAcrossSplitsForPlayer( entity player, ItemFlavor rankedPeriod )
+{
+	Assert( RankedPeriod_HasSplits( rankedPeriod ) )
+	Assert( GetActiveRankedPeriod( GetUnixTimestamp() ) != rankedPeriod )
+
+	string rankedPeriodGUID = ItemFlavor_GetGUIDString( rankedPeriod )
+
+	int firstSplitRankedScore = Ranked_GetHistoricalFirstSplitRankScore( player, rankedPeriodGUID )
+	int firstSplitLadderPosition = Ranked_GetHistoricalLadderPosition( player, rankedPeriodGUID, true )
+	RankedTierData firstSplitRankedTier = Ranked_GetHistoricalRankedDivisionFromScoreAndLadderPosition( firstSplitRankedScore, firstSplitLadderPosition, rankedPeriodGUID ).tier
+
+	int secondSplitRankedScore = Ranked_GetHistoricalRankScore ( player, rankedPeriodGUID )
+	int secondSplitLadderPosition = Ranked_GetHistoricalLadderPosition( player, rankedPeriodGUID, false )
+	RankedTierData secondSplitRankedTier = Ranked_GetHistoricalRankedDivisionFromScoreAndLadderPosition( secondSplitRankedScore, secondSplitLadderPosition, rankedPeriodGUID ).tier
+
+	RankedTierData highestTierAchieved = Ranked_GetHigherOfTwoTiers( firstSplitRankedTier, secondSplitRankedTier )
+
+	return highestTierAchieved
+}
+
+bool function Ranked_NeedToCheckWithStryderForEndRankedSplitOrPeriod( entity player, string rankedPeriodGUID )
+{
+	if ( !GetCurrentPlaylistVarBool( "ranked_end_series_stryder_check", true ) )
+		return false
+
+	int numberOfRankedGames = GetStat_Int( player, ResolveStatEntry( CAREER_STATS.rankedperiod_games_played, rankedPeriodGUID ) )
+	if ( numberOfRankedGames == 0 )
+		return false
+
+	return true
+
+}
+
+RankedTierData function Ranked_GetHigherOfTwoTiers( RankedTierData firstTier, RankedTierData secondTier ) //
+{
+	RankedTierData highestTierAchieved = firstTier.index > secondTier.index ? firstTier : secondTier
+	return highestTierAchieved
+}
+
+string function Ranked_GetStryderLadderNameForLatestRankedPeriod() //
+{
+	ItemFlavor latestPeriod = GetLatestRankedPeriod( GetUnixTimestamp() )
+	//
+	string baseLadderName
+
+	string periodGUIDString = ItemFlavor_GetGUIDString( latestPeriod )
+
+	switch( periodGUIDString )
+	{
+		case RANKED_SEASON_02_GUIDSTRING:
+			baseLadderName = "calevent_rankedperiod01"
+			break
+
+		case RANKED_SEASON_03_GUIDSTRING:
+			baseLadderName = "calevent_rankedperiod02"
+			break
+
+		case RANKED_SEASON_04_GUIDSTRING:
+			baseLadderName = "calevent_rankedperiod03"
+			break
+
+		case RANKED_SEASON_05_GUIDSTRING:
+			baseLadderName = "calevent_rankedperiod04"
+			break
+
+		default:
+			baseLadderName = ItemFlavor_GetHumanReadableRef( latestPeriod )
+			break
+	}
+
+	if ( !RankedPeriod_HasSplits( latestPeriod ) )
+		return baseLadderName
+
+	if ( RankedPeriod_IsFirstSplitActive( latestPeriod )  )
+		return baseLadderName + RANKED_SPLIT_1_STRYDER_SUFFIX
+	else //
+		return baseLadderName + RANKED_SPLIT_2_STRYDER_SUFFIX
+
+	unreachable
+}
+
+string function Ranked_GetStryderLadderNameForHistoricalRankedPeriod( ItemFlavor rankedPeriod, bool isFirstSplit  )
+{
+	Assert( IsRankedPeriodFlavor( rankedPeriod ) )
+
+	//
+	string baseLadderName
+
+	string periodGUIDString = ItemFlavor_GetGUIDString( rankedPeriod )
+
+	switch( periodGUIDString )
+	{
+		case RANKED_SEASON_02_GUIDSTRING:
+			baseLadderName = "calevent_rankedperiod01"
+			break
+
+		case RANKED_SEASON_03_GUIDSTRING:
+			baseLadderName = "calevent_rankedperiod02"
+			break
+
+		case RANKED_SEASON_04_GUIDSTRING:
+			baseLadderName = "calevent_rankedperiod03"
+			break
+
+		case RANKED_SEASON_05_GUIDSTRING:
+			baseLadderName = "calevent_rankedperiod04"
+			break
+
+		default:
+			baseLadderName = ItemFlavor_GetHumanReadableRef( rankedPeriod )
+			break
+	}
+
+	if ( !RankedPeriod_HasSplits( rankedPeriod ) )
+		return baseLadderName
+
+	if ( isFirstSplit )
+		return baseLadderName + RANKED_SPLIT_1_STRYDER_SUFFIX
+	else
+		return baseLadderName + RANKED_SPLIT_2_STRYDER_SUFFIX
+
+	unreachable
+
+}
+string function Ranked_GetSeasonGUIDStringFromStryderLadderName( string stryderLadderName )
+{
+	return file.stryderLadderNameToPeriodGUIDStringTable[ stryderLadderName ]
+}
+
+array< RankedTierData > function Ranked_GetHistoricalRankedTiers( string rankedPeriodGUIDString )
+{
+	Assert( rankedPeriodGUIDString in file.historicalRankedTiers )
+	return file.historicalRankedTiers[ rankedPeriodGUIDString  ]
+}
+
+array < RankedDivisionData  > function Ranked_GetHistoricalRankedDivisions( string rankedPeriodGUIDString )
+{
+	Assert( rankedPeriodGUIDString in file.historicalRankedDivisions )
+	return file.historicalRankedDivisions[ rankedPeriodGUIDString  ]
+}
+
+bool function Ranked_PeriodHasLadderOnlyDivision( string rankedPeriodGUIDString )
+{
+	return rankedPeriodGUIDString in file.historicalLadderOnlyDivision
+}
+
+
+RankedDivisionData function Ranked_GetHistoricalLadderOnlyDivision( string rankedPeriodGUIDString )
+{
+	Assert( rankedPeriodGUIDString in file.historicalLadderOnlyDivision )
+	return file.historicalLadderOnlyDivision[ rankedPeriodGUIDString  ]
+}
+
+int function Ranked_GetHistoricalNumPlayersOnLadder( string rankedPeriodGUIDString )
+{
+	Assert( rankedPeriodGUIDString in file.historicalNumPlayersOnLadder )
+	ItemFlavor historicalRankedPeriod = GetItemFlavorByGUID( ConvertItemFlavorGUIDStringToGUID( rankedPeriodGUIDString  ) )
+	string playlistOverrideVar = Ranked_GetNumPlayerOnLaddersOverridePlaylistVar( historicalRankedPeriod )
+	return  GetCurrentPlaylistVarInt( playlistOverrideVar, file.historicalNumPlayersOnLadder[ rankedPeriodGUIDString ] )
+}
+
+#if(CLIENT)
+void function ShRanked_RegisterNetworkFunctions()
+{
+	if ( !IsRankedGame() )
+		return
+
+	RegisterNetworkedVariableChangeCallback_int( "currentRankedScore", OnRankedScoreChanged )
+	RegisterNetworkedVariableChangeCallback_int( "currentRankedLadderPosition", OnRankedLadderPositionChanged )
+}
+#endif
+
+int function CompareRankedDivision( RankedDivisionData a, RankedDivisionData b )
+{
+	if ( a == b )
+		return 0
+
+	//
+	if ( a.scoreMin != b.scoreMin )
+		return a.scoreMin - b.scoreMin
+
+	Assert( false, "Cannot have ranks with the same scoreMin " + a.divisionName + " " + b.divisionName )
+
+	unreachable
+}
+
+RankedDivisionData function GetCurrentRankedDivisionFromScoreAndLadderPosition( int score, int ladderPosition )
+{
+	int numPlayersOnLadder = Ranked_GetNumPlayersOnLadder()
+	if (  ( ladderPosition != RANKED_INVALID_LADDER_POSITION ) &&  ( numPlayersOnLadder > 0 ) && ( ladderPosition <= numPlayersOnLadder ) )
+	{
+		RankedDivisionData ladderDivisionData = expect RankedDivisionData ( file.ladderOnlyDivision )
+		#if(DEV)
+			if ( ladderDivisionData.scoreMin > score  ) //
+				return GetCurrentRankedDivisionFromScore( score )
+		#endif
+
+		Assert( ladderDivisionData.scoreMin <= score  )
+		return ( ladderDivisionData )
+	}
+
+	return GetCurrentRankedDivisionFromScore( score )
+
+}
+
+RankedDivisionData function GetCurrentRankedDivisionFromScore( int score )
+{
+	if ( score <= 0  )
+	{
+		Assert( file.rankedDivisions.len() > 0 )
+		Assert( file.rankedDivisions[ 0 ].scoreMin == 0 )
+		return file.rankedDivisions[ 0 ]
+	}
+
+	bool foundRank = false
+	RankedDivisionData data
+
+	for ( int i = 0; i < file.rankedDivisions.len(); i++ )
+	{
+		if ( file.rankedDivisions[i].scoreMin > score )
+			break
+
+		foundRank = true
+
+		data = file.rankedDivisions[ i ]
+	}
+
+	Assert( foundRank )
+	return data
+}
+
+RankedDivisionData ornull function GetNextRankedDivisionFromScore( int score )
+{
+	bool foundRank = false
+	RankedDivisionData data
+
+	int i = 0
+	for ( ; i < file.rankedDivisions.len(); i++ )
+	{
+		if ( file.rankedDivisions[i].scoreMin > score )
+			break
+
+		foundRank = true
+
+		data = file.rankedDivisions[ i ]
+	}
+
+	if ( i >= file.rankedDivisions.len() )
+	{
+		return null
+	}
+
+	data = file.rankedDivisions[ i ]
+
+	if ( data.isLadderOnlyDivision  )
+		return null
+
+	Assert( foundRank )
+
+
+	return data
+}
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+int function Ranked_GetCostForEntry( RankedDivisionData currentRank )
+{
+	return currentRank.tier.entryCost
+}
+
+int function Ranked_GetPointsPerKillForPlacement( int placement  )
+{
+	int lookupPlacement = minint( file.placementScoringData.len() - 1, placement)
+	int csvValue =  file.placementScoringData[ lookupPlacement ].pointsPerKill
+	string playlistVarName = "rankedPointsPerKillForPlacement_" + lookupPlacement
+
+	return GetCurrentPlaylistVarInt( playlistVarName, csvValue )
+}
+
+int function Ranked_GetPointsForKills( int placement, int kills )
+{
+	return Ranked_GetPointsPerKillForPlacement( placement ) * kills
+}
+
+int function Ranked_GetPointsForAssists( int placement, int assists )
+{
+	int lookupPlacement = minint( file.placementScoringData.len() - 1, placement)
+	int csvValue =  file.placementScoringData[ lookupPlacement ].pointsPerAssist
+	string playlistVarName = "rankedPointsPerAssistForPlacement_" + lookupPlacement
+	int pointsPerAssit = GetCurrentPlaylistVarInt( playlistVarName, csvValue  )
+	return pointsPerAssit * assists
+}
+
+int function Ranked_GetKillsAndAssistsPointCap( int placement )
+{
+	int lookupPlacement = minint( file.placementScoringData.len() - 1, placement )
+	int csvValue =  file.placementScoringData[ lookupPlacement ].sumOfKillsAndAssistsPointCap
+	string playlistVarName = "rankedKillsAndAssistsPointCapForPlacement_" + lookupPlacement
+	return GetCurrentPlaylistVarInt( playlistVarName, csvValue  )
+}
+
+int function Ranked_GetPointsForPlacement( int placement )
+{
+	int lookupPlacement = minint( file.placementScoringData.len() - 1, placement )
+	int csvValue =  file.placementScoringData[ lookupPlacement ].placementPoints
+	string playlistVarName = "rankedPointsForPlacement_" + lookupPlacement
+
+	return GetCurrentPlaylistVarInt( playlistVarName, csvValue  )
+}
+
+int function Ranked_GetPenaltyPointsForAbandon( RankedDivisionData currentRank )
+{
+	RankedTierData tierData = currentRank.tier
+	int tierIndex = tierData.index
+	string playlistVarString = "ranked_abandon_cost_" + tierIndex
+	return GetCurrentPlaylistVarInt( playlistVarString, Ranked_GetCostForEntry( currentRank ) )
+}
+
+int function Ranked_GetHistoricalRankScore( entity player, string rankedSeasonGUID  )
+{
+	#if(UI)
+		if ( !IsFullyConnected() )
+			return 0
+	#endif
+
+	#if(CLIENT)
+		if ( !IsConnected() )
+			return 0
+	#endif
+
+	#if(CLIENT)
+		Assert ( player == GetLocalClientPlayer()  )
+	#endif
+
+	#if(UI)
+		Assert ( player == GetUIPlayer() )
+	#endif
+
+	var score = Ranked_GetHistoricalRankedPersistenceData( player, "currentRankedScore", rankedSeasonGUID )
+
+	if ( score == null )
+		return 0
+
+	return expect int( score )
+}
+
+int function Ranked_GetHistoricalFirstSplitRankScore( entity player, string rankedSeasonGUID  ) //
+{
+#if(UI)
+	if ( !IsFullyConnected() )
+		return 0
+#endif
+
+#if(CLIENT)
+	if ( !IsConnected() )
+		return 0
+#endif
+
+	#if(CLIENT)
+		Assert ( player == GetLocalClientPlayer()  )
+	#endif
+
+	#if(UI)
+		Assert ( player == GetUIPlayer() )
+	#endif
+
+	var score = Ranked_GetHistoricalRankedPersistenceData( player, "firstSplitRankedScore", rankedSeasonGUID )
+
+	if ( score == null )
+		return 0
+
+	return expect int( score )
+}
+
+RankedDivisionData function Ranked_GetHistoricalRankedDivisionFromScore( int rankScore, string rankedSeasonGUID  )
+{
+	Assert( rankedSeasonGUID in file.historicalRankedDivisions )
+
+	array< RankedDivisionData > historicalRankedDivisionData = file.historicalRankedDivisions[ rankedSeasonGUID  ]
+
+	if ( rankScore <= 0  )
+	{
+		Assert( historicalRankedDivisionData.len() > 0 )
+		Assert( historicalRankedDivisionData[ 0 ].scoreMin == 0 )
+		return historicalRankedDivisionData[ 0 ]
+	}
+
+	bool foundRank = false
+	RankedDivisionData data
+
+	for ( int i = 0; i < historicalRankedDivisionData.len(); i++ )
+	{
+		if ( historicalRankedDivisionData[i].scoreMin > rankScore )
+			break
+
+		foundRank = true
+
+		data = historicalRankedDivisionData[ i ]
+	}
+
+	Assert( foundRank )
+	return data
+}
+
+RankedTierData function Ranked_GetHighestHistoricalRankedTierData( entity player )
+{
+	RankedDivisionData highestDivision
+	int highestRankScore = 0
+	int highestLadderPos = 0
+
+	array< ItemFlavor > rankedPeriods = GetAllRankedPeriodFlavors()
+	foreach ( ItemFlavor period in rankedPeriods )
+	{
+		string periodGUID       = ItemFlavor_GetGUIDString( period )
+		int endRankScore        = Ranked_GetHistoricalRankScore( player, periodGUID )
+		int firstSplitRankScore = Ranked_GetHistoricalFirstSplitRankScore( player, periodGUID )
+		int bestRankScore       = firstSplitRankScore > endRankScore ? firstSplitRankScore : endRankScore
+
+		//
+		if ( periodGUID == RANKED_SEASON_02_GUIDSTRING )
+			bestRankScore = bestRankScore * 10
+
+		if ( bestRankScore > highestRankScore )
+		{
+			highestRankScore = bestRankScore
+			highestDivision = Ranked_GetHistoricalRankedDivisionFromScore( bestRankScore, periodGUID )
+		}
+	}
+
+	return highestDivision.tier
+}
+
+int function Ranked_GetTierOfThresholdForRankedPartyDifferences()
+{
+	array<RankedTierData> tiers = Ranked_GetTiers()
+	foreach( rankTier in tiers )
+	{
+		if ( rankTier.name == "#RANKED_TIER_PLATINUM" )
+			return rankTier.index
+	}
+
+	return tiers.len() + 1 //
+}
+
+RankedDivisionData function Ranked_GetHistoricalRankedDivisionFromScoreAndLadderPosition( int rankScore, int ladderPosition, string rankedSeasonGUID  )
+{
+	if ( Ranked_PeriodHasLadderOnlyDivision( rankedSeasonGUID )  )
+	{
+		int historicalNumPlayersOnLadder = Ranked_GetHistoricalNumPlayersOnLadder( rankedSeasonGUID  )
+		if (  ladderPosition != RANKED_INVALID_LADDER_POSITION && ladderPosition > 0 && ladderPosition < historicalNumPlayersOnLadder ) //
+			return Ranked_GetHistoricalLadderOnlyDivision( rankedSeasonGUID )
+	}
+
+	return Ranked_GetHistoricalRankedDivisionFromScore( rankScore, rankedSeasonGUID )
+
+
+	unreachable
+}
+
+int function Ranked_GetHistoricalLadderPosition( entity player, string rankedSeasonGUID, bool forFirstSplit = false )
+{
+	Assert( rankedSeasonGUID in file.historicalRankedDivisions )
+	//
+	ItemFlavor historicalRankedPeriod = GetItemFlavorByGUID( ConvertItemFlavorGUIDStringToGUID( rankedSeasonGUID  ) )
+	//
+
+	if ( !RankedPeriod_HasSplits( historicalRankedPeriod ) || !forFirstSplit )
+		return expect int ( Ranked_GetHistoricalRankedPersistenceData( player, "endSeriesLadderPosition",  rankedSeasonGUID ) )
+
+	if ( RankedPeriod_HasSplits( historicalRankedPeriod ) && forFirstSplit )
+		return expect int ( Ranked_GetHistoricalRankedPersistenceData( player, "endFirstSplitLadderPosition",  rankedSeasonGUID ) )
+
+	unreachable
+}
+
+var function Ranked_GetHistoricalRankedPersistenceData( entity player, string persistenceField, string rankedSeasonGUID )
+{
+	#if(DEV)
+		if ( DEV_ShouldIgnorePersistence() )
+			return null
+	#endif
+
+	Assert( rankedSeasonGUID in file.historicalRankedTiers )
+	#if(UI)
+		return GetPersistentVar( "allRankedData[" + rankedSeasonGUID + "]." + persistenceField )
+	#else
+		return player.GetPersistentVar( "allRankedData[" + rankedSeasonGUID + "]." + persistenceField )
+	#endif
+
+}
+
+int function Ranked_GetHistoricalRankScoreForTopRankedDivision( string rankedSeasonGUID )
+{
+	Assert ( rankedSeasonGUID in file.historicalRankedDivisions )
+	return file.historicalRankedDivisions[ rankedSeasonGUID ].top().scoreMin
+}
+
+RankedDivisionData function Ranked_GetNewDivisionForNewSeasonReset( entity player, ItemFlavor newRankedPeriod  )
+{
+	string newRankedPeriodRef       = ItemFlavor_GetGUIDString( newRankedPeriod )
+	ItemFlavor previousRankedPeriod = expect ItemFlavor ( GetPrecedingRankedPeriod( newRankedPeriod ) )
+	string previousRankedPeriodRef  = ItemFlavor_GetGUIDString( previousRankedPeriod )
+
+	int resetDivisionCount
+
+	switch ( newRankedPeriodRef )
+	{
+		//
+		//
+		//
+
+		default:
+			resetDivisionCount = RANKED_RESET_DIVISION_COUNT
+			break
+	}
+
+	//
+	int previousRankedScore = Ranked_GetHistoricalRankScore( player, previousRankedPeriodRef )
+	RankedDivisionData divData = Ranked_GetHistoricalRankedDivisionFromScore( previousRankedScore, previousRankedPeriodRef ) //
+	int resetDivisionIndex = maxint(0, divData.index - resetDivisionCount )
+	RankedDivisionData newDivData = file.historicalRankedDivisions[ newRankedPeriodRef ][ resetDivisionIndex ]
+
+	return newDivData
+}
+
+RankedDivisionData function Ranked_GetNewDivisionForSeasonSplitReset( entity player, ItemFlavor rankedPeriod  )
+{
+	string rankedPeriodRef = ItemFlavor_GetGUIDString( rankedPeriod )
+
+	int resetDivisionCount
+	switch ( rankedPeriodRef )
+	{
+		//
+		//
+		//
+
+		default:
+			resetDivisionCount = RANKED_RESET_DIVISION_COUNT
+			break
+	}
+
+	//
+	int previousRankedScore = Ranked_GetHistoricalRankScore( player, rankedPeriodRef )
+	RankedDivisionData divData = Ranked_GetHistoricalRankedDivisionFromScore( previousRankedScore, rankedPeriodRef ) //
+	int resetDivisionIndex = maxint( 0, divData.index - resetDivisionCount )
+	RankedDivisionData newDivData = file.historicalRankedDivisions[ rankedPeriodRef ][ resetDivisionIndex ]
+
+	return newDivData
+}
+
+int function GetPlayerRankScore( entity player )
+{
+#if(UI)
+	if ( !IsFullyConnected() )
+		return 0
+#endif
+
+	#if(CLIENT)
+		if ( !IsConnected() )
+			return 0
+	#endif
+
+	#if(false)
+
+
+
+
+
+#endif
+
+	#if(CLIENT)
+		Assert( !IsLobby() )
+		EHI playerEHI = ToEHI( player )
+		return GetEHIScriptStruct( playerEHI ).rankScore
+	#endif
+
+	#if(UI)
+	if ( !IsLobby() )
+	{
+		EHI playerEHI = ToEHI( player )
+		return GetEHIScriptStruct( playerEHI ).rankScore
+	}
+	else
+	{
+		Assert( player == GetUIPlayer() )
+		var score = GetRankedPersistenceData( player, "currentRankedScore" )
+		if ( score == null )
+			return 0
+
+		return expect int( score )
+	}
+	#endif
+
+	unreachable
+}
+
+#if(CLIENT)
+bool function IsRankedGame()
+{
+	return GetCurrentPlaylistVarBool( "is_ranked_game", false )
+}
+
+bool function Ranked_IsPlayerAbandoning( entity player ) //
+{
+	if ( !IsRankedGame() )
+		return false
+
+	if ( !GetCurrentPlaylistVarBool( "ranked_match_abandon_penalty", true ) )
+		return false
+
+	if ( expect bool ( GetRankedPersistenceData( player, "lastGameRankedForgiveness" )  ) )
+		return false
+
+	//
+	//
+	//
+
+	if ( Ranked_IsMatchOverForPlayer( player ) )
+		return false
+
+	if ( Ranked_HasPlayerWaitedTooLongAfterBannerWasPickedUp( player) )
+		return false
+
+	if ( GetGameState() >= eGameState.Prematch && !player.GetPlayerNetBool( "rankedDidPlayerEverHaveAFullTeam" ) ) //
+		return false
+
+	return true
+}
+
+bool function Ranked_DidPlayerEverHaveAFullTeam( entity player  ) //
+{
+	return player.GetPlayerNetBool( "rankedDidPlayerEverHaveAFullTeam" )
+}
+
+bool function Ranked_IsMatchOverForPlayer( entity player ) //
+{
+	if ( GetGameState() >= eGameState.WinnerDetermined )
+		return true
+
+
+	//
+	if ( GetGameState() >= eGameState.Playing && GetPlayerArrayOfTeam_Alive( player.GetTeam() ).len() == 0  ) //
+		return true
+
+	if ( PlayerMatchState_GetFor( player ) >= ePlayerMatchState.NORMAL )
+	{
+		switch ( player.GetPlayerNetInt( "respawnStatus" )  )
+		{
+			case eRespawnStatus.PICKUP_DESTROYED:
+			case eRespawnStatus.SQUAD_ELIMINATED: //
+				return true
+
+			default:
+				break
+
+		}
+	}
+
+	return false
+}
+
+bool function Ranked_HasPlayerWaitedTooLongAfterBannerWasPickedUp( entity player )
+{
+	if ( IsAlive( player )  )
+		return false
+
+	if ( PlayerMatchState_GetFor( player ) < ePlayerMatchState.NORMAL )
+		return false
+
+	if ( player.GetPlayerNetInt( "respawnStatus" ) !=  eRespawnStatus.WAITING_FOR_DELIVERY  )
+		return false
+
+	Assert( player.GetPlayerNetTime( "respawnBannerPickedUpTime" ) > -1  )
+	float timeSinceBeaconPickedUp = Time() - player.GetPlayerNetTime( "respawnBannerPickedUpTime" )
+
+	return ( timeSinceBeaconPickedUp > GetCurrentPlaylistVarFloat( "ranked_respawn_banner_pickedup_timeout", 150.0 )  )
+
+}
+
+#endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+
+//
+
+
+
+
+
+//
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+var function GetRankedPersistenceData( entity player, string persistenceField )
+{
+	#if(DEV)
+		if ( DEV_ShouldIgnorePersistence() )
+			return null
+	#endif
+
+	string ornull currentSeasonRefOrNull = GetCurrentStatRankedPeriodRefOrNull()
+
+	if ( currentSeasonRefOrNull != null )
+	{
+		expect string( currentSeasonRefOrNull )
+
+		#if(UI)
+			return GetPersistentVar( "allRankedData[" + currentSeasonRefOrNull + "]." + persistenceField )
+		#else
+			return player.GetPersistentVar( "allRankedData[" + currentSeasonRefOrNull + "]." + persistenceField )
+		#endif
+	}
+	else
+	{
+		#if(UI)
+			return GetPersistentVar( "offSeasonRankedData." + persistenceField )
+		#else
+			return player.GetPersistentVar( "offSeasonRankedData." + persistenceField )
+		#endif
+
+	}
+
+	unreachable
+
+}
+
+#if(false)
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+//
+
+
+
+
+//
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+//
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+//
+
+//
+//
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+//
+
+//
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
+
+
+
+#if(CLIENT)
+void function OnRankedScoreChanged( entity player, int old, int new, bool actuallyChanged )
+{
+	if ( IsLobby()  )
+		return
+
+	if ( !actuallyChanged && new == RANKED_INVALID_RANK_SCORE  ) //
+		return
+
+	EHI playerEHI  = ToEHI( player )
+	Ranked_UpdateEHIRankScore( playerEHI, new  )
+	RunUIScript( "Ranked_UpdateEHIRankScore", playerEHI, new )
+
+	if ( player != GetLocalViewPlayer() )
+		return
+
+	SetRankedIcon( new, Ranked_GetLadderPosition( player )  )
+}
+
+void function OnRankedLadderPositionChanged( entity player, int old, int new, bool actuallyChanged )
+{
+	if ( IsLobby()  )
+		return
+
+
+	if ( !actuallyChanged && new == RANKED_INVALID_LADDER_POSITION  ) //
+		return
+
+	EHI playerEHI  = ToEHI( player )
+	Ranked_UpdateEHIRankedLadderPosition( playerEHI, new  )
+	RunUIScript( "Ranked_UpdateEHIRankedLadderPosition", playerEHI, new )
+
+	if ( player != GetLocalViewPlayer() )
+		return
+
+	SetRankedIcon( GetPlayerRankScore( player ), new )
+}
+
+void function SetRankedIcon( int score, int ladderPos )
+{
+	var rui = ClGameState_GetRui()
+
+	if ( rui == null )
+	{
+		//
+		return
+	}
+
+	//
+
+
+	if ( score < 0 )
+		return
+
+
+	RankedDivisionData data = GetCurrentRankedDivisionFromScoreAndLadderPosition( score, ladderPos )
+	//
+	PopulateRuiWithRankedBadgeDetails( rui, score, ladderPos )
+	
+	if ( GetLocalViewPlayer() != null  )
+	{
+		RuiTrackInt( rui, "inMatchRankScoreProgress", GetLocalViewPlayer(), RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( "inMatchRankScoreProgress" ) )
+		RuiTrackInt( rui, "rankedKillAssistMultiplier", GetLocalViewPlayer(), RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( "rankedKillAssistMultiplier" ) )
+	}
+}
+
+void function Ranked_OnSpectateTargetChanged ( entity spectatingPlayer, entity prevSpectatorTarget, entity newSpectatorTarget )
+{
+	//
+	if ( IsValid( newSpectatorTarget ) && newSpectatorTarget.IsPlayer() )
+		SetRankedIcon( GetPlayerRankScore( newSpectatorTarget ), Ranked_GetLadderPosition( newSpectatorTarget  ) )
+
+}
+
+#endif //
+
+bool function IsRankedPersistenceValid()
+{
+	#if(DEV)
+		if ( DEV_ShouldIgnorePersistence()  )
+			return false
+	#endif
+
+	return IsRankedInSeason()
+}
+
+bool function IsRankedInSeason()
+{
+	string ornull currentSeasonRefOrNull = GetCurrentStatRankedPeriodRefOrNull()
+
+	if ( currentSeasonRefOrNull == null )
+		return false
+
+	return true
+}
+
+#if(CLIENT)
+void function OnScoreboardCreated()
+{
+	if ( GetLocalViewPlayer() == null )
+		return
+
+	int score = GetPlayerRankScore( GetLocalViewPlayer() )
+	int ladderPos = Ranked_GetLadderPosition( GetLocalViewPlayer() )
+	SetRankedIcon( score, ladderPos )
+}
+#endif
+
+#if(CLIENT)
+void function OnGameStateChanged(entity player, int oldVal, int newVal, bool actuallyChanged)
+{
+	if ( IsLobby()  )
+		return
+
+	Assert( IsRankedGame() )
+
+	var rui = ClGameState_GetRui()
+	int gameState = newVal
+	if ( gameState >= eGameState.Prematch )
+	{
+		RuiSetBool( rui, "showRanked", true )
+		OnScoreboardCreated()
+	}
+}
+#endif
+
+
+
+asset function Ranked_GetIconForRank( RankedDivisionData data )
+{
+	return data.tier.icon
+}
+
+array<RankedTierData> function Ranked_GetTiers()
+{
+	return file.rankedTiers
+}
+
+RankedTierData ornull function Ranked_GetPrevTierData( RankedTierData data )
+{
+	if ( data.isLadderOnlyTier )
+		return null
+
+	if ( data.index - 1 >= 0 )
+		return file.rankedTiers[ data.index - 1 ]
+
+	return null
+}
+
+RankedTierData ornull function Ranked_GetNextTierData( RankedTierData data )
+{
+	if ( data.isLadderOnlyTier )
+		return null
+
+	if ( data.index + 1 < file.rankedTiers.len() )
+		return file.rankedTiers[ data.index + 1 ]
+
+	return null
+}
+
+array< RankedDivisionData > function Ranked_GetRankedDivisionDataForTier( RankedTierData tier )
+{
+	if ( tier.isLadderOnlyTier  )
+	{
+		Assert( file.ladderOnlyDivision != null )
+		return [ expect RankedDivisionData( file.ladderOnlyDivision ) ]
+	}
+
+	array< RankedDivisionData > data
+
+	for ( int i = 0; i < file.rankedDivisions.len(); i++ )
+	{
+		if ( file.rankedDivisions[ i ].tier == tier )
+			data.append( file.rankedDivisions[ i ] )
+	}
+
+	return data
+}
+
+void function Ranked_UpdateEHIRankScore( EHI playerEHI, int rankScore ) //
+{
+	EHIScriptStruct ehiss = GetEHIScriptStruct( playerEHI )
+	ehiss.rankScore = rankScore
+}
+
+void function Ranked_UpdateEHIRankedLadderPosition( EHI playerEHI, int rankedLadderPosition  ) //
+{
+	EHIScriptStruct ehiss = GetEHIScriptStruct( playerEHI )
+	ehiss.rankedLadderPosition = rankedLadderPosition
+}
+
+int function Ranked_GetLadderPosition( entity player  )
+{
+	#if(false)
+
+
+
+#endif
+
+	#if(CLIENT)
+		Assert( !IsLobby() )
+		EHI playerEHI = ToEHI( player )
+		return GetEHIScriptStruct( playerEHI ).rankedLadderPosition
+	#endif
+
+	#if(UI)
+		if ( !IsLobby() )
+		{
+			EHI playerEHI = ToEHI( player )
+			return GetEHIScriptStruct( playerEHI ).rankedLadderPosition
+		}
+		else
+		{
+			Assert( player == GetUIPlayer() )
+			CommunityUserInfo ornull cui = GetUserInfo( GetPlayerHardware(), GetPlayerUID() )
+
+			if ( cui == null  )
+				return -1
+
+			expect CommunityUserInfo( cui )
+			return cui.rankedLadderPos
+		}
+	#endif
+
+	unreachable
+}
+
+RankedDivisionData function Ranked_GetTopRankedDivision()
+{
+	return file.topRankedDivisionData
+}
+
+#if(UI)
+void function Ranked_SetupMenuGladCardForUIPlayer()
+{
+	entity player = GetUIPlayer()
+	Ranked_SetupMenuGladCard_internal( Ranked_GetLadderPosition( player  ),  GetPlayerRankScore( player )  )
+}
+
+void function Ranked_SetupMenuGladCardFromCommunityUserInfo( CommunityUserInfo userInfo  )
+{
+	Ranked_SetupMenuGladCard_internal( userInfo.rankedLadderPos, userInfo.rankScore  )
+}
+
+void function Ranked_SetupMenuGladCard_internal( int ladderPos, int rankScore )
+{
+	int rankShouldShow = IsRankedPlaylist( Lobby_GetSelectedPlaylist() ) ? 1 : 0
+	SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.RANKED_SHOULD_SHOW, rankShouldShow, null )
+	SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.RANKED_DATA, ladderPos, null, rankScore )
+}
+
+int function Ranked_GetMatchmakingDelayFromCommunityUserInfo( CommunityUserInfo userInfo )
+{
+	return userInfo.banSeconds
+}
+
+int function Ranked_GetUIPlayerMatchmakingDelay()
+{
+	string playerHardware = GetPlayerHardware()
+	if ( playerHardware == ""  ) //
+		return 0
+
+	string playerUID = GetPlayerUID()
+	if ( playerUID == ""  ) //
+		return 0
+
+	CommunityUserInfo ornull userInfo = GetUserInfo( GetPlayerHardware(), GetPlayerUID() )
+	if ( userInfo == null )
+		return 0
+
+	expect CommunityUserInfo( userInfo  )
+
+	return Ranked_GetMatchmakingDelayFromCommunityUserInfo( userInfo )
+}
+
+int function Ranked_GetMaxPartyMatchmakingDelay()
+{
+	Party party    = GetParty()
+	int currentMax = -1
+
+	if ( party.members.len() == 0 )
+	{
+		//
+		currentMax = Ranked_GetUIPlayerMatchmakingDelay()
+	}
+	else
+	{
+		foreach ( member in party.members )
+		{
+			CommunityUserInfo ornull userInfoOrNull = GetUserInfo( member.hardware, member.uid )
+
+			if ( userInfoOrNull != null )
+			{
+				CommunityUserInfo userInfo = expect CommunityUserInfo(userInfoOrNull)
+
+				int delay = Ranked_GetMatchmakingDelayFromCommunityUserInfo( userInfo )
+
+				//
+
+				if ( delay > currentMax )
+				{
+					currentMax = delay
+				}
+			}
+		}
+
+	}
+
+	return currentMax
+}
+
+bool function Ranked_HasRankedPeriodMarkedForRewardAcknowledgement()
+{
+	string earliestRankedPeriod = Ranked_EarliestRankedPeriodWithRewardsNotAcknowledged()
+	if ( earliestRankedPeriod == "" )
+		return false
+
+	//
+	ItemFlavor rankedPeriodToAcknowledgeReward                = GetItemFlavorByGUID( ConvertItemFlavorGUIDStringToGUID( earliestRankedPeriod ) )
+	ItemFlavor ornull followingRankedPeriod                   = GetFollowingRankedPeriod( rankedPeriodToAcknowledgeReward )
+
+	if ( followingRankedPeriod == null )
+		return false
+
+	file.rankedPeriodToAcknowledgeRewards = earliestRankedPeriod
+	return true
+}
+
+string function Ranked_GetRankedPeriodToAcknowledgReward()
+{
+	return file.rankedPeriodToAcknowledgeRewards
+}
+string function Ranked_EarliestRankedPeriodWithRewardsNotAcknowledged()
+{
+	string rankedPeriodResult = ""
+
+	if ( !IsPersistenceAvailable() )
+		return rankedPeriodResult
+
+	int previousPeriodFinishTime = 0 //
+
+	foreach ( ItemFlavor rankedPeriod in GetAllRankedPeriodFlavors() )
+	{
+		int rankedPeriodFinishTime = CalEvent_GetFinishUnixTime( rankedPeriod  )
+		Assert( previousPeriodFinishTime < rankedPeriodFinishTime  )
+
+		if ( rankedPeriodFinishTime > GetUnixTimestamp() ) //
+			continue
+
+		previousPeriodFinishTime = rankedPeriodFinishTime
+		string rankedPeriodGUID = ItemFlavor_GetGUIDString( rankedPeriod )
+
+		entity uiPlayer = GetUIPlayer()
+
+		int numberOfRankedGames = GetStat_Int( uiPlayer, ResolveStatEntry( CAREER_STATS.rankedperiod_games_played, rankedPeriodGUID ) )
+
+		if ( numberOfRankedGames == 0 ) //
+			continue
+
+		if ( Ranked_NeedToCheckWithStryderForEndRankedSplitOrPeriod( uiPlayer, rankedPeriodGUID ) )
+		{
+			if ( Ranked_GetHistoricalLadderPosition( uiPlayer, rankedPeriodGUID ) == 0 ) //
+				continue
+		}
+
+		var wasAwardsAcknowledged = Ranked_GetHistoricalRankedPersistenceData( uiPlayer, "rankedRewardsAcknowledged", rankedPeriodGUID ) //
+
+		if ( wasAwardsAcknowledged == null  )
+			continue
+
+		expect bool ( wasAwardsAcknowledged  )
+
+		if ( wasAwardsAcknowledged )
+			continue
+
+		if ( Ranked_HasNotifiedRankedRewardsGiven( rankedPeriodGUID  )  )
+			continue
+
+		rankedPeriodResult = rankedPeriodGUID
+		break
+	}
+
+	return rankedPeriodResult
+}
+
+bool function Ranked_NeedToNotifySplitReset() //
+{
+	if ( !IsPersistenceAvailable() )
+		return false
+
+	ItemFlavor ornull activeRankedPeriod = GetActiveRankedPeriod( GetUnixTimestamp()  )
+
+	if( activeRankedPeriod == null )
+		return false
+
+	expect ItemFlavor( activeRankedPeriod  )
+
+	if ( !RankedPeriod_HasSplits( activeRankedPeriod ) )
+		return false
+
+	if ( RankedPeriod_IsFirstSplitActive( activeRankedPeriod ) )
+		return false
+
+	if ( !RankedPeriod_IsSecondSplitActive( activeRankedPeriod )  )
+		return false
+
+	var hasRankedSplitOccured = GetRankedPersistenceData( GetUIPlayer(), "hasSplitResetOccured" )
+	if( hasRankedSplitOccured == null  )
+		return false
+
+	expect bool ( hasRankedSplitOccured )
+	if ( !hasRankedSplitOccured  )
+		return false
+
+	if ( GetCurrentPlaylistVarBool( "ranked_end_series_stryder_check", true ) )
+	{
+		if ( Ranked_GetHistoricalLadderPosition( GetUIPlayer(), ItemFlavor_GetGUIDString( activeRankedPeriod), true ) == 0 ) //
+			return false
+	}
+
+	string rankedPeriodGUID = ItemFlavor_GetGUIDString( activeRankedPeriod )
+	string historicalPersistenceFieldAcknowledged = "allRankedData[" + rankedPeriodGUID + "]." + "splitResetAcknowledged"
+
+	file.rankedSplitResetAcknowledgePersistenceField = historicalPersistenceFieldAcknowledged
+
+	return ( GetDialogFlowTablesValueOrPersistence( historicalPersistenceFieldAcknowledged, 9999 ) == false )
+}
+
+string function Ranked_GetSplitResetAcknowledgePersistenceField()
+{
+	return file.rankedSplitResetAcknowledgePersistenceField
+}
+
+bool function Ranked_NeedToNotifyRPAdjustment()
+{
+	if ( !IsPersistenceAvailable() )
+		return false
+
+	ItemFlavor ornull activeRankedPeriod = GetActiveRankedPeriod( GetUnixTimestamp()  )
+
+	if( activeRankedPeriod == null )
+		return false
+
+	expect ItemFlavor( activeRankedPeriod  )
+
+
+	return ( ( GetPersistentVarAsInt( "hasStryderRPAdjustment" ) > 0 ) && (GetPersistentVarAsInt( "stryderRPAdjustment" ) != 0 ) && ( GetPersistentVarAsInt( "stryderRPAdjustmentAcknowledged"  ) == 0  ) )
+
+}
+
+//
+void function PlayLobbyCharacterDialogue( string aliasPart, float delay = 0 )
+{
+	thread PlayLobbyCharacterDialogue_Internal( aliasPart, delay  )
+}
+
+void function PlayLobbyCharacterDialogue_Internal( string aliasPart, float delay )
+{
+	wait delay
+	waitthread WaitForLocalClientEHI()
+	if ( LoadoutSlot_IsReady( LocalClientEHI(), Loadout_Character() ) )
+	{
+		ItemFlavor character = LoadoutSlot_GetItemFlavor( LocalClientEHI(), Loadout_Character() )
+		string characterName = Localize( ItemFlavor_GetLongName( character ) )
+		string soundAliasName = "diag_mp_" + characterName +"_" + aliasPart + "_menu"
+		//
+		EmitUISound( soundAliasName )
+	}
+}
+
+bool function IsRankedPlaylist( string playlist )
+{
+	return GetPlaylistVarBool( playlist, "is_ranked_game", false )
+}
+
+bool function Ranked_ShouldUpdateWithComnunityUserInfo( int score, int ladderPosition )
+{
+	RankedDivisionData data = GetCurrentRankedDivisionFromScoreAndLadderPosition( score, ladderPosition  )
+	if( data.emblemDisplayMode ==  emblemDisplayMode.DISPLAY_LADDER_POSITION && ladderPosition == RANKED_INVALID_LADDER_POSITION )
+		return true
+
+	if ( file.ladderOnlyDivision != null  )
+	{
+		RankedTierData rankedTier = data.tier
+		if ( Ranked_GetNextTierData( rankedTier ) != null  )
+		{
+			return false
+		}
+		else
+		{
+
+			return ( ( expect RankedDivisionData( file.ladderOnlyDivision )).scoreMin <= score )
+		}
+	}
+
+	return false
+}
+
+bool function Ranked_PartyHasRankedLevelAccess()
+{
+	if ( !IsFullyConnected() )
+		return false
+
+	if ( GetCurrentPlaylistVarBool( "ranked_dev_playtest", false ) )
+		return true
+
+	Party party = GetParty()
+	if ( party.members.len() == 0 )
+	{
+		if ( IsPersistenceAvailable() )
+			return GetAccountLevelForXP( GetPersistentVarAsInt( "xp" ) ) >= RANKED_LEVEL_REQUIREMENT
+		else
+			return false
+	}
+
+	bool allPartyMembersMeetRankedLevelRequirement = true
+
+	foreach ( member in party.members )
+	{
+		CommunityUserInfo ornull userInfoOrNull = GetUserInfo( member.hardware, member.uid )
+
+		if ( userInfoOrNull != null )
+		{
+			CommunityUserInfo userInfo = expect CommunityUserInfo(userInfoOrNull)
+
+			if ( userInfo.charData[ePlayerStryderCharDataArraySlots.ACCOUNT_LEVEL] < RANKED_LEVEL_REQUIREMENT )
+			{
+				allPartyMembersMeetRankedLevelRequirement = false
+				break
+			}
+		}
+		else
+		{
+			allPartyMembersMeetRankedLevelRequirement = false
+			break
+		}
+	}
+
+	return allPartyMembersMeetRankedLevelRequirement
+}
+
+bool function Ranked_PartyMeetsRankedDifferenceRequirements()
+{
+	if ( !IsFullyConnected() )
+		return false
+
+	if ( GetCurrentPlaylistVarBool( "ranked_dev_playtest", false ) )
+		return true
+
+	if ( GetCurrentPlaylistVarBool( "ranked_ignore_party_rank_difference", false ) )
+		return true
+
+	Party party = GetParty()
+	if ( party.members.len() == 0 )
+		return true
+
+	bool allPartyMembersMeetRankedDifferenceRequirements = true
+
+	foreach ( member in party.members )
+	{
+		CommunityUserInfo ornull userInfoOrNull = GetUserInfo( member.hardware, member.uid )
+
+		if ( userInfoOrNull != null )
+		{
+			CommunityUserInfo userInfo = expect CommunityUserInfo(userInfoOrNull)
+
+			int rankedTierThresholdIndex = Ranked_GetTierOfThresholdForRankedPartyDifferences()
+
+			RankedTierData tierData = GetCurrentRankedDivisionFromScore( userInfo.rankScore ).tier
+			if ( tierData.index <  rankedTierThresholdIndex )
+			{
+				continue
+			}
+			else
+			{
+				foreach ( partyMember in party.members ) //
+				{
+					if ( partyMember.hardware == member.hardware && partyMember.uid == member.uid )
+						continue
+
+					CommunityUserInfo ornull partyMemberUserInfo = GetUserInfo( partyMember.hardware, partyMember.uid )
+					if ( partyMemberUserInfo == null )
+					{
+						allPartyMembersMeetRankedDifferenceRequirements = false
+						break
+					}
+
+					expect CommunityUserInfo( partyMemberUserInfo )
+
+					RankedTierData partyMemberTierData = GetCurrentRankedDivisionFromScore( partyMemberUserInfo.rankScore ).tier
+
+					if ( abs( partyMemberTierData.index - tierData.index ) > 1  )
+					{
+						allPartyMembersMeetRankedDifferenceRequirements = false
+						break
+					}
+				}
+
+				if ( !allPartyMembersMeetRankedDifferenceRequirements  )
+					break
+			}
+		}
+		else
+		{
+			allPartyMembersMeetRankedDifferenceRequirements = false
+			break
+		}
+	}
+
+	return allPartyMembersMeetRankedDifferenceRequirements
+
+}
+
+bool function Ranked_HasBeenInitialized()
+{
+	if ( !IsFullyConnected() )
+		return false
+
+	if ( !IsPersistenceAvailable()  )
+		return false
+
+	if ( GetCurrentPlaylistVarBool( "ranked_dev_playtest", false ) )
+		return true
+
+	if ( GetCurrentPlaylistVarBool( "ranked_ignore_intialization_check", false ) )
+		return true
+
+	ItemFlavor ornull activeRankedPeriod = GetActiveRankedPeriod( GetUnixTimestamp()  )
+	if ( activeRankedPeriod == null  ) //
+		return true
+
+	expect ItemFlavor ( activeRankedPeriod )
+
+	entity uiPlayer = GetUIPlayer()
+
+	if ( !GetRankedPersistenceData( uiPlayer, "rankedInitialized" ) )
+		return false
+
+	if (  RankedPeriod_HasSplits( activeRankedPeriod )  )
+	{
+		if ( GetCurrentPlaylistVarBool( "ranked_end_series_stryder_check", true ) ) //
+		{
+			if (  RankedPeriod_IsSecondSplitActive( activeRankedPeriod )  && GetRankedPersistenceData( uiPlayer, "endFirstSplitLadderPosition" ) == 0  )
+				return false
+		}
+	}
+
+	return true
+
+}
+
+void function ServerToUI_Ranked_NotifyRankedPeriodScoreChanged()
+{
+	thread ServerToUI_Ranked_NotifyRankedPeriodScoreChanged_threaded()
+}
+
+void function ServerToUI_Ranked_NotifyRankedPeriodScoreChanged_threaded()
+{
+	Signal( uiGlobal.signalDummy, "Ranked_NotifyRankedPeriodScoreChanged" ) //
+	EndSignal( uiGlobal.signalDummy, "Ranked_NotifyRankedPeriodScoreChanged" )
+
+	WaitEndFrame()
+	thread TryRunDialogFlowThread()
+}
+
+bool function Ranked_HasNotifiedRankedRewardsGiven( string rankedPeriodGUID )
+{
+	return ( rankedPeriodGUID in file.rankedPeriodsWithRewardsNotified )
+}
+
+void function Ranked_MarkRankedRewardsGivenNotified( string rankedPeriodGUID ) //
+{
+	if (  rankedPeriodGUID in file.rankedPeriodsWithRewardsNotified )
+		return
+
+	file.rankedPeriodsWithRewardsNotified[ rankedPeriodGUID  ] <- true
+}
+
+
+#endif //
+
+#if CLIENT || UI 
+void function PopulateRuiWithRankedBadgeDetails( var rui, int rankScore, int ladderPosition, bool isNested = false )
+{
+	RankedDivisionData currentRank = GetCurrentRankedDivisionFromScoreAndLadderPosition( rankScore, ladderPosition )
+	//
+	RankedTierData currentTier     = currentRank.tier
+	RuiSetImage( rui, "rankedIcon", currentTier.icon )
+	if (  currentTier.isLadderOnlyTier ) //
+	{
+		RankedTierData tierByScore = GetCurrentRankedDivisionFromScore( rankScore ).tier
+		RuiSetInt( rui, "rankedIconState", tierByScore.index + 1 )
+
+	}
+	else
+	{
+		RuiSetInt( rui, "rankedIconState", currentTier.index )
+	}
+
+	Ranked_FillInRuiEmblemText( rui, currentRank, rankScore, ladderPosition )
+
+	if ( !isNested )
+	{
+		RuiDestroyNestedIfAlive( rui, "rankedBadgeHandle" )
+		CreateNestedRankedRui( rui, currentRank.tier, "rankedBadgeHandle", rankScore, ladderPosition )
+	}
+}
+
+void function PopulateRuiWithHistoricalRankedBadgeDetails( var rui, int rankScore, int ladderPosition, string rankedSeasonGUID, bool isNested = false ) //
+{
+	Assert( rankedSeasonGUID in file.historicalRankedDivisions )
+	RankedDivisionData historicalRank = Ranked_GetHistoricalRankedDivisionFromScoreAndLadderPosition( rankScore, ladderPosition, rankedSeasonGUID )
+	RankedTierData historicalTier     = historicalRank.tier
+	RuiSetImage( rui, "rankedIcon", historicalTier.icon )
+	//
+
+	if (  historicalTier.isLadderOnlyTier ) //
+	{
+		RankedTierData tierByScore = Ranked_GetHistoricalRankedDivisionFromScore( rankScore, rankedSeasonGUID ).tier
+		RuiSetInt( rui, "rankedIconState", tierByScore.index + 1 )
+
+	}
+	else
+	{
+		RuiSetInt( rui, "rankedIconState", historicalTier.index )
+	}
+
+	Ranked_FillInRuiEmblemText( rui, historicalRank, rankScore, ladderPosition )
+
+	if ( !isNested )
+	{
+		RuiDestroyNestedIfAlive( rui, "rankedBadgeHandle" )
+		CreateNestedHistoricalRankedRui( rui, historicalRank.tier, rankedSeasonGUID, "rankedBadgeHandle", rankScore, ladderPosition )
+	}
+}
+
+var function CreateNestedRankedRui( var pRui, RankedTierData tier, string varName, int score, int ladderPosition )
+{
+	var rui = RuiCreateNested( pRui, varName, tier.iconRuiAsset )
+
+	PopulateRuiWithRankedBadgeDetails( rui, score, ladderPosition, true )
+
+	return rui
+}
+
+var function CreateNestedHistoricalRankedRui( var pRui, RankedTierData tier, string rankedSeasonGUID, string varName, int score, int ladderPosition )
+{
+	var rui = RuiCreateNested( pRui, varName, tier.iconRuiAsset )
+
+	PopulateRuiWithHistoricalRankedBadgeDetails( rui, score, ladderPosition, rankedSeasonGUID,  true )
+
+	return rui
+}
+
+void function Ranked_FillInRuiEmblemText( var rui, RankedDivisionData divData, int rankScore, int ladderPosition, string ruiArgumentPostFix = "" )
+{
+	RuiSetInt( rui, "emblemDisplayMode" + ruiArgumentPostFix , divData.emblemDisplayMode )
+	switch( divData.emblemDisplayMode )
+	{
+		case emblemDisplayMode.DISPLAY_DIVISION:
+		{
+			RuiSetString( rui, "emblemText" + ruiArgumentPostFix, divData.emblemText )
+			break
+		}
+
+		case emblemDisplayMode.DISPLAY_RP:
+		{
+			string rankScoreShortened = ShortenNumber( string( rankScore ) )
+			RuiSetString( rui, "emblemText" + ruiArgumentPostFix, Localize(  "#RANKED_POINTS_GENERIC", rankScoreShortened )  )
+			break
+		}
+
+		case emblemDisplayMode.DISPLAY_LADDER_POSITION:
+		{
+			string ladderPosShortened
+			if ( ladderPosition == RANKED_INVALID_LADDER_POSITION  )
+				ladderPosShortened = ""
+			else
+				ladderPosShortened = Localize(  "#RANKED_LADDER_POSITION_DISPLAY", ShortenNumber( string( ladderPosition ) ) )
+
+			RuiSetString( rui, "emblemText" + ruiArgumentPostFix,  ladderPosShortened )
+			break
+		}
+
+		case emblemDisplayMode.NONE:
+		default:
+		{
+			RuiSetString( rui, "emblemText" + ruiArgumentPostFix, "" )
+			break
+		}
+	}
+}
+
+#endif //
+
+#if CLIENT && DEV 
+void function Ranked_ForceClientError()
+{
+	thread Ranked_AssertFalse()
+}
+
+void function Ranked_AssertFalse()
+{
+	wait 2.0
+	Assert( false )
+}
+#endif //
