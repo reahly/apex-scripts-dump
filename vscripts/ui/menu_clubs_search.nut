@@ -394,9 +394,8 @@ void function OnSearchSettingsChanged()
 	array<ItemFlavor> selectedTags = clone( ClubSearchTag_GetSelectedSearchTags() )
 
 	bool anyDataCenter = false
-	//
-	//
-	//
+	if ( clubName != "" || clubTag != "" )
+		anyDataCenter = true
 
 	string pinSearchTerms = clubName + ", " + clubTag
 	string pinSearchFilters = Clubs_GetDescStringForPrivacyLevel( file.selectedPrivacy ) + ", " + Clubs_GetDescStringForMinAccountLevel( file.selectedAccountLvl ) + ", " + Clubs_GetDescStringForMinRank( file.selectedRank ) + ", "

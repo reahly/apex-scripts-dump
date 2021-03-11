@@ -191,8 +191,6 @@ function MpWeaponTrophy_Init()
 	#if(CLIENT)
 		PrecacheParticleSystem( TACTICAL_CHARGE_FX )
 		PrecacheParticleSystem( TROPHY_PLACEMENT_RADIUS_FX )
-		StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_trophy_system, Trophy_OnBeginPlacement )
-		StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_trophy_system, Trophy_OnEndPlacement )
 		AddCreateCallback( "prop_script", Trophy_OnPropScriptCreated )
 
 		RegisterSignal( "Trophy_StopPlacementProxy" )
@@ -232,10 +230,9 @@ void function OnWeaponActivate_weapon_trophy_defense_system( entity weapon )
 	#if(CLIENT)
 		if ( !InPrediction() ) //
 			return
-	#endif
 
-	int statusEffect = eStatusEffect.placing_trophy_system
-	StatusEffect_AddEndless( ownerPlayer, statusEffect, 1.0 )
+		Trophy_OnBeginPlacement( weapon, ownerPlayer )
+	#endif
 }
 
 
@@ -244,11 +241,11 @@ void function OnWeaponDeactivate_weapon_trophy_defense_system( entity weapon )
 	entity ownerPlayer = weapon.GetWeaponOwner()
 	Assert( ownerPlayer.IsPlayer() )
 	#if(CLIENT)
+		Trophy_OnEndPlacement( ownerPlayer )
 		if ( !InPrediction() ) //
 			return
 	#endif
 
-	StatusEffect_StopAllOfType( ownerPlayer, eStatusEffect.placing_trophy_system )
 }
 
 
@@ -287,7 +284,11 @@ var function OnWeaponPrimaryAttack_weapon_trophy_defense_system( entity weapon, 
 	#if(false)
 
 #endif
-	StatusEffect_StopAllOfType( ownerPlayer, eStatusEffect.placing_trophy_system )
+
+	#if(CLIENT)
+		Trophy_OnEndPlacement( ownerPlayer )
+	#endif
+
 	PlayerUsedOffhand( ownerPlayer, weapon, true, null, {pos = placementInfo.origin} )
 
 	int ammoReq = weapon.GetAmmoPerShot()
@@ -497,7 +498,7 @@ entity function Trophy_CreateTrapPlacementProxy( asset modelName )
 }
 
 #if(CLIENT)
-void function Trophy_OnBeginPlacement( entity player, int statusEffect, bool actuallyChanged )
+void function Trophy_OnBeginPlacement( entity weapon, entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
@@ -506,10 +507,10 @@ void function Trophy_OnBeginPlacement( entity player, int statusEffect, bool act
 
 	asset model = TROPHY_MODEL
 
-	thread Trophy_PlacementProxy( player, model )
+	thread Trophy_PlacementProxy( weapon, player, model )
 }
 
-void function Trophy_OnEndPlacement( entity player, int statusEffect, bool actuallyChanged )
+void function Trophy_OnEndPlacement( entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
@@ -519,7 +520,7 @@ void function Trophy_OnEndPlacement( entity player, int statusEffect, bool actua
 	player.Signal( "Trophy_StopPlacementProxy" )
 }
 
-void function Trophy_PlacementProxy( entity player, asset model )
+void function Trophy_PlacementProxy( entity weapon, entity player, asset model )
 {
 	player.EndSignal( "Trophy_StopPlacementProxy" )
 
@@ -641,6 +642,7 @@ void function SCB_WattsonRechargeHint()
 
 
 
+//
 //
 //
 

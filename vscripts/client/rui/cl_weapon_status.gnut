@@ -654,63 +654,71 @@ void function PrimaryWeapon_UpdateFireSelectHUD( entity weapon )
 
 		if ( IsWeaponInSingleShotMode( weapon ) )
 		{
-                  
-                                                        
+                     
+                                                         
      
                                                      
                                                                                                                         
          
                                                                                                                                      
      
-       
-      
-			SetWeaponToggleHUD( $"rui/hud/weapon_toggle/single_shot", "#FIRE_MODE_SINGLE", 2, currentFireModeIndex )
-		}
-		else if ( IsWeaponInBurstMode( weapon ) )
-		{
-			SetWeaponToggleHUD( $"rui/hud/weapon_toggle/burst", "#FIRE_MODE_BURST", 2, currentFireModeIndex )
-		}
-		else if ( IsWeaponInAutomaticMode( weapon ) )
-		{
-                               
-                                                                     
-    
-                                     
-                                                                                                                                    
         
-                                                                                                         
-    
-       
+      
+                        
+                                                             
+     
+                                                       
+                                                                                                           
+         
+                                                                                                              
+     
+         
+			if ( IsWeaponInBurstMode( weapon ) )
+			{
+				SetWeaponToggleHUD( $"rui/hud/weapon_toggle/burst", "#FIRE_MODE_BURST", 2, currentFireModeIndex )
+			}
+			else if ( IsWeaponInAutomaticMode( weapon ) )
+			{
+                               
+                                                                      
+     
+                                      
+                                                                                                                                     
+         
+                                                                                                          
+     
+        
       
                  
-			if ( DoesModExist( weapon, "hopup_paintball" ) && IsModActive( weapon, "hopup_paintball" ) )
-			{
-				if ( currentFireModeIndex == 0 )
+				if ( DoesModExist( weapon, "hopup_paintball" ) && IsModActive( weapon, "hopup_paintball" ) )
 				{
-					SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_PAINT_01", 3, currentFireModeIndex, true )
+					if ( currentFireModeIndex == 0 )
+					{
+						SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_PAINT_01", 3, currentFireModeIndex, true )
+					}
+					else if ( currentFireModeIndex == 1 )
+					{
+						SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_PAINT_02", 3, currentFireModeIndex, true )
+					}
+					else if ( currentFireModeIndex == 2 )
+					{
+						SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_PAINT_03", 3, currentFireModeIndex, true )
+					}
+					else if ( currentFireModeIndex == 3 )
+					{
+						SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_PAINT_04", 3, currentFireModeIndex, true )
+					}
 				}
-				else if ( currentFireModeIndex == 1 )
+				else
+      
 				{
-					SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_PAINT_02", 3, currentFireModeIndex, true )
-				}
-				else if ( currentFireModeIndex == 2 )
-				{
-					SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_PAINT_03", 3, currentFireModeIndex, true )
-				}
-				else if ( currentFireModeIndex == 3 )
-				{
-					SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_PAINT_04", 3, currentFireModeIndex, true )
+					SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_AUTO", 2, currentFireModeIndex )
 				}
 			}
 			else
-      
 			{
-				SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_AUTO", 2, currentFireModeIndex )
+				ClearWeaponToggleHUD()
 			}
-		}
-		else
-		{
-			ClearWeaponToggleHUD()
 		}
 	}
 	//
@@ -867,7 +875,7 @@ void function UpdateModsOnSurvivalWeaponRui( var rui, entity weapon )
 				if ( SURVIVAL_Loot_IsRefValid( mod ) )
 				{
 					LootData data = SURVIVAL_Loot_GetLootDataByRef( mod )
-					if ( isAttachmentLockedWeapon )
+					if ( SURVIVAL_IsAttachmentPointLocked( weaponRef, attachmentName ) )
 						RuiSetInt( rui, ruiAttachmentTierArgs[attachmentName], weaponData.tier )
 					else
 						RuiSetInt( rui, ruiAttachmentTierArgs[attachmentName], data.tier )
@@ -960,6 +968,10 @@ bool function WeaponHasFireModeSelect( entity weapon )
                                                                                                     
              
          
+                        
+                                                                                                                
+             
+         
                  
 	else if ( DoesModExist( weapon, "hopup_paintball" ) && IsModActive( weapon, "hopup_paintball" ) )
 		return true
@@ -985,6 +997,15 @@ int function GetWeaponCurrentFireModeIndex( entity weapon )
 		else
 			return 0
 	}
+         
+                        
+                                                                                                           
+  
+                                                   
+           
+      
+           
+  
          
                   
                                                                                                
@@ -1023,6 +1044,14 @@ int function GetWeaponCurrentFireModeIndex( entity weapon )
 	if ( DoesModExist( weapon, "altfire" ) )
 	{
 		if ( IsModActive( weapon, "altfire" ) )
+			return 1
+		else
+			return 0
+	}
+
+	if ( DoesModExist( weapon, "hopup_selectfire" ) )
+	{
+		if ( IsModActive( weapon, "altfire_selectfire" ) )
 			return 1
 		else
 			return 0
@@ -1087,6 +1116,16 @@ void function UpdateFireSelectHint( entity player, entity weapon, string mod )
 
 	if ( IsWeaponInSingleShotMode( weapon ) )
 	{
+                               
+                                                           
+   
+                                                     
+                                
+       
+                                 
+   
+      
+      
 		message = "#FIRE_MODE_SINGLE"
 	}
 	else if ( IsWeaponInBurstMode( weapon ) )
@@ -1128,7 +1167,7 @@ void function UpdateChokeHint( entity player, entity weapon, string mod )
 
 void function OnPlayerAddWeaponMod( entity player, entity weapon, string mod )
 {
-	if ( mod == "altfire" || mod == "altfire_highcal" || mod == "altfire_double_tap" )
+	if ( IsModAltfireMod( mod ) )
 	{
 		if ( WeaponHasFireModeSelect( weapon ) )
 			UpdateFireSelectHint( player, weapon, mod )
@@ -1142,7 +1181,7 @@ void function OnPlayerAddWeaponMod( entity player, entity weapon, string mod )
 
 void function OnPlayerRemoveWeaponMod( entity player, entity weapon, string mod )
 {
-	if ( mod == "altfire" || mod == "altfire_highcal" || mod == "altfire_double_tap" )
+	if ( IsModAltfireMod( mod ) )
 	{
 		if ( WeaponHasFireModeSelect( weapon ) )
 			UpdateFireSelectHint( player, weapon, mod )
@@ -1153,6 +1192,18 @@ void function OnPlayerRemoveWeaponMod( entity player, entity weapon, string mod 
 	}
 
 	OnSelectedWeaponChanged( weapon )
+}
+
+bool function IsModAltfireMod( string mod )
+{
+	if ( mod == "altfire" || mod == "altfire_highcal" || mod == "altfire_double_tap" )
+		return true
+                         
+                                         
+             
+       
+
+	return false
 }
 
 
@@ -1686,14 +1737,19 @@ void function InitOffhandRui( var rui, entity player, entity weapon )
 		case eWeaponCooldownType.ammo:
 			int maxAmmoReady = weapon.UsesClipsForAmmo() ? weapon.GetWeaponSettingInt( eWeaponVar.ammo_clip_size ) : weapon.GetWeaponPrimaryAmmoCountMax( weapon.GetActiveAmmoSource() )
 			int ammoPerShot = weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
-			int ammoMinToFire = weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+
+			int burstCount = maxint( weapon.GetWeaponSettingInt( eWeaponVar.burst_fire_count ), 1 )
+			int ammoMinToFire = weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire ) * burstCount
+
+			RuiSetInt( rui, "ammoMinToFire", ammoMinToFire )
 
 			if ( maxAmmoReady == 0 )
 				maxAmmoReady = 1
 			RuiSetFloat( rui, "minFireFrac", float( ammoMinToFire ) / float( maxAmmoReady ) )
 			if ( ammoPerShot == 0 )
 				ammoPerShot = 1
-			RuiSetInt( rui, "segments", maxAmmoReady / ammoPerShot )
+
+			RuiSetInt( rui, "segments", maxAmmoReady / (ammoPerShot * burstCount ) )
 
 			RuiTrackFloat( rui, "chargeFrac", weapon, RUI_TRACK_WEAPON_CLIP_AMMO_FRACTION )
 

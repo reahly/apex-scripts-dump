@@ -1542,12 +1542,32 @@ void function OnClickedToAdvance( bool isForward )
 		{
 			for ( int i = minPanelIndexToLoad - 1; i >= 0; --i )
 			{
-				if ( file.s_panels[i].groupId == minGroupId )
+				if ( file.s_panels[i].groupId == minGroupId ) //
 				{
 					minPanelIndexToLoad = i
 				}
+				else
+				{
+					break;
+				}
 			}
 		}
+
+		#if(DEV)
+			int prevMinPanelToLoad = wantPanelIndex - 1
+			int maxSupportedPanels = file.readerRuis.len()
+			int numPanels = prevMinPanelToLoad - minPanelIndexToLoad
+			if ( prevMinPanelToLoad - minPanelIndexToLoad > maxSupportedPanels )
+			{
+				//
+				//
+				//
+				//
+				//
+				Assert( 0, "Trying to find panels associated with panel #" + (prevMinPanelToLoad+1) + "(index: " + prevMinPanelToLoad +
+				", " + file.s_panels[prevMinPanelToLoad].panelImage + ") but " + numPanels + " were found, exceeding " + maxSupportedPanels + " panels a page can show. Check 'Type Of speech bubble' on Panel Rows are uniquely grouped.  See script comments for more details." )
+			}
+		#endif
 
 		LoadPanelImages( minPanelIndexToLoad, maxPanelIndexToLoad )
 

@@ -219,6 +219,9 @@ void function ShGameModeShadowSquad_Init()
 	//
 
 	#if(CLIENT)
+		SetCustomScreenFadeAsset( $"ui/screen_fade_shadow_fall.rpak" )
+		ClApexScreens_SetCustomApexScreenBGAsset( $"rui/rui_screens/banner_c_shadowfall" )
+		ClApexScreens_SetCustomLogoTint( <1.0, 1.0, 1.0> )
 		SetCommsDialogueEnabled( false ) //
 		AddCallback_OnPlayerLifeStateChanged( OnPlayerLifeStateChanged )
 		AddCallback_OnVictoryCharacterModelSpawned( OnVictoryCharacterModelSpawned )

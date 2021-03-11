@@ -260,6 +260,12 @@ int function GetAirdropPingColorIDFromRarityTier( int rarityTier )
 
 
 
+//
+
+
+//
+
+
 
 
 
@@ -481,6 +487,12 @@ int function GetAirdropPingColorIDFromRarityTier( int rarityTier )
 
 
 
+//
+
+
+//
+
+
 
 
 
@@ -767,6 +779,9 @@ int function GetAirdropPingColorIDFromRarityTier( int rarityTier )
 
 
 
+
+
+
 //
 
 
@@ -841,6 +856,9 @@ int function GetAirdropPingColorIDFromRarityTier( int rarityTier )
 
 
 //
+
+
+
 
 
 

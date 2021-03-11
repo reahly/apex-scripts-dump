@@ -16,7 +16,7 @@ void function RemoteFunctions_Init_Begin()
 	Remote_BeginRegisteringFunctions()
 
                         
-                                                                           
+                                    
                                                                     
        
 
@@ -68,6 +68,9 @@ void function RemoteFunctions_Init_Begin()
 	RegisterNetworkedVariable( "isOptInServer", SNDC_GLOBAL, SNVT_BOOL, isOptInServer )
 
 	Remote_RegisterClientFunction( "SCB_WattsonRechargeHint" )
+
+	//
+	ObserverLiveLogs_RegisterNetworking()
 
 	//
 	RegisterNetworkedVariable( "gameStateChangeTime", SNDC_GLOBAL_NON_REWIND, SNVT_TIME, -1.0 )
@@ -150,6 +153,12 @@ void function RemoteFunctions_Init_Begin()
 			//
 
 		case SURVIVAL:
+                       
+                       
+      
+                        
+                        
+      
 			RegisterNetworkedVariable( "hasDeathFieldImmunity", SNDC_PLAYER_EXCLUSIVE, SNVT_BOOL, false )
 			RegisterNetworkedVariable( "isMapZoneDisplayTextDisabled", SNDC_GLOBAL, SNVT_BOOL, false )
 			RegisterNetworkedVariable( "pickLoadoutGamestateStartTime", SNDC_GLOBAL, SNVT_TIME, -1 )
@@ -180,7 +189,7 @@ void function RemoteFunctions_Init_Begin()
 			Remote_RegisterClientFunction( "ServerCallback_ShowDeathScreen" )
 			Remote_RegisterClientFunction( "ServerCallback_DeathScreenSwitchTab" )
 
-			Remote_RegisterClientFunction( "ServerCallback_AddWinningSquadData", "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX )
+			Remote_RegisterClientFunction( "ServerCallback_AddWinningSquadData", "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX )
 
                 
                                                                                                      
@@ -345,7 +354,7 @@ void function RemoteFunctions_Init_Begin()
 			Remote_RegisterClientFunction( "ServerCallback_PromptTaunt" )
 			Remote_RegisterClientFunction( "ServerCallback_PromptSayGetOnTheDropship" )
                             
-                                                                             
+			Remote_RegisterClientFunction( "ServerCallback_PromptMarkMyLastDeathbox" )
       
 
 			Remote_RegisterClientFunction( "PROTO_ServerCallback_Sur_HoldForUltimate" )
@@ -354,7 +363,8 @@ void function RemoteFunctions_Init_Begin()
 
               
                                                                                                            
-                                                                                                                                                     
+                                                                                                                                                               
+                                                                                                   
       
 
                       
@@ -367,22 +377,32 @@ void function RemoteFunctions_Init_Begin()
                                                                 
       
 
+                    
+			Remote_RegisterUIFunction( "EnableCharacterChangeInFiringRange", "bool" )
+      
+
                           
 			PrivateMatch_RegisterNetworking()
          
 
-			RegisterNetworkedVariable( "playerObservedCount", SNDC_PLAYER_EXCLUSIVE, SNVT_INT, 0 )
+			//
 
 			if ( !IsPVEMode() )
 			{
-				RegisterNetworkedVariable( "currentRankedScore", SNDC_PLAYER_GLOBAL, SNVT_BIG_INT, -1 )
-				RegisterNetworkedVariable( "currentRankedLadderPosition", SNDC_PLAYER_GLOBAL, SNVT_BIG_INT, -1 )
+				//
 				RegisterNetworkedVariable( "inMatchRankScoreProgress", SNDC_PLAYER_EXCLUSIVE, SNVT_INT, -1 )
 				RegisterNetworkedVariable( "rankedKillAssistMultiplier", SNDC_PLAYER_EXCLUSIVE, SNVT_INT, 10 )
+
+				//
 				RegisterNetworkedVariable( "rankedDidPlayerEverHaveAFullTeam", SNDC_PLAYER_EXCLUSIVE, SNVT_BOOL, false )
+				RegisterNetworkedVariable( "nv_currentRankedScore", SNDC_PLAYER_GLOBAL, SNVT_BIG_INT, -1 )
+				RegisterNetworkedVariable( "nv_currentRankedLadderPosition", SNDC_PLAYER_GLOBAL, SNVT_BIG_INT, -1 )
 
 				#if(CLIENT)
 					ShRanked_RegisterNetworkFunctions()
+                            
+                                               
+           
 				#endif
 			}
 
@@ -392,6 +412,13 @@ void function RemoteFunctions_Init_Begin()
 				ObjectiveSystem_RegisterNetworking()
 				Remote_RegisterUntypedFunction_deprecated( "ServerCallback_PlaySpectreChatterMP" )
 			}
+                         
+                                         
+     
+                              
+                                                                                       
+     
+         
 
 #if(CLIENT)
 			CLSurvival_RegisterNetworkFunctions()
@@ -431,16 +458,16 @@ void function RemoteFunctions_Init_Begin()
       
 
                               
-                                        
+			RingCollapseMode_RegisterNetworking()
       
 
                           
-                                               
-                                            
-                                              
-                                               
-                                            
-                                            
+			ShGameMode_DeathTrigger_RegisterNetworking()
+			ShGameMode_AutoCards_RegisterNetworking()
+			ShGameMode_ShieldRegen_RegisterNetworking()
+			ShGameMode_SecondChance_RegisterNetworking()
+			ShGameMode_GlowZones_RegisterNetworking()
+			ShGameMode_ArmedDrop_RegisterNetworking()
       
 
                         
@@ -455,13 +482,22 @@ void function RemoteFunctions_Init_Begin()
 			SHGameMode_ACETakeOverMode_RegisterNetworking()
       
 
+                               
+			ShGameMode_AprilFools_S8_RegisterNetworking()
+      
+
                       
                                   
       
                    
                                                                                     
       
-
+                            
+			ShMapToy_ExplosiveHold_RegisterNetworking()
+      
+                  
+			Caustic_TT_RegisterNetworking()
+      
                 
 			Crafting_RegisterNetworking()
       
@@ -664,8 +700,13 @@ void function RemoteFunctions_Init_Begin()
 	Remote_RegisterServerFunction( "ClientCallback_SetClubIsPendingApproval", "bool" )
 
 	Remote_RegisterServerFunction( "ClientCallback_MarkBattlePassPopupAsSeen", "string", "int", INT_MIN, INT_MAX )
+
+	Remote_RegisterServerFunction( "ClientCallback_MarkStoryEventDialoguePopupAsAttempted" )
 	Remote_RegisterServerFunction( "ClientCallback_MarkStoryEventDialoguePopupAsSeen", "bool", "string" )
 	Remote_RegisterServerFunction( "ClientCallback_MarkStoryEventChallengesPopupAsSeen", "bool", "string" )
+                     
+	Remote_RegisterServerFunction( "ClientCallback_MarkStoryEventFinaleRewardSeen")
+       
 
 	//
 	Remote_RegisterServerFunction( "ClientCallback_BloodTT_StoryPropDialogueAborted" )
@@ -685,6 +726,12 @@ void function RemoteFunctions_Init_Begin()
 	//
 	Remote_RegisterServerFunction( "ClientCallback_BroadcastQuip", "int", INT_MIN, INT_MAX )
 
+               
+    
+                                                                                                                               
+                                                                                                                               
+       
+
 	//
 	Remote_RegisterServerFunction( "ClientCallback_InitializeCraftingAtWorkbench", "int", INT_MIN, INT_MAX )
 	Remote_RegisterServerFunction( "ClientCallback_RegisterClosedCraftingMenu" )
@@ -701,6 +748,8 @@ void function RemoteFunctions_Init_Begin()
 		"int", 0, INT_MAX, "int", 0, INT_MAX, "int", 0, INT_MAX, "int", 0, INT_MAX, "int", INT_MIN, INT_MAX, "int", 0, INT_MAX, "int", INT_MIN, INT_MAX,
 		"int", 0, INT_MAX, "int", INT_MIN, INT_MAX )
 
+	Remote_RegisterClientFunction( "ServerToClient_PlayCausticLoreMessage" )
+
 	//
 	Remote_RegisterUntypedFunction_deprecated( "Dev_BuildTextInfoPanel" )
 	Remote_RegisterUntypedFunction_deprecated( "Dev_CreateTextInfoPanel" )
@@ -714,6 +763,8 @@ void function RemoteFunctions_Init_Begin()
 	Remote_RegisterClientFunction( "ServerCallback_SyncedMeleeDone" )
 
 	Remote_RegisterClientFunction( "ServerCallback_DisplayJumpPadHint" )
+
+	Remote_RegisterServerFunction ( "ClientCallback_RefereshEventChallenges" )
 
                    
                             

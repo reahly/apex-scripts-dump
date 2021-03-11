@@ -113,7 +113,7 @@ void function LobaUltimateBlackMarket_LevelInit()
 			"int", 0, INT_MAX, //
 			"int", 0, 255, //
 			"int", 0, 4096, //
-			"int", 0, 200 //
+			"int", 0, 4096 //
 		)
 
 		Remote_RegisterServerFunction( BLACK_MARKET_OPEN_CMD, "entity" )
@@ -130,8 +130,6 @@ void function LobaUltimateBlackMarket_LevelInit()
 #endif
 
 	#if(CLIENT)
-		StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_black_market, OnBeginPlacement )
-		StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_black_market, OnEndPlacement )
 		AddCreateCallback( "prop_loot_grabber", OnPropScriptCreated )
 
 		RegisterSignal( "BlackMarket_StopPlacementProxy" )
@@ -186,9 +184,9 @@ void function OnWeaponActivate_ability_black_market( entity weapon )
 	#if(CLIENT)
 		if ( !InPrediction() || !IsFirstTimePredicted() )
 			return
-	#endif
 
-	StatusEffect_AddEndless( owner, eStatusEffect.placing_black_market, 1.0 )
+		OnBeginPlacement( weapon, owner )
+	#endif
 }
 #endif
 
@@ -198,11 +196,10 @@ void function OnWeaponDeactivate_ability_black_market( entity weapon )
 {
 	entity owner = weapon.GetWeaponOwner()
 	#if(CLIENT)
+		OnEndPlacement( owner )
 		if ( !InPrediction() || !IsFirstTimePredicted() )
 			return
 	#endif
-
-	StatusEffect_StopAllOfType( owner, eStatusEffect.placing_black_market )
 }
 #endif
 
@@ -225,10 +222,10 @@ var function OnWeaponPrimaryAttack_ability_black_market( entity weapon, WeaponPr
 
 #if(CLIENT)
 	if ( InPrediction() )
-#endif
 	{
-		StatusEffect_StopAllOfType( owner, eStatusEffect.placing_black_market )
+		OnEndPlacement( owner )
 	}
+#endif
 
 	return weapon.GetAmmoPerShot()
 }
@@ -316,6 +313,14 @@ PlacementInfo function GetPlacementInfo( entity player )
 
 	if ( info.success )
 	{
+		if ( IsOriginInvalidForPlacingPermanentOnto( downResults.endPos ) )
+		{
+			info.success = false
+		}
+	}
+
+	if ( info.success )
+	{
 		TraceResults upResults = TraceHull( info.origin, info.origin, BLACK_MARKET_BOUND_MINS, BLACK_MARKET_BOUND_MAXS, ignoreEnts, TRACE_MASK_PLAYERSOLID, TRACE_COLLISION_GROUP_NONE, up, player )
 		if ( upResults.startSolid )
 		{
@@ -398,18 +403,18 @@ PlacementInfo function GetPlacementInfo( entity player )
 
 
 #if(CLIENT)
-void function OnBeginPlacement( entity player, int statusEffect, bool actuallyChanged )
+void function OnBeginPlacement( entity weapon, entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
 
-	thread PlacementProxyThread( player )
+	thread PlacementProxyThread( weapon, player )
 }
 #endif
 
 
 #if(CLIENT)
-void function OnEndPlacement( entity player, int statusEffect, bool actuallyChanged )
+void function OnEndPlacement( entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
@@ -420,8 +425,10 @@ void function OnEndPlacement( entity player, int statusEffect, bool actuallyChan
 
 
 #if(CLIENT)
-void function PlacementProxyThread( entity player )
+void function PlacementProxyThread( entity weapon, entity player )
 {
+	weapon.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
 	player.EndSignal( "BlackMarket_StopPlacementProxy" )
 
 	entity proxy = CreateClientSidePropDynamic( <0, 0, 0>, <0, 0, 0>, BLACK_MARKET_PROXY_MODEL )
@@ -437,6 +444,7 @@ void function PlacementProxyThread( entity player )
 	proxy.e.clientEntMinimapCustomState = eMinimapObject_prop_script.BLACK_MARKET
 	proxy.e.clientEntMinimapFlags = MINIMAP_FLAG_VISIBILITY_SHOW
 	proxy.e.clientEntMinimapScale = lootGrabDist / 16384.0
+	proxy.e.clientEntMinimapZOrder = MINIMAP_Z_OBJECT
 	thread MinimapObjectThread( proxy )
 
 	int proxyRadiusFx = StartParticleEffectOnEntity( proxy, GetParticleSystemIndex( BLACK_MARKET_RADIUS_FX ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
@@ -831,6 +839,10 @@ void function BlackMarketRumbleOnReadyThread( entity ent )
 
 
 
+//
+
+
+
 #endif
 
 
@@ -898,10 +910,15 @@ void function BlackMarketRumbleOnReadyThread( entity ent )
 
 
 
+
+
+
 #endif
 
 
 #if(false)
+
+
 
 
 

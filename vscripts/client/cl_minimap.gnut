@@ -726,7 +726,7 @@ var function CreateFullmapRuiForEnt( entity ent, entity viewPlayer )
 	if ( fullmapAsset == $"" )
 		return null
 
-	int zOrder = ent.Minimap_GetZOrder()
+	int zOrder = ent.IsClientOnly() ? maxint( ent.Minimap_GetZOrder(), ent.e.clientEntMinimapZOrder ) : ent.Minimap_GetZOrder()
 	var rui    = FullMap_CommonAdd( fullmapAsset, zOrder )
 	FullMap_CommonTrackEntOrigin( rui, ent, false )
 
@@ -760,7 +760,7 @@ var function CreateFullmapRuiForEnt( entity ent, entity viewPlayer )
 
 var function CreateMinimapRuiForEnt( entity ent, entity viewPlayer, asset minimapAsset )
 {
-	int zOrder = ent.Minimap_GetZOrder()
+	int zOrder = ent.IsClientOnly() ? maxint( ent.Minimap_GetZOrder(), ent.e.clientEntMinimapZOrder ) : ent.Minimap_GetZOrder()
 	var rui    = CreateMinimapRui( minimapAsset, MINIMAP_Z_BASE + zOrder )
 
 	//
@@ -981,72 +981,10 @@ void function OnPlayerCreate( entity player )
 	if ( player != GetLocalClientPlayer() )
 		return
 
+                 
 	if ( file.minimap_coords != null )
-	{
-		RuiTrackFloat3( file.minimap_coords, "playerPos", player, RUI_TRACK_ABSORIGIN_FOLLOW )
-		string uidString = GetConVarString( "platform_user_id" )
-		if ( IsOdd( uidString.len() ) )
-			uidString = "0" + uidString
-		int uidLength     = uidString.len()
-		int uidHalfLength = uidLength / 2
-		string uidPart1   = uidString.slice( 0, uidHalfLength )
-		string uidPart2   = uidString.slice( uidHalfLength, uidLength )
-		Assert( uidPart1.len() == uidPart2.len() )
-
-		string fakeHexUidString = ""
-		for ( int i = 0 ; i < uidString.len() ; i++ )
-		{
-			string n = uidString.slice( i, i + 1 )
-			switch( n )
-			{
-				case "0":
-					n = "0"
-					break
-
-				case "1":
-					n = "1"
-					break
-
-				case "2":
-					n = "2"
-					break
-
-				case "3":
-					n = "3"
-					break
-
-				case "4":
-					n = "a"
-					break
-
-				case "5":
-					n = "b"
-					break
-
-				case "6":
-					n = "c"
-					break
-
-				case "7":
-					n = "d"
-					break
-
-				case "8":
-					n = "e"
-					break
-
-				case "9":
-					n = "f"
-					break
-			}
-			fakeHexUidString += n
-		}
-
-		RuiSetString( file.minimap_coords, "uid", fakeHexUidString )
-		RuiSetInt( file.minimap_coords, "uidPart1", int( uidPart1 ) )
-		RuiSetInt( file.minimap_coords, "uidPart2", int( uidPart2 ) )
-		RuiTrackString( file.minimap_coords, "name", GetLocalClientPlayer(), RUI_TRACK_PLAYER_NAME_STRING )
-	}
+		InitializeMinimapCoords( file.minimap_coords, false )
+      
 
 	asset mapImage       = Minimap_GetAssetForKey( "minimap" )
 	float mapCornerX     = Minimap_GetFloatForKey( "pos_x" )
@@ -1137,6 +1075,14 @@ void function MinimapPackage_PlayerInit( entity ent, var rui )
 
 	RuiSetInt( rui, "squadIDLocalPlayer", GetLocalViewPlayer().GetSquadID() )
 	RuiTrackInt( rui, "squadID", ent, RUI_TRACK_SQUADID )
+
+	if ( IsFriendlyTeam( ent.GetTeam(), GetLocalViewPlayer().GetTeam() ) && ent.GetTeam() != GetLocalViewPlayer().GetTeam() )
+	{
+		RuiSetFloat3( rui, "iconColorOverride", (GetKeyColor( COLORID_FRIENDLY ) / 255.0)  )
+		RuiSetBool( rui, "shouldOverrideClampedIcon", true )
+		RuiSetFloat2( rui, "iconScaleOverride", <0.65, 0.65, 0.0> )
+
+	}
 
 	file.minimapPlayers.append( rui )
 }

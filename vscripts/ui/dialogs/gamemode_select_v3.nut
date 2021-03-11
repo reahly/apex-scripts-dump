@@ -18,6 +18,7 @@ struct {
 	asset currentVideoAsset = $""
 
 	string featuredSlot = ""
+	string featuredSlotString = "#HEADER_NEW_MODE"
 
 	array<var>         modeSelectButtonList
 	table<var, string> selectButtonPlaylistNameMap
@@ -108,15 +109,16 @@ void function GamemodeSelectV3_UpdateSelectButton( var button, string playlistNa
 		PopulateRuiWithRankedBadgeDetails( rui, rankScore, ladderPosition )
 	}
                         
-                                                                        
+                                                   
   
-                                 
-   
-                         
-                                                      
-                                                                  
-   
+    
   
+       
+                     
+	else if (GetPlaylistVarBool( playlistName, "preview_locked", false ))
+	{
+		RuiSetString( rui, "modeLockedReason", Localize( "#S08E04_PLAY_LOBBY_UNLOCK" ) )
+	}
        
 	else
 	{
@@ -149,7 +151,10 @@ void function GamemodeSelectV3_UpdateSelectButton( var button, string playlistNa
 	else
 	{
 		if ( slot == file.featuredSlot )
+		{
 			RuiSetInt( rui, "featuredState", FEATURED_ACTIVE )
+			RuiSetString( rui, "featuredString", file.featuredSlotString )
+		}
 		else
 			RuiSetInt( rui, "featuredState", FEATURED_INACTIVE )
 	}
@@ -212,9 +217,10 @@ void function OnOpenModeSelectDialog()
 }
 
 
-void function GamemodeSelectV3_SetFeaturedSlot( string slot )
+void function GamemodeSelectV3_SetFeaturedSlot( string slot, string modeString = "#HEADER_NEW_MODE" )
 {
 	file.featuredSlot = slot
+	file.featuredSlotString = modeString
 }
 
 
@@ -260,8 +266,11 @@ void function UpdateOpenModeSelectV3Dialog()
 		"regular_2",
 		"regular_3",
 		"ranked",
+                      
+			"arenas",
+        
                          
-            
+                   
         
 		"ltm",
 	]
@@ -278,12 +287,8 @@ void function UpdateOpenModeSelectV3Dialog()
 		if ( uiSlot == "" )
 			continue
 
-		#if(DEV)
-                          
-			if ( uiSlot == "arenas" )
-				continue
-        
-		#endif
+		if ( !slots.contains(uiSlot) )
+			continue
 
 		if ( !(uiSlot in slotToPlaylistNameMap) )
 		{
@@ -541,4 +546,4 @@ void function OnCloseButton_Activate( var button )
 //
 {
 	CloseAllDialogs()
-}
+}

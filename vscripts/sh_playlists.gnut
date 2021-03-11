@@ -90,15 +90,16 @@ global const table<string, asset> GAMEMODE_IMAGE_MAP = {
 		tournament = $"rui/menu/gamemode/tournament",
        
                            
-                                                       
-                                                     
-                                                       
+		salvo_wargames_kc = $"rui/menu/gamemode/salvo_wargames_kc",
+		salvo_wargames_oly = $"rui/menu/gamemode/salvo_wargames_oly",
+		wargames_duos = $"rui/menu/gamemode/wargames_duos",
+		wargames_trios = $"rui/menu/gamemode/wargames_trios",
        
                                
-                                                     
-                                                                                     
-                                                                                            
-                                                                                                
+		ring_collapse = $"rui/menu/gamemode/ring_collapse",
+		panel_olympus_ringcollapse = $"rui/menu/gamemode/playlist_bg_olympus_ringcollapse",
+		panel_canyon_land_mu3_ringcollapse = $"rui/menu/gamemode/playlist_bg_kc_mu3_ringcollapse",
+		panel_worlds_edge_mu2_ringcollapse = $"rui/menu/gamemode/playlist_bg_worldsedge_ringcollapse",
        
 	live_die_live = $"rui/menu/gamemode/live_die_live",
 	third_person = $"rui/menu/gamemode/third_person",
@@ -110,6 +111,9 @@ global const table<string, asset> GAMEMODE_IMAGE_MAP = {
 	campfire = $"rui/menu/gamemode/flashpoint",
        
 	explore_mode = $"rui/menu/gamemode/playlist_bg_olympus_explore",
+                     
+	s08e04_playlist_image = $"rui/menu/gamemode/playlist_bg_s08e04",
+       
 }
 
 global const table<string, asset> GAMEMODE_MINI_ICON_MAP = {
@@ -153,9 +157,6 @@ const table<string, asset> GAMEMODE_BINK_MAP = {
 	deja_loot = $"media/gamemodes/deja_loot.bik",
                           
 	campfire = $"media/gamemodes/campfire.bik",
-       
-                           
-                                                       
        
 }
 #endif //
@@ -674,16 +675,16 @@ const table<string, asset> GAMEMODE_EMBLEM_MAP = {
 		winter_express = $"rui/menu/gamemode_emblem/winter_express",
        
                            
-                                                                             
-                                                                   
-                                                                             
-                                                                       
-                                                                       
-                                                                           
-                                                                       
+		death_trigger = $"rui/menu/gamemode_emblem/emblem_war_games_death_trigger",
+		flare_up = $"rui/menu/gamemode_emblem/emblem_war_games_flare_up",
+		second_chance = $"rui/menu/gamemode_emblem/emblem_war_games_second_chance",
+		armed_drop = $"rui/menu/gamemode_emblem/emblem_war_games_armed_drop",
+		glow_zones = $"rui/menu/gamemode_emblem/emblem_war_games_glow_zones",
+		shield_regen = $"rui/menu/gamemode_emblem/emblem_war_games_shield_regen",
+		auto_cards = $"rui/menu/gamemode_emblem/emblem_war_games_auto_cards",
        
                                
-                                                            
+		ring_collapse = $"rui/menu/gamemode_emblem/ring_collapse",
        
 	lost_treasures = $"rui/menu/gamemode_emblem/campfire_lost_treasures",
                               

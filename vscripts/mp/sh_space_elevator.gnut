@@ -600,6 +600,9 @@ void function SPACEELEVATOR_TriggerEnter( entity trigger, entity ent )
 
 
 
+
+
+
 //
 
 

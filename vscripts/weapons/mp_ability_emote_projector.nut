@@ -12,6 +12,7 @@ global function GetDataIntForEmoteIcon
 #endif
 
 global function EmoteIcon_Waypoint_GetLinkedPlayers
+global function Holospray_DisableForTime
 
 #if(false)
 
@@ -105,6 +106,9 @@ bool function OnWeaponAttemptOffhandSwitch_WeaponEmoteProjector( entity weapon )
 			return false
 		}
 	}
+
+	if ( weapon.w.startChargeTime > Time() )
+		return false
 
 	return GetCurrentPlaylistVarBool( "holosprays_enabled", true )
 }
@@ -1024,4 +1028,17 @@ array<entity> function EmoteIcon_Waypoint_GetLinkedPlayers( entity wp )
 
 
 
-#endif
+#endif
+
+void function Holospray_DisableForTime( entity player, float duration )
+{
+	entity weapon = player.GetOffhandWeapon( HOLO_PROJECTOR_INDEX )
+
+	if ( !IsValid( weapon ) )
+		return
+
+	float nextAllowTime = weapon.w.startChargeTime
+
+	if ( nextAllowTime < Time() + duration )
+		weapon.w.startChargeTime = Time() + duration
+}

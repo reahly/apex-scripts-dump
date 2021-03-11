@@ -192,6 +192,7 @@ void function RewardPurchaseDialog_UpdateRewards()
 		ToolTipData toolTip
 		toolTip.titleText = GetBattlePassRewardHeaderText( bpReward )
 		toolTip.descText = GetBattlePassRewardItemName( bpReward )
+		toolTip.rarity =  ItemFlavor_GetQuality( bpReward.flav )
 		Hud_SetToolTipData( button, toolTip )
 	}
 }

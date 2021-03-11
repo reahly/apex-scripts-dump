@@ -16,7 +16,6 @@ global function ShowMatchConnectDialog
 global function LeaveDialog
 global function LeavePartyDialog
 global function OpenClubLeaveDialog
-global function Disconnect
 
 global function AddDialogButton
 global function AddDialogButtonEx
@@ -61,7 +60,7 @@ void function InitDataCenterDialogMenu( var newMenuArg ) //
 }
 
 
-void function InitConnectingDialog( var newMenuArg ) //
+void function InitConnectingDialog( var newMenuArg )
 {
 	var menu = GetMenu( "ConnectingDialog" )
 
@@ -136,10 +135,7 @@ void function OnDataCenterButton_Activate( var button )
 void function CancelConnect()
 {
 	MatchmakingCancel()
-	ClientCommand( "party_leave" ) //
-
-	if ( GetLobbyType() == "party" )
-		ClientCommand( "CancelPrivateMatchSearch" ) //
+	Party_LeaveParty()
 }
 
 
@@ -511,7 +507,7 @@ void function LeaveDialog()
 				if ( AmIPartyLeader() && PartyHasMembers() )
 					AddDialogButton( dialogData, "#YES_LEAVE_PARTY", LeaveParty )
 				else
-					AddDialogButton( dialogData, "#YES_RETURN_TO_TITLE_MENU", Disconnect )
+					AddDialogButton( dialogData, "#YES_RETURN_TO_TITLE_MENU", LeaveMatch_Disconnect )
 			}
 			else
 			{
@@ -616,11 +612,11 @@ void function CancelMatchSearch()
 }
 
 
-void function Disconnect()
+void function LeaveMatch_Disconnect()
 {
 	StopMatchmaking()
 	ClientCommand( "disconnect" )
-	ClientCommand( "party_leave" )
+	Party_LeaveParty()
 }
 
 

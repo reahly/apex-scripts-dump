@@ -138,7 +138,11 @@ WeaponData
 	playermodel         "mdl/weapons/loba_rings/w_loba_rings.rmdl"
 	projectilemodel     "mdl/weapons/loba_rings/w_loba_rings.rmdl"
 
-	zoom_effects                   1
+                                   
+                                  
+      
+		zoom_effects                   1
+       
 	zoom_time_in                   0.4
 	zoom_time_out                  0.4
 	zoom_fov                       70.0 // matches Maya scene file (70.0 actually results in no change at all)
@@ -213,7 +217,6 @@ WeaponData
 	OnWeaponActivate                    "OnWeaponActivate_ability_translocation"
 	OnWeaponDeactivate                  "OnWeaponDeactivate_ability_translocation"
 	OnWeaponTossPrep                    "OnWeaponTossPrep_ability_translocation"
-	OnWeaponToss                        "OnWeaponToss_ability_translocation"
 	OnWeaponTossReleaseAnimEvent        "OnWeaponTossReleaseAnimEvent_ability_translocation"
 	OnProjectileCollision               "OnProjectileCollision_weapon_deployable"
 	OnWeaponRegenEnd                    "OnWeaponRegenEndGeneric"
@@ -244,6 +247,13 @@ WeaponData
                                          
                                        
                                           
+         
+
+                               
+         
+                                                               
+                                                             
+                                                              
          
            
 

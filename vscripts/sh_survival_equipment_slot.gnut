@@ -207,19 +207,16 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	#endif
 
                     
-                                       
-                          
-                                                         
-                                           
-                                                   
-                                     
-                                      
-             
-                                                                                         
-                                                                                             
-                                                                                     
-                                                             
-        
+		e = RegisterEquipslot( "gadgetslot" )
+		e.title = "#GADGET_SLOT"
+		e.emptyCommsAction = eCommsAction.INVENTORY_NEED_GADGET
+		e.trackingNetInt = "equipedItemLootIndex_Gadgets"
+		#if(CLIENT)
+			e.trackingVisionPickupPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_GADGET
+			e.trackingVisionExchangePOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_GADGET
+			e.trackingVisionDropPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_GADGET
+			e.getEquippedRefFunc = GetEquippedRefBasedOnTrackingNetInt
+		#endif
        
 
 	e = RegisterEquipslot( "main_weapon0" )
@@ -650,6 +647,8 @@ int function EmptyCommsAction_AttachmentForParent( string equipmentSlot, string 
 
 int function FilledCommsAction_Weapon( string equipmentSlotRef, string itemRef )
 {
+	#if(CLIENT)
+
 	LootData lootData = SURVIVAL_Loot_GetLootDataByRef( itemRef )
 
 	switch( lootData.ammoType )
@@ -658,34 +657,57 @@ int function FilledCommsAction_Weapon( string equipmentSlotRef, string itemRef )
 			return eCommsAction.BLANK
 
 		case "bullet":
+                            
+                                                                               
+                                                
+         
 			return eCommsAction.INVENTORY_NEED_AMMO_BULLET
 
 		case "special":
+                            
+                                                                                
+                                                 
+         
 			return eCommsAction.INVENTORY_NEED_AMMO_SPECIAL
 
 		case "highcal":
+                            
+                                                                                
+                                                 
+         
 			return eCommsAction.INVENTORY_NEED_AMMO_HIGHCAL
 
 		case "shotgun":
+                            
+                                                                                
+                                                 
+         
 			return eCommsAction.INVENTORY_NEED_AMMO_SHOTGUN
 
-                     
-
+                       
                    
                                                     
-      
-                   
-
+        
+                     
 		case "sniper":
+                           
+                                                                               
+                                                
+        
 			return eCommsAction.INVENTORY_NEED_AMMO_SNIPER
-      
-                  
+        
+                    
                 
+                            
+                                                                               
+                                                
+         
                                                  
-      
+        
 	}
 
 	Warning( "GetCommsActionForEquipmentSlot() - Unhandled ammo type '" + lootData.ammoType + "'" )
+	#endif //
 	return eCommsAction.BLANK
 }
 

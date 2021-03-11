@@ -40,32 +40,13 @@ WeaponData
 
 	"ammo_display"									"count"
 
-	MP_BASE
-	{
-		"ammo_clip_size"   								"150"
-		"ammo_default_total"							"150"
-		"ammo_min_to_fire"								"150"
-		"ammo_per_shot"									"150"
-		"ammo_stockpile_max"							"150"
-		"fire_rate"   									"1.0"
-		"regen_ammo_refill_rate"						"10"
-
-		"enable_highlight_networking_on_creation"		"<KEEP_DEFAULT>"
-	}
-
-	SP_BASE
-	{
-		"ammo_clip_size"   								"200"
-		"ammo_default_total"							"200"
-		"ammo_min_to_fire"								"50"
-		"ammo_per_shot"									"50"
-		"ammo_stockpile_max"							"200"
-		"fire_rate"   									"1.0"
-		"regen_ammo_refill_rate"						"5"
-
-		"enable_highlight_networking_on_creation"		"1"
-	}
-
+	"ammo_clip_size"   								"150"
+	"ammo_default_total"							"150"
+	"ammo_min_to_fire"								"150"
+	"ammo_per_shot"									"150"
+	"ammo_stockpile_max"							"150"
+	"fire_rate"   									"1.0"
+	"regen_ammo_refill_rate"						"10"
 
 	// Regen Ammo
 	"regen_ammo_refill_start_delay"					"0.0"
@@ -136,6 +117,13 @@ WeaponData
                                          
                                        
                                           
+         
+
+                               
+         
+                                                               
+                                                               
+                                                               
          
            
 

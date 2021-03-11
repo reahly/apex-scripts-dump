@@ -1081,6 +1081,21 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 			}
 		}
 
+		//
+		array<int> realmsToTest = IsValid( realmEnt ) ? realmEnt.GetRealms() : [ eRealms.DEFAULT ]
+		foreach ( entity trigger in GetTriggersByClassesInRealms(
+			["trigger_hurt"],
+			baseOrigin + < 0, 0, 512>, baseOrigin, realmsToTest//
+			, TRACE_MASK_PLAYERSOLID ) )
+		{
+			if ( trigger.HasKey( "damageSourceId" ) && trigger.GetValueForKey( "damageSourceId" ) != "" )
+			{
+				failCode = failCode | 0x0400
+				failed = true
+				break
+			}
+		}
+
 		if ( failed )
 			break
 	}
@@ -1089,6 +1104,8 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 
 
 	#if(false)
+
+
 
 
 
@@ -1378,6 +1395,24 @@ array<entity> function GetAirDropTraceIgnoreEntArray()
 
 
 
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 
 
@@ -1416,17 +1451,6 @@ array<entity> function GetAirDropTraceIgnoreEntArray()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 //
 
 
@@ -1444,6 +1468,26 @@ array<entity> function GetAirDropTraceIgnoreEntArray()
 
 
 
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 

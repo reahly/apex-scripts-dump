@@ -580,6 +580,7 @@ void function UpdateComicPageButtons( var panel, bool haveStartedQuest )
 		toolTip1.titleText = GetBattlePassRewardHeaderText( reward )
 		toolTip1.descText = GetBattlePassRewardItemName( reward )
 		toolTip1.tooltipFlags = eToolTipFlag.SOLID
+		toolTip1.rarity = ItemFlavor_GetQuality( reward.flav )
 		Hud_SetToolTipData( completionRewardButton1, toolTip1 )
 	}
 	else
@@ -601,6 +602,7 @@ void function UpdateComicPageButtons( var panel, bool haveStartedQuest )
 		toolTip2.titleText = GetBattlePassRewardHeaderText( reward )
 		toolTip2.descText = GetBattlePassRewardItemName( reward )
 		toolTip2.tooltipFlags = eToolTipFlag.SOLID
+		toolTip2.rarity = ItemFlavor_GetQuality( reward.flav )
 		Hud_SetToolTipData( completionRewardButton2, toolTip2 )
 	}
 	else
@@ -634,6 +636,7 @@ void function UpdateComicPageButtons( var panel, bool haveStartedQuest )
 		toolTip3.titleText = GetBattlePassRewardHeaderText( reward )
 		toolTip3.descText = GetBattlePassRewardItemName( reward )
 		toolTip3.tooltipFlags = eToolTipFlag.SOLID
+		toolTip3.rarity = ItemFlavor_GetQuality( reward.flav )
 		if ( finalMissionStatus != eQuestMissionStatus.COMPLETED )
 			toolTip3.descText = "#QUEST_CHARM_UNKNOWN_REWARD_DESC"
 		Hud_SetToolTipData( completionRewardButton3, toolTip3 )
@@ -768,6 +771,7 @@ void function UpdateRewardTrackButtons( var panel, bool startedQuest )
 					toolTip.titleText = GetBattlePassRewardHeaderText( bpReward )
 					toolTip.descText = GetBattlePassRewardItemName( bpReward )
 					toolTip.tooltipFlags = eToolTipFlag.SOLID
+					toolTip.rarity = ItemFlavor_GetQuality( bpReward.flav )
 					Hud_SetToolTipData( button, toolTip )
 				}
 

@@ -1,5 +1,9 @@
 
 global function Lobby_AddLocalPlayer
+                    
+global function Lobby_ToggleHighlightOnKeyCard
+global function Lobby_TurnOffIdleHighlightOnKeyCard
+      
 
 void function Lobby_AddLocalPlayer()
 {
@@ -11,4 +15,76 @@ void function Lobby_AddLocalPlayer()
 
 	SetStandardAbilityBindingsForPilot( player )
 	RefreshPresentationType()
+
+                 
+	RunUIScript( "Lobby_SetMinimapCoordsName", player.GetPlayerName() ) //
+      
+
+                     
+
+	array<entity> keyCards = GetEntArrayByScriptName("arenas_tease_phone")
+	if ( keyCards.len() != 1 )
+		return
+
+	entity keyCard = GetEntByScriptName("arenas_tease_phone")
+	if ( !IsValid (keyCard) )
+		return
+
+	if ( !IsArenasTeaseLive() || !player.GetPersistentVar( "s08StoryEvent.hasStep1Completed" ) || player.GetPersistentVar("s08StoryEvent.hasStep4Completed") )
+	{
+		keyCard.Destroy()
+	}
+	else
+	{
+		//
+		keyCard.SetSkin(4)
+		LobbyPropHighlight( keyCard, < 49.0/255.0, 147.0/255.0, 145.0/255.0> ) //
+		if ( player.GetPersistentVar( "s08StoryEvent.hasStep2Completed" ) )
+		{
+			keyCard.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1, <0, 1, 0> )
+		}
+	}
+       
 }
+
+                    
+void function Lobby_ToggleHighlightOnKeyCard(bool focus)
+{
+	array<entity> keyCards = GetEntArrayByScriptName("arenas_tease_phone")
+	if ( keyCards.len() != 1 )
+		return
+
+	entity keyCard = GetEntByScriptName("arenas_tease_phone")
+	if ( !IsValid (keyCard) )
+		return
+
+	vector highlightParam = keyCard.Highlight_GetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1 )
+
+	if ( focus )
+	{
+		keyCard.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1, <1, highlightParam.y, 0> )
+	}
+	else
+	{
+		keyCard.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1, <0, highlightParam.y, 0> )
+	}
+}
+
+void function Lobby_TurnOffIdleHighlightOnKeyCard()
+{
+	array<entity> keyCards = GetEntArrayByScriptName("arenas_tease_phone")
+	if ( keyCards.len() != 1 )
+		return
+
+	entity keyCard = GetEntByScriptName("arenas_tease_phone")
+	if ( !IsValid (keyCard) )
+		return
+
+	//
+	//
+	//
+		vector highlightParam = keyCard.Highlight_GetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1 )
+		keyCard.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1, <highlightParam.x, 1, 0> )
+	//
+}
+      

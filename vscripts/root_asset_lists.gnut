@@ -279,6 +279,9 @@ global const array<asset> CAL_EVENT_ASSET_LIST =
                     
 		$"settings/itemflav/calevent/rankedseason08.rpak",
           
+                        
+                                                       
+          
 	$"settings/itemflav/calevent/s03e02.rpak",
 	$"settings/itemflav/calevent/s03e03_buffet.rpak",
 	$"settings/itemflav/calevent/s03e03_themedshop.rpak",
@@ -310,6 +313,7 @@ global const array<asset> CAL_EVENT_ASSET_LIST =
                      
 		$"settings/itemflav/calevent/login_steam_launch.rpak",
        
+	$"settings/itemflav/calevent/login_switch_launch.rpak",
                     
 		$"settings/itemflav/calevent/s08ace_collection.rpak",
 		$"settings/itemflav/calevent/s08ace_buffet.rpak",
@@ -472,7 +476,7 @@ global const array<asset> ENTITLEMENT_ASSETS = [
 	//
 	$"settings/itemflav/entitlement/CHAMPION_SKU_PACK.rpak",
                     
-                                                        
+		$"settings/itemflav/entitlement/MIRAGE_SKU_PACK.rpak",
        
                     
 		$"settings/itemflav/entitlement/MAYHEM_PACK_FUSE.rpak",
@@ -492,7 +496,7 @@ global const array<asset> ENTITLEMENT_ASSETS = [
        
 
                     
-                                                      
+		$"settings/itemflav/entitlement/PSPLUS_PACK_10.rpak"
        
                     
 		$"settings/itemflav/entitlement/PSPLUS_PACK_09.rpak",
@@ -507,7 +511,7 @@ global const array<asset> ENTITLEMENT_ASSETS = [
 	$"settings/itemflav/entitlement/PSPLUS_PACK_01.rpak",
 
                     
-                                                             
+		$"settings/itemflav/entitlement/amazon_caustic_skin1.rpak",
        
                     
 		$"settings/itemflav/entitlement/amazon_octane_skin1.rpak",
@@ -539,11 +543,19 @@ global const array<asset> ENTITLEMENT_ASSETS = [
 
 	//
                    
-                                                              
-                                                             
-                                                                
-                                                              
+	$"settings/itemflav/entitlement/algs_2020_mirage_frame.rpak",
+	$"settings/itemflav/entitlement/algs_2020_mirage_pose.rpak",
+	$"settings/itemflav/entitlement/algs_2020_mirage_tracker.rpak",
+	$"settings/itemflav/entitlement/algs_2020_mirage_badge.rpak",
       
+
+	//
+	$"settings/itemflav/entitlement/XBOX_EA_PLAY_CHARM_MASS_EFFECT.rpak",
+	$"settings/itemflav/entitlement/XBOX_EA_PLAY_CHARM_MIRRORS_EDGE.rpak",
+	$"settings/itemflav/entitlement/XBOX_EA_PLAY_CHARM_SQUADRONS_01.rpak",
+	$"settings/itemflav/entitlement/XBOX_EA_PLAY_CHARM_SQUADRONS_02.rpak",
+	$"settings/itemflav/entitlement/XBOX_EA_PLAY_CHARM_KNOCKOUTCITY.rpak",
+	$"settings/itemflav/entitlement/XBOX_EA_PLAY_CHARM_TITANFALL.rpak",
 ]
 
 

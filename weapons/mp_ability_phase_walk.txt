@@ -61,7 +61,6 @@ WeaponData
 	"ammo_drains_to_empty_on_fire"					"0"
 	"ammo_no_remove_from_clip"						"0"
 
-                   
     "deploy_time"   								"1.25"
 
     "ammo_clip_size"   								"250"
@@ -71,17 +70,6 @@ WeaponData
 	"ammo_stockpile_max"							"250"
 
 	"charge_time"									"4.0"
-     
-                                
-
-                                 
-                                 
-                                
-                              
-                                 
-
-                            
-      
 
     "charge_cooldown_time"							"1.0"
     "charge_cooldown_delay"   						"0.5"
@@ -269,6 +257,13 @@ WeaponData
                                          
                                        
                                           
+         
+
+                               
+         
+                                                               
+                                                               
+                                                               
          
            
 

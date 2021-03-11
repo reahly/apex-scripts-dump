@@ -259,6 +259,8 @@ bool function ShouldShowLowPopDialog( string playlist )
 
 bool function IsLowPopPlaylist( string playlist )
 {
+	//
+	//
 	if ( IsRankedPlaylist( playlist ) )
 		return true
 

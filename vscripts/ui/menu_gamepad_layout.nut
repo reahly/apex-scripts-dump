@@ -810,8 +810,8 @@ ButtonVars function GetBindDisplayName( string bind )
 			break
 
 		case "scriptcommand6":
-			displayName.common = ""
-			displayName.pilot = "#GADGET_SLOT"
+			displayName.common = "#EQUIP_GADGET"
+			displayName.pilot = "#EQUIP_GADGET"
 			displayName.titan = ""
 			break
 

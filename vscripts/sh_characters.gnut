@@ -88,6 +88,7 @@ global struct CharacterMenuLightData
 	vector fill_color
 	vector rimL_color
 	vector rimR_color
+	asset  animSeq
 }
 
 global struct CharacterHudUltimateColorData
@@ -356,6 +357,7 @@ CharacterMenuLightData function CharacterClass_GetMenuLightData( ItemFlavor flav
 	data.fill_color = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "menuLightColorFill" )
 	data.rimL_color = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "menuLightColorRimL" )
 	data.rimR_color = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "menuLightColorRimR" )
+	data.animSeq = GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "menuLightAnimSeq" )
 	return data
 }
 

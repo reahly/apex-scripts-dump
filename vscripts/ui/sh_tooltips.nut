@@ -32,6 +32,12 @@ struct ToolTipElementData
 	var element
 }
 
+struct ToolTipInfo
+{
+	asset ruiAsset
+	bool  hasActionText
+}
+
 struct ToolTipMenuData
 {
 	var menu
@@ -46,8 +52,9 @@ struct {
 	var tooltipRui
 
 	table< string, ToolTipMenuData > menusWithToolTips
+	table< int, ToolTipInfo> tooltipInfos
 
-	table<string, ToolTipData> _toolTipElements
+	table< string, ToolTipData > _toolTipElements
 	string                     lastFocusElement
 
 	table< int, array<void functionref(int style, ToolTipData)> > onUpdateTooltipCallbacks
@@ -62,10 +69,53 @@ void function Sh_InitToolTips()
 	UpdateTooltipRui( $"ui/generic_tooltip.rpak" )
 	#endif
 
+	ToolTipInfo tooltipInfo
+
 	foreach ( style in eTooltipStyle )
 	{
 		file.onUpdateTooltipCallbacks[ style ] <- []
+		file.tooltipInfos[ style ] <- clone tooltipInfo
 	}
+
+	int style
+
+	style = eTooltipStyle.DEFAULT
+	file.tooltipInfos[ style ].ruiAsset = $"ui/generic_tooltip.rpak"
+	file.tooltipInfos[ style ].hasActionText = true
+
+	style = eTooltipStyle.LOOT_PROMPT
+	file.tooltipInfos[ style ].ruiAsset = LOOT_PICKUP_HINT_DEFAULT_RUI
+	file.tooltipInfos[ style ].hasActionText = false
+
+	style = eTooltipStyle.WEAPON_LOOT_PROMPT
+	file.tooltipInfos[ style ].ruiAsset = WEAPON_PICKUP_HINT_DEFAULT_RUI
+	file.tooltipInfos[ style ].hasActionText = false
+
+	style = eTooltipStyle.BUTTON_PROMPT
+	file.tooltipInfos[ style ].ruiAsset = $"ui/button_tooltip.rpak"
+	file.tooltipInfos[ style ].hasActionText = true
+
+	style = eTooltipStyle.ACCESSIBLE
+	file.tooltipInfos[ style ].ruiAsset = $"ui/accessibility_tooltip.rpak"
+	file.tooltipInfos[ style ].hasActionText = true
+
+	style = eTooltipStyle.CURRENCY
+	file.tooltipInfos[ style ].ruiAsset = $"ui/currency_tooltip.rpak"
+	file.tooltipInfos[ style ].hasActionText = true
+
+                       
+                                         
+                                                                       
+                                                 
+      
+
+	style = eTooltipStyle.CLUB_MEMBER
+	file.tooltipInfos[ style ].ruiAsset = $"ui/club_member_tooltip.rpak"
+	file.tooltipInfos[ style ].hasActionText = true
+
+	style = eTooltipStyle.GLADIATOR_CARD_BADGE
+	file.tooltipInfos[ style ].ruiAsset = $"ui/gladiator_card_badge_tooltip.rpak"
+	file.tooltipInfos[ style ].hasActionText = true
 }
 
 #if(UI)
@@ -242,37 +292,7 @@ void function UpdateToolTipElement( var toolTipElement, var focusElement )
 		func( dt.tooltipStyle, dt )
 	}
 
-	asset ruiAsset
-
-	//
-	switch ( dt.tooltipStyle )
-	{
-		case eTooltipStyle.LOOT_PROMPT:
-			ruiAsset = LOOT_PICKUP_HINT_DEFAULT_RUI
-			break
-		case eTooltipStyle.WEAPON_LOOT_PROMPT:
-			ruiAsset = WEAPON_PICKUP_HINT_DEFAULT_RUI
-			break
-		case eTooltipStyle.BUTTON_PROMPT:
-			ruiAsset = $"ui/button_tooltip.rpak"
-			break
-		case eTooltipStyle.ACCESSIBLE:
-			ruiAsset = $"ui/accessibility_tooltip.rpak"
-			break
-		case eTooltipStyle.CURRENCY:
-			ruiAsset = $"ui/currency_tooltip.rpak"
-			break
-                        
-                                        
-                                              
-        
-       
-		case eTooltipStyle.CLUB_MEMBER:
-			ruiAsset = $"ui/club_member_tooltip.rpak"
-			break
-		default:
-			ruiAsset = $"ui/generic_tooltip.rpak"
-	}
+	asset ruiAsset = file.tooltipInfos[ dt.tooltipStyle ].ruiAsset
 
 	#if(UI)
 		UpdateTooltipRui( ruiAsset )
@@ -316,7 +336,7 @@ void function UpdateToolTipElement( var toolTipElement, var focusElement )
 
 	var rui = GetTooltipRui()
 
-	if ( ruiAsset == "ui/generic_tooltip.rpak" || ruiAsset == $"ui/button_tooltip.rpak" || ruiAsset == $"ui/accessibility_tooltip.rpak" || ruiAsset == $"ui/currency_tooltip.rpak" || ruiAsset == $"ui/club_member_tooltip.rpak" )
+	if ( file.tooltipInfos[ dt.tooltipStyle ].hasActionText )
 	{
 		array<string> actionList
 		if ( dt.actionHint1 != "" )
@@ -338,6 +358,10 @@ void function UpdateToolTipElement( var toolTipElement, var focusElement )
 			RuiSetGameTime( rui, "changeTime", Time() )
 
 		file.lastFocusElement = string(focusElement)
+	}
+	if ( dt.tooltipStyle == eTooltipStyle.DEFAULT )
+	{
+		RuiSetInt( rui, "rarity", dt.rarity )
 	}
 
 	if ( dt.tooltipStyle == eTooltipStyle.CLUB_MEMBER )

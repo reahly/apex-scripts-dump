@@ -32,9 +32,16 @@ void function SCB_WeaponInspectHint()
 	if ( GetLocalViewPlayer() != GetLocalClientPlayer() )
 		return
 
+                    
+	if ( IsControllerModeActive() )
+	{
+		AddPlayerHint( 4.0, 0.25, $"", "HINT_WEAPON_INSPECT_CONTROLLER" )
+	}
+	else
+       
 	AddPlayerHint( 4.0, 0.25, $"", "#HINT_WEAPON_INSPECT" )
-}
 
+}
 
 void function OnInspectKeyPressed( entity localPlayer )
 {

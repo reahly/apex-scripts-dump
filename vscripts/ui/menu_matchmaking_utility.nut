@@ -39,7 +39,7 @@ void function LeaveMatch_Freelance()
 
 void function LeaveParty()
 {
-	ClientCommand( "party_leave" )
+	Party_LeaveParty()
 	Signal( uiGlobal.signalDummy, "LeaveParty" )
 }
 

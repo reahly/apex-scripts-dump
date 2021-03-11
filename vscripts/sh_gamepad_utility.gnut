@@ -62,14 +62,13 @@ struct
 			["reload", "use; use_long"],
 			["use", "reload; use_long"],
 			["reload; use", "use_long; use"],
-			["scriptCommand3", "weapon_inspect"],
+			["scriptCommand3", "scriptCommand6"],
 			["scriptCommand4", "scriptCommand2"],
 			["weaponselectordnance", "strafe"],
 			["scriptCommand5; chat_wheel", "scriptCommand1"],
 		]
 	#endif
 } file
-
 
 global const int GAMEPAD_CUSTOM_BUTTONS_COUNT = 15
 #if CLIENT || UI 
@@ -174,7 +173,7 @@ void function ShGamepad_LevelInit()
 	SetDefaultHeldBindings()
 
                     
-                                  
+	SetHeldBindingsWithGadgetButton()
        
 }
 #endif
@@ -190,7 +189,7 @@ void function SetDefaultHeldBindings()
 			["reload", "use; use_long"],
 			["use", "reload; use_long"],
 			["reload; use", "use_long; use"],
-			["scriptCommand3", "weapon_inspect"],
+			["scriptCommand3", "scriptCommand6"],
 			["scriptCommand4", "scriptCommand2"],
 			["weaponselectordnance", "strafe"],
 			["scriptCommand5; chat_wheel", "scriptCommand1"],
@@ -543,7 +542,7 @@ array<string> function GetABBindsForBaseBind( string baseBind )
 		case "weaponSelectPrimary0":
 		case "weaponSelectPrimary1":
 		case "weaponSelectPrimary2":
-		case "weapon_inspect":
+		case "+scriptCommand3":
 		case "toggle_inventory":
 		case "toggle_map":
 		case "chat_wheel":

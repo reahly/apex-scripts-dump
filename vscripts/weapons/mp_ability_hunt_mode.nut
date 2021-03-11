@@ -364,8 +364,32 @@ void function EndThreadOn_HuntCommon( entity player )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 //
+
+
+
+
+
+
+
+
 
 
 

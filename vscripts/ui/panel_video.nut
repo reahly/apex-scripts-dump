@@ -18,7 +18,7 @@ struct
 
 	array<ConVarData>    conVarDataList
 
-	array<var>            noApplyConfirmationRequired
+	array<var>            noApplyConfirmationRequired	
 } file
 
 void function InitVideoPanelForCode( var panel )

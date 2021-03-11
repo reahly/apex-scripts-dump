@@ -63,9 +63,6 @@ void function ShCarePackage_Init()
 
 	#if(CLIENT)
 		RegisterSignal( "DeployableCarePackagePlacement" )
-
-		StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_care_package, OnBeginPlacingCarePackage )
-		StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_care_package, OnEndPlacingCarePackage )
 	#endif
 
 	#if(false)
@@ -97,12 +94,8 @@ void function OnWeaponActivate_care_package( entity weapon )
 		SetCarePackageDeployed( false )
 		if ( !InPrediction() ) //
 			return
-#endif
 
-
-	#if(false)
-
-//
+		OnBeginPlacingCarePackage( weapon, ownerPlayer )
 #endif
 }
 
@@ -113,13 +106,9 @@ void function OnWeaponDeactivate_care_package( entity weapon )
 	Assert( ownerPlayer.IsPlayer() )
 
 #if(CLIENT)
-		if ( !InPrediction() ) //
+	OnEndPlacingCarePackage( ownerPlayer )
+	if ( !InPrediction() ) //
 			return
-#endif
-
-	#if(false)
-
-//
 #endif
 }
 
@@ -229,15 +218,15 @@ int function GetSkinForCarePackageModel( entity player )
 }
 
 #if(CLIENT)
-void function OnBeginPlacingCarePackage( entity player, int statusEffect, bool actuallyChanged )
+void function OnBeginPlacingCarePackage( entity weapon, entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
 
-	thread DeployableCarePackagePlacement( player, CARE_PACKAGE_AIRDROP_MODEL )
+	thread DeployableCarePackagePlacement( weapon, player, CARE_PACKAGE_AIRDROP_MODEL )
 }
 
-void function OnEndPlacingCarePackage( entity player, int statusEffect, bool actuallyChanged )
+void function OnEndPlacingCarePackage( entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
@@ -245,8 +234,10 @@ void function OnEndPlacingCarePackage( entity player, int statusEffect, bool act
 	player.Signal( "DeployableCarePackagePlacement" )
 }
 
-void function DeployableCarePackagePlacement( entity player, asset carePackageModel )
+void function DeployableCarePackagePlacement( entity weapon, entity player, asset carePackageModel )
 {
+	weapon.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
 	player.EndSignal( "DeployableCarePackagePlacement" )
 
 	entity carePackage = CreateCarePackageProxy( carePackageModel )

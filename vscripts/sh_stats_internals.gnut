@@ -45,6 +45,9 @@ global function RegisterStatEnumStruct
 
 
 
+
+
+
 #endif
 
 #if(false)
@@ -825,6 +828,81 @@ string function DEV_GetStatTemplateDebugName( StatTemplate template )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 
 
@@ -1479,6 +1557,7 @@ StatTemplate function RegisterCachedCalculatedStat_Int( StatEnumStruct ornull en
 
 
 #if(false)
+
 
 
 

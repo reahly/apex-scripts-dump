@@ -15,7 +15,7 @@ global function ServerCallback_PromptSayThanksRevive
 global function ServerCallback_PromptTaunt
 global function ServerCallback_PromptSayGetOnTheDropship
                             
-                                                       
+global function ServerCallback_PromptMarkMyLastDeathbox
       
 global function ServerCallback_RefreshInventoryAndWeaponInfo
 global function ServerCallback_RefreshDeathBoxHighlight
@@ -85,6 +85,7 @@ global function SetVictorySequenceEffectPackage
 global function SetVictorySequenceLocation
 global function SetVictorySequenceSunSkyIntensity
 global function IsShowingVictorySequence
+global function GetVictoryScreenCharacterModelForEHI
 global function ServerCallback_NessyMessage
 global function ShowChampionVictoryScreen
 
@@ -104,10 +105,6 @@ global function SetCustomPlayerInfoColor
 global function SetCustomPlayerInfoShadowFormState
 global function GetPlayerInfoColor
 global function ClearCustomPlayerInfoColor
-
-                          
-                                            
-      
 
 global function SetNextCircleDisplayCustomStarting
 global function SetNextCircleDisplayCustomClosing
@@ -136,6 +133,7 @@ global function HideTeamNameInHud
 #if(DEV)
 global function Dev_ShowVictorySequence
 global function Dev_AdjustVictorySequence
+global function Dev_SpoofMatchData
 #endif
 
 global function CircleAnnouncementsEnable
@@ -216,7 +214,7 @@ global const float SAFE_ZONE_ALPHA = 0.05
 global const string HEALTHKIT_BIND_COMMAND = "+scriptCommand2"
 global const string ORDNANCEMENU_BIND_COMMAND = "+strafe"
                    
-                                                               
+global const string GADGETSLOT_BIND_COMMAND = "+scriptCommand6"
       
 
 struct MinimapLabelStruct
@@ -231,10 +229,13 @@ global struct SquadSummaryPlayerData
 {
 	int eHandle
 	int kills
+	int assists
+	int knockdowns
 	int damageDealt
 	int survivalTime
 	int revivesGiven
 	int respawnsGiven
+	entity victoryScreenCharacterModel
 }
 
 global struct SquadSummaryData
@@ -290,7 +291,7 @@ struct
 	string playerState
 
 	array<MinimapLabelStruct> 	minimapLabels
-	table<entity, var> 			fullmapPlayerItems
+	table<EHI, var> 			fullmapPlayerItems
 	int							playerTagMode = OBS_PLAYERTAG_MODE_ALL
 	bool						updatePlayerTags = true
 	entity 						highlightedPlayer
@@ -352,6 +353,7 @@ struct
 
 	array<bool functionref(entity) > tryAccessInventoryCallbacks
 
+	string clubName = ""
 } file
 
 void function ClGamemodeSurvival_Init()
@@ -421,7 +423,7 @@ void function ClGamemodeSurvival_Init()
 	RegisterConCommandTriggeredCallback( "-" + ORDNANCEMENU_BIND_COMMAND.slice( 1 ), OrdnanceMenu_Up )
 
                     
-                                                                                
+	RegisterConCommandTriggeredCallback( GADGETSLOT_BIND_COMMAND, GadgetSlot_Down )
        
 	asset mapImage = Minimap_GetAssetForKey( "minimap" )
 	file.mapCornerX = Minimap_GetFloatForKey( "pos_x" )
@@ -439,7 +441,6 @@ void function ClGamemodeSurvival_Init()
 
 	AddCallback_MinimapEntShouldCreateCheck( DontCreateRuisForEnemies )
 	AddCallback_MinimapEntSpawned( AddInWorldMinimapObject )
-	AddCallback_LocalViewPlayerSpawned( AddInWorldMinimapObject )
 
 	AddCallback_LocalClientPlayerSpawned( OnLocalPlayerSpawned )
 
@@ -554,12 +555,6 @@ void function InitInWorldScreens()
 	}
 
 	file.minimapTopos.extend( topos )
-
-	foreach ( player in GetPlayerArray() )
-	{
-		if ( IsValid( player ) )
-			AddInWorldMinimapObject( player )
-	}
 
 	if ( file.minimapTopos.len() > 1 )
 		file.needsMapHint = false
@@ -1243,19 +1238,19 @@ void function MinimapPackage_ObjectiveAreaInit( entity ent, var rui )
       
 
                               
-                               
-                                                                                                  
-                                                                                                       
-                                   
-                                         
-        
+		case FISSURE_MINIMAP_WARNING:
+			RuiSetColorAlpha( rui, "objColor", SrgbToLinear( RING_COLLAPSEMODE_WARN_COLOR / 255.0 ), 0.04 )
+			RuiSetColorAlpha( rui, "objBorderColor", SrgbToLinear( RING_COLLAPSEMODE_WARN_COLOR / 255.0 ), 0.5 )
+			RuiSetBool( rui, "blink", true )
+			RuiSetBool( rui, "borderBlink", true )
+			break
 
-                    
-                                                                                                   
-                                                                                                                
-                                    
-                                          
-        
+		case RING_FISSURE:
+			RuiSetColorAlpha( rui, "objColor", SrgbToLinear( RING_COLLAPSEMODE_DANGER_COLOR / 255.0 ), 1.0 )
+			RuiSetColorAlpha( rui, "objBorderColor", SrgbToLinear( RING_COLLAPSEMODE_DANGER_COLOR_BORDER / 255.0 ), 1.0 )
+			RuiSetBool( rui, "blink", false )
+			RuiSetBool( rui, "borderBlink", false )
+			break
       
               
                                      
@@ -1387,23 +1382,27 @@ void function UpdateDpadHud( entity player )
 	RuiSetInt( file.dpadMenuRui, "ordnanceTypeCount", GetCountForLootType( eLootType.ORDNANCE ) )
 
                     
-                                                        
-                                                 
-                                                                                     
-                                                                          
-                                            
-  
-                               
-                                                                              
-                               
-                                                  
-  
-     
-  
-          
-  
-                                                          
-                                                   
+	RuiSetBool( file.dpadMenuRui, "gadgetUIEnabled", true )
+	asset gadgetIcon = $"rui/hud/dpad/empty_slot" //
+	LootData lootData = EquipmentSlot_GetEquippedLootDataForSlot( player, "gadgetslot" )
+	string equipRef = EquipmentSlot_GetLootRefForSlot( player, "gadgetslot" )
+	int maxAmmoCount = 0
+	if ( IsLootTypeValid( lootData.lootType ) )
+	{
+		gadgetIcon = lootData.hudIcon
+		maxAmmoCount = lootData.inventorySlotCount
+
+		entity gadgetWeapon = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_GADGET )
+		if( IsValid( gadgetWeapon ) )
+			ammo = gadgetWeapon.GetWeaponPrimaryClipCount()
+	}
+	else
+	{
+		ammo = 0
+	}
+	RuiSetImage( file.dpadMenuRui, "gadgetIcon", gadgetIcon )
+	RuiSetInt( file.dpadMenuRui, "gadgetCount", ammo )
+	RuiSetInt( file.dpadMenuRui, "maxGadgetCount", maxAmmoCount )
        
 
                 
@@ -1496,26 +1495,6 @@ void function OnIsHealingChanged( entity player, bool old, bool new, bool actual
 
 	UpdateHealHint( player )
 }
-
-                          
-                                                            
- 
-                                              
-                                   
-        
-
-                                        
-                                  
-                                              
-                            
-                          
-
-                        
-  
-                                                      
-  
- 
-      
 
 void function SetNextCircleDisplayCustom_( NextCircleDisplayCustomData data )
 {
@@ -2196,20 +2175,63 @@ void function UpdateMap_THREAD()
 
 		if ( IsSpectator( GetLocalClientPlayer() ) && file.updatePlayerTags == true)
 		{
-			foreach ( ent, rui in file.fullmapPlayerItems)
+			array< entity > sortedPlayers = GetPlayerArray()
+			sortedPlayers.sort( int function(entity playerA, entity playerB){
+				entity player = GetLocalViewPlayer()
+				if ( playerA.GetTeam() == playerB.GetTeam() && playerA.GetTeam() == player.GetTeam() )
+				{
+					return -1
+				}
+
+				vector playerOrigin = player.GetOrigin()
+				vector distToPlayerA = playerA.GetOrigin() - playerOrigin
+				vector distToPlayerB = playerB.GetOrigin() - playerOrigin
+				if(distToPlayerA > distToPlayerB)
+				{
+					return 1
+				}
+				else if ( distToPlayerA < distToPlayerB )
+				{
+					return -1
+				}
+
+				return 0
+			});
+
+			int playersShownCount = 0
+			foreach ( ent in sortedPlayers )
 			{
-				if ( !IsValid( ent ) || !IsValid( rui ) || !ent.IsPlayer() )
+				if ( !IsValid( ent ) || !ent.IsPlayer() )
 					continue
 
-				entity player = GetLocalViewPlayer();
+				EHI ehi = ToEHI( ent )
+				var rui = file.fullmapPlayerItems[ehi]
+
+				if ( !IsValid( rui ) )
+					continue
+
+				entity player = GetLocalViewPlayer()
 
 				bool showNameTag = false
 				switch( file.playerTagMode )
 				{
 					case OBS_PLAYERTAG_MODE_NONE:
+						printt("PlayerTagMode_None")
 						showNameTag = false
 						break;
 
+					case OBS_PLAYERTAG_MODE_5_TEAMS:
+						showNameTag = playersShownCount < 15
+						playersShownCount++;
+						break;
+					case OBS_PLAYERTAG_MODE_7_TEAMS:
+						showNameTag = playersShownCount < 21
+						playersShownCount++;
+						break;
+					case OBS_PLAYERTAG_MODE_11_TEAMS:
+						showNameTag = playersShownCount < 33
+						playersShownCount++;
+						break;
 					case OBS_PLAYERTAG_MODE_ALL:
 						showNameTag = true
 						break;
@@ -2218,6 +2240,11 @@ void function UpdateMap_THREAD()
 						showNameTag = (ent.GetTeam() == player.GetTeam())
 						break;
 				}
+
+				if ( showNameTag )
+					RuiSetString( rui, "playerName", ent.GetPlayerNameWithClanTag() )
+				else
+					RuiSetString( rui, "playerName", "" )
 
 				if ( ent == player )
 					RuiSetFloat2( rui, "highlightScaleTarget", < 1.5, 1.5, 0.0 > )
@@ -2395,8 +2422,8 @@ void function AddInWorldMinimapObject_WhenValid( entity ent )
 
                               
 
-                               
-                    
+		case FISSURE_MINIMAP_WARNING:
+		case RING_FISSURE:
       
 
 		case "safeZone":
@@ -2531,6 +2558,16 @@ void function AddInWorldMinimapObject_WhenValid( entity ent )
 		if ( IsPVEMode() && ent.IsPlayer() && IsMultiTeamMission() )
 			break
 
+		if ( DoesModeDisplayIconsForAllTeams( GameRules_GetGameMode() ) )
+			break
+		if ( DoesModeDisplayIconsForAllFriendlyTeams( GameRules_GetGameMode() ) )
+		{
+			if ( ent.IsPlayer() && IsFriendlyTeam( ent.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
+			{
+				break
+			}
+		}
+
 		//
 		if ( !IsSpectator( GetLocalClientPlayer() ) )
 		{
@@ -2566,6 +2603,22 @@ void function WaitForEntUpdate( entity ent, entity viewPlayer )
 	EndSignal( viewPlayer, "SettingsChanged", "OnDeath", "TeamChanged" )
 
 	WaitForever()
+}
+
+
+bool function DoesModeDisplayIconsForAllTeams( string mode )
+{
+	return false
+}
+
+
+bool function DoesModeDisplayIconsForAllFriendlyTeams( string mode )
+{
+                         
+                                 
+              
+       
+	return false
 }
 
 
@@ -2751,6 +2804,7 @@ void function AddInWorldMinimapObjectInternal( entity ent, var screen, asset def
 	bool isPetTitan    = ent == viewPlayer.GetPetTitan()
 	bool isLocalPlayer = ent == viewPlayer
 	int customState    = ent.Minimap_GetCustomState()
+	bool isFriendlyAlly = ent.GetTeam() != viewPlayer.GetTeam() && IsFriendlyTeam( ent.GetTeam(), viewPlayer.GetTeam() )
 	asset minimapAsset = FULLMAP_OBJECT_RUI
 	if ( ent.IsPlayer() )
 	{
@@ -2828,24 +2882,30 @@ void function AddInWorldMinimapObjectInternal( entity ent, var screen, asset def
 		vector smokeColor = SrgbToLinear(GetSkydiveSmokeColorForTeam( ent.GetTeam() ) / 255.0)
 		RuiSetFloat3( rui, "smokeColor", smokeColor )
 
+
+		RuiSetString( rui, "playerName", viewerIsSpectator ? ent.GetPlayerNameWithClanTag() : "" )
+		if ( isFriendlyAlly )
+			RuiSetFloat3( rui, "iconColorOverride", (GetKeyColor( COLORID_FRIENDLY ) / 255.0)  )
+
 		if( viewerIsSpectator )
 		{
 			RuiTrackGameTime( rui, "lastFireTime", ent, RUI_TRACK_LAST_FIRED_TIME )
 		}
 
-		if( ent in file.fullmapPlayerItems )
+		EHI ehi = ToEHI( ent )
+		if( ehi in file.fullmapPlayerItems )
 		{
-			Fullmap_RemoveRui( file.fullmapPlayerItems[ent] )
-			file.fullmapPlayerItems[ent] = null
+			Fullmap_RemoveRui( file.fullmapPlayerItems[ehi] )	//
+			file.fullmapPlayerItems[ehi] = null
 		}
 
-		file.fullmapPlayerItems[ent] <- rui
+		file.fullmapPlayerItems[ehi] <- rui
 	}
 
 	Fullmap_AddRui( rui )
 
 	OnThreadEnd(
-		function() : ( rui )
+		function() : ( rui, ent )
 		{
 			Fullmap_RemoveRui( rui )
 			RuiDestroy( rui )
@@ -2863,6 +2923,8 @@ void function AddInWorldMinimapObjectInternal( entity ent, var screen, asset def
 		{
 			WaitSignal( ent, "SettingsChanged", "OnDeath" )
 			RuiSetFloat2( rui, "iconScale", ent.IsTitan() ? <1.0, 1.0, 0.0> : <2.0, 2.0, 0.0> )
+			if ( isFriendlyAlly && !ent.IsTitan() )
+				RuiSetFloat2( rui, "iconScale", <1.0, 1.0, 0.0> )
 		}
 	}
 	else
@@ -3729,6 +3791,18 @@ void function OnGameStateChanged(entity player, int oldVal, int newVal, bool act
 {
 	int gamestate = newVal
 
+	if ( gamestate == eGameState.Playing && actuallyChanged )
+	{
+		array<entity> players = GetPlayerArray()
+		//
+		int myTeam = GetLocalClientPlayer().GetTeam()
+		foreach ( enemyPlayer in players )
+		{
+			if ( enemyPlayer.GetTeam() != myTeam )
+				enemyPlayer.RequestClubData()
+		}
+	}
+
 	var gamestateRui = ClGameState_GetRui()
 	if ( gamestateRui == null )
 		return
@@ -3900,6 +3974,12 @@ bool function DontCreateRuisForEnemies( entity ent )
 			{
 				return false
 			}
+		}
+
+		if ( DoesModeDisplayIconsForAllFriendlyTeams( GameRules_GetGameMode() ) )
+		{
+			if ( IsFriendlyTeam( ent.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
+				return true
 		}
 
 		if ( ent.GetTeam() != GetLocalViewPlayer().GetTeam() && GetLocalViewPlayer().GetTeam() != TEAM_SPECTATOR ) //
@@ -4445,6 +4525,13 @@ void function ShowChampionVictoryScreen( int winningTeam )
 	file.victoryRui = CreateFullscreenRui( ruiAsset )
 
 	RuiSetBool( file.victoryRui, "onWinningTeam", onWinningTeam )
+	if ( onWinningTeam )
+	{
+		if ( GetBugReproNum() == 8675309 )
+			RuiSetString( file.victoryRui, "winningClubName", "WWWWWWWWWWWWWWWW" )
+		else if ( GetClubPartyBool() == true )
+			RuiSetString( file.victoryRui, "winningClubName", Clubs_GetMyStoredClubName() )
+	}
 
 	if ( s_championScreenExtraFunc != null )
 		s_championScreenExtraFunc( file.victoryRui )
@@ -4499,7 +4586,7 @@ void function ShowSquadSummary()
 }
 
 
-void function ServerCallback_AddWinningSquadData( int index, int eHandle, int kills, int damageDealt, int survivalTime, int revivesGiven, int respawnsGiven )
+void function ServerCallback_AddWinningSquadData( int index, int eHandle, int kills, int assists, int knockdowns, int damageDealt, int survivalTime, int revivesGiven, int respawnsGiven )
 {
 	if ( index == -1 )
 	{
@@ -4511,6 +4598,8 @@ void function ServerCallback_AddWinningSquadData( int index, int eHandle, int ki
 	SquadSummaryPlayerData data
 	data.eHandle = eHandle
 	data.kills = kills
+	data.assists = assists
+	data.knockdowns = knockdowns
 	data.damageDealt = damageDealt
 	data.survivalTime = survivalTime
 	data.revivesGiven = revivesGiven
@@ -4534,19 +4623,26 @@ SquadSummaryData function GetWinnerSquadSummaryData()
 #if(DEV)
 void function Dev_ShowVictorySequence()
 {
-	ServerCallback_AddWinningSquadData( -1, -1, 0, 0, 0, 0, 0 )
+	ServerCallback_AddWinningSquadData( -1, -1, 0, 0, 0, 0, 0, 0, 0 )
 	foreach ( int i, entity player in GetPlayerArrayOfTeam( GetLocalClientPlayer().GetTeam() ) )
-		ServerCallback_AddWinningSquadData( i, player.GetEncodedEHandle(), 2, 1234, 600, 3, 1 )
+		ServerCallback_AddWinningSquadData( i, player.GetEncodedEHandle(), 2, 3, 4, 1234, 600, 3, 1 )
 	thread ShowVictorySequence( false, true )
 }
 
 void function Dev_AdjustVictorySequence()
 {
-	ServerCallback_AddWinningSquadData( -1, -1, 0, 0, 0, 0, 0 )
+	ServerCallback_AddWinningSquadData( -1, -1, 0, 0, 0, 0, 0, 0, 0 )
 	foreach ( int i, entity player in GetPlayerArrayOfTeam( GetLocalClientPlayer().GetTeam() ) )
-		ServerCallback_AddWinningSquadData( i, player.GetEncodedEHandle(), 2, 1234, 600, 3, 1 )
+		ServerCallback_AddWinningSquadData( i, player.GetEncodedEHandle(), 2, 3, 4, 1234, 600, 3, 1 )
 	GetLocalClientPlayer().FreezeControlsOnClient()
 	thread ShowVictorySequence( true, true )
+}
+
+void function Dev_SpoofMatchData()
+{
+	int i = 0
+    entity player = GetLocalClientPlayer()
+	ServerCallback_AddWinningSquadData( i, player.GetEncodedEHandle(), 2, 3, 4, 1234, 600, 3, 1 )
 }
 #endif
 
@@ -4592,6 +4688,8 @@ void function SetSquadDataToLocalTeam()
 
 		data.eHandle = eHandle
 		data.kills = player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].kills" )
+		data.assists = player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].assists" )
+		data.knockdowns = player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].knockdowns" )
 		data.damageDealt = player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].damageDealt" )
 		data.survivalTime = player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].survivalTime" )
 		data.revivesGiven = player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].revivesGiven" )
@@ -4599,6 +4697,8 @@ void function SetSquadDataToLocalTeam()
 
 		#if(DEV)
 			printt( "PD: ", i, "kills", player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].kills" ) )
+			printt( "PD: ", i, "assists", player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].assists" ) )
+			printt( "PD: ", i, "knockdowns", player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].knockdowns" ) )
 			printt( "PD: ", i, "damageDealt", player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].damageDealt" ) )
 			printt( "PD: ", i, "survivalTime", player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].survivalTime" ) )
 			printt( "PD: ", i, "revivesGiven", player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].revivesGiven" ) )
@@ -4648,9 +4748,11 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 		placementMode = false
 	#endif
 
-	entity player = GetLocalClientPlayer()
+	entity player 				= GetLocalClientPlayer()
+	int playerTeam 				= player.GetTeam()
+	int playerEncodedEHandle 	= player.GetEncodedEHandle()
 
-	EndSignal( player, "OnDestroy" )
+	//
 
                   
 		array<int> offsetArray = [90, 78, 78, 90, 90, 78, 78, 90, 90, 78]
@@ -4659,11 +4761,11 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 	//
 	ScreenFade( player, 255, 255, 255, 255, 0.4, 2.0, FFADE_OUT | FFADE_PURGE )
 
-	EmitSoundOnEntity( GetLocalClientPlayer(), "UI_InGame_ChampionMountain_Whoosh" )
+	EmitSoundOnEntity( player, "UI_InGame_ChampionMountain_Whoosh" )
 
 	file.IsShowingVictorySequence = true
 
-	if ( IsSquadDataPersistenceEmpty( GetLocalClientPlayer() ) && !isDevTest )
+	if ( IsSquadDataPersistenceEmpty( player ) && !isDevTest )
 		Remote_ServerCallFunction( "ClientCallback_Sur_RequestSquadDataPersistence" )
 	wait 0.4
 
@@ -4682,9 +4784,12 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 
 	UpdateRespawnStatus( eRespawnStatus.NONE )
 	HideGladiatorCardSidePane( true )
-	Signal( player, "Bleedout_StopBleedoutEffects" )
 
-	ScreenFade( player, 255, 255, 255, 255, 0.4, 0.0, FFADE_IN | FFADE_PURGE )
+	if ( IsValid ( player ) )
+	{
+		Signal( player, "Bleedout_StopBleedoutEffects" )
+		ScreenFade( player, 255, 255, 255, 255, 0.4, 0.0, FFADE_IN | FFADE_PURGE )
+	}
 
 	//
 	asset defaultModel                = GetGlobalSettingsAsset( DEFAULT_PILOT_SETTINGS, "bodyModel" )
@@ -4698,7 +4803,7 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 	VictoryPlatformModelData victoryPlatformModelData = GetVictorySequencePlatformModel()
 	entity platformModel
 	int maxPlayersToShow                              = -1
-	if ( victoryPlatformModelData.isSet )
+	if ( victoryPlatformModelData.isSet && IsValid ( player ) )
 	{
 		printf( "VICTORY: Getting platform model" )
 		platformModel = CreateClientSidePropDynamic( file.victorySequencePosition + victoryPlatformModelData.originOffset, victoryPlatformModelData.modelAngles, victoryPlatformModelData.modelAsset )
@@ -4767,6 +4872,8 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 			CharacterSkin_Apply( characterModel, characterSkin )
 			cleanupEnts.append( characterModel )
 
+			data.victoryScreenCharacterModel = characterModel
+
 			#if(DEV)
 				if ( GetBugReproNum() == 1111 )
 				{
@@ -4812,7 +4919,7 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 			//
 			bool createOverheadRui = true
                     
-				if ( IsFallLTM() && IsShadowVictory() && player.GetEncodedEHandle() != data.eHandle )
+				if ( ( IsFallLTM() && IsShadowVictory() ) && ( playerEncodedEHandle != data.eHandle ) )
 				{
 					createOverheadRui = false
 				}
@@ -4839,7 +4946,7 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 		//
 		VictorySoundPackage victorySoundPackage = GetVictorySoundPackage()
 		string dialogueApexChampion
-		if ( player.GetTeam() == GetWinningTeam() )
+		if ( playerTeam == GetWinningTeam() )
 		{
 			//
 			if ( playersOnPodium > 1 )
@@ -4856,53 +4963,53 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 		}
 
                     
-    
-                          
-   
-                                  
+		//
+		if ( IsMadMaggieHost() )
+		{
+			bool isFuseInChampSquad = false
 
-                                                                                           
-    
-                                                                     
-             
+			foreach ( int i, SquadSummaryPlayerData data in file.winnerSquadSummaryData.playerData )
+			{
+				if ( !LoadoutSlot_IsReady( data.eHandle, loadoutSlotCharacter ) )
+					continue
 
-                                                                                          
-                                                              
-                                                  
-     
-                              
-          
-     
-    
+				ItemFlavor character = LoadoutSlot_GetItemFlavor( data.eHandle, loadoutSlotCharacter )
+				string characterName = ItemFlavor_GetLongName( character )
+				if ( characterName == "#character_fuse_NAME" )
+				{
+					isFuseInChampSquad = true
+					break
+				}
+			}
 
-                                                   
-    
-                                                                                                                                               
-    
-                                                   
-    
-      
-                              
-     
-                                                                                                                                                 
-     
-        
-     
-                                                                                                                                                
-     
-    
-       
-    
-                              
-     
-                                                                                                                                             
-     
-        
-     
-                                                                                                                                            
-     
-    
-   
+			if ( playersOnPodium > 1 && isFuseInChampSquad )
+			{
+				dialogueApexChampion = GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( eSurvivalCommentaryBucket.VICTORY_APEX_CHAMP_HAS_FUSE ) )
+			}
+			else if ( player.GetTeam() == GetWinningTeam() )
+			{
+				//
+				if ( playersOnPodium > 1 )
+				{
+					dialogueApexChampion = GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( eSurvivalCommentaryBucket.VICTORY_APEX_CHAMP_SQUAD_YOU ) )
+				}
+				else
+				{
+					dialogueApexChampion = GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( eSurvivalCommentaryBucket.VICTORY_APEX_CHAMP_SOLO_YOU ) )
+				}
+			}
+			else
+			{
+				if ( playersOnPodium > 1 )
+				{
+					dialogueApexChampion = GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( eSurvivalCommentaryBucket.VICTORY_APEX_CHAMP_SQUAD ) )
+				}
+				else
+				{
+					dialogueApexChampion = GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( eSurvivalCommentaryBucket.VICTORY_APEX_CHAMP_SOLO ) )
+				}
+			}
+		}
           
 
 		EmitSoundOnEntityAfterDelay( platformModel, dialogueApexChampion, 0.5 )
@@ -5003,23 +5110,34 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 	file.IsShowingVictorySequence = false
 
 	#if(DEV)
-		printt( "PD: IsSquadDataPersistenceEmpty", IsSquadDataPersistenceEmpty( GetLocalClientPlayer() ) )
+		if ( IsValid( player ) )
+			printt( "PD: IsSquadDataPersistenceEmpty", IsSquadDataPersistenceEmpty( player ) )
 	#endif
 
-	if ( GetLocalClientPlayer().GetTeam() != TEAM_SPECTATOR )
+	if ( playerTeam != TEAM_SPECTATOR )
 	{
-		//
-		while ( IsSquadDataPersistenceEmpty( GetLocalClientPlayer() ) && !isDevTest )
+		if ( IsValid( player ) )
 		{
-			Remote_ServerCallFunction( "ClientCallback_Sur_RequestSquadDataPersistence" )
-			wait 1.0
-		}
+			while ( IsSquadDataPersistenceEmpty( player ) && !isDevTest )
+			{
+				Remote_ServerCallFunction( "ClientCallback_Sur_RequestSquadDataPersistence" )
+				wait 1.0
+			}
 
-		SetSquadDataToLocalTeam()
-		ShowDeathScreen( eDeathScreenPanel.SQUAD_SUMMARY )
-		EnableDeathScreenTab( eDeathScreenPanel.SPECTATE, false )
-		EnableDeathScreenTab( eDeathScreenPanel.DEATH_RECAP, !IsAlive( player ) )
-		SwitchDeathScreenTab( eDeathScreenPanel.SQUAD_SUMMARY )
+			SetSquadDataToLocalTeam()
+			ShowDeathScreen( eDeathScreenPanel.SQUAD_SUMMARY )
+			EnableDeathScreenTab( eDeathScreenPanel.SPECTATE, false )
+			EnableDeathScreenTab( eDeathScreenPanel.DEATH_RECAP, !IsAlive( player ) )
+			SwitchDeathScreenTab( eDeathScreenPanel.SQUAD_SUMMARY )
+		}
+		else
+		{
+			SetSquadDataToLocalTeam()
+			ShowDeathScreen( eDeathScreenPanel.SQUAD_SUMMARY )
+			EnableDeathScreenTab( eDeathScreenPanel.SPECTATE, false )
+			EnableDeathScreenTab( eDeathScreenPanel.DEATH_RECAP, true )
+			SwitchDeathScreenTab( eDeathScreenPanel.SQUAD_SUMMARY )
+		}
 
 		//
 		wait 1.0
@@ -5032,6 +5150,19 @@ void function ShowVictorySequence( bool placementMode = false, bool isDevTest = 
 		ent.Destroy()
 }
 
+entity function GetVictoryScreenCharacterModelForEHI( int playerEHI )
+{
+	if ( !IsShowingVictorySequence() )
+		return null
+
+	foreach ( int i, SquadSummaryPlayerData data in file.winnerSquadSummaryData.playerData )
+	{
+		if ( data.eHandle == playerEHI )
+			return data.victoryScreenCharacterModel
+	}
+
+	return null
+}
 
 bool function IsShowingVictorySequence()
 {
@@ -5311,30 +5442,30 @@ void function OrdnanceMenu_Up( entity player )
 
 
                    
-                                              
- 
-                                                   
-        
+void function GadgetSlot_Down( entity player )
+{
+	if ( !SURVIVAL_PlayerCanSwitchOrdnance( player ) )
+		return
 
                    
                          
          
           
 
-                                        
-        
+	if ( Bleedout_IsBleedingOut( player ) )
+		return
 
-                                                                          
-                      
-        
-     
-  
-                                                                               
-   
-                                                                          
-   
-  
- 
+	string equipRef = EquipmentSlot_GetLootRefForSlot( player, "gadgetslot" )
+	if ( equipRef == "" )
+		return
+	else
+	{
+		if( SURVIVAL_Loot_GetLootDataByRef( equipRef ).lootType == eLootType.GADGET )
+		{
+			Remote_ServerCallFunction( "ClientCallback_Sur_EquipGadget", equipRef )
+		}
+	}
+}
       
 
 const float MINIMAP_SCALE_SPECTATE = 1.0
@@ -5441,6 +5572,12 @@ void function UICallback_QueryPlayerCanBeRespawned()
 	{
 		penaltyMayBeActive = Ranked_IsPlayerAbandoning( player ) //
 	}
+                        
+                                  
+   
+                                                                 
+   
+       
 	else
 	{
 		if ( !GetCurrentPlaylistVarBool( "survival_abandonment_enable", true ) ) //
@@ -5564,10 +5701,10 @@ void function ServerCallback_PromptSayGetOnTheDropship()
 }
 
                             
-                                                       
- 
-                                                                                                                                                                  
- 
+void function ServerCallback_PromptMarkMyLastDeathbox()
+{
+	AddOnscreenPromptFunction( "quickchat",  CreateQuickchatFunction ( eCommsAction.MARK_MY_LAST_DEATHBOX, null ), 6.0, Localize( "#PROMPT_MARK_MY_LAST_DEATHBOX" ) )
+}
       
 
 void functionref(entity) function CreateQuickchatFunction( int commsAction, entity playerBeingAddressed )

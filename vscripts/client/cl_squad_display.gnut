@@ -20,6 +20,7 @@ struct PlayerInfo
 	string uid
 	string eaid
 	string hardware
+	string unspoofedUid
 	entity player
 }
 
@@ -68,6 +69,7 @@ void function OnPlayerTeamChanged( entity player, int oldTeam, int newTeam )
 			info.uid = player.GetPlatformUID()
 			info.eaid = player.GetEadpUserIdStr()
 			info.hardware = player.GetUnspoofedHardware()
+			info.unspoofedUid = player.GetUnspoofedPlatformUserIdStr()
 			info.ehi = ehi
 			file.teammates[ ehi ] <- info
 		}
@@ -282,14 +284,14 @@ void function UICallback_PopulateClientGladCard( var panel, var elem, var muteBu
 			SetDefaultTooltipData( blockButton, "#BLOCK_SQUAD_MATE" )
 
 			if ( overlayButton != null )
-				RunUIScript( "ClientCallback_UpdatePlayerOverlayButton", panel, overlayButton, GetPlayerName( ehi ), teammateInfo.uid, teammateInfo.hardware, teammateInfo.eaid, teamMemberIndex )
+				RunUIScript( "ClientCallback_UpdatePlayerOverlayButton", panel, overlayButton, GetPlayerName( ehi ), teammateInfo.uid, teammateInfo.hardware, teammateInfo.eaid, teammateInfo.unspoofedUid, teamMemberIndex )
 
 			hardware = teammateInfo.hardware
 		}
 		else
 		{
 			if ( overlayButton != null )
-				RunUIScript( "ClientCallback_UpdatePlayerOverlayButton", panel, overlayButton, "", "", "", "", teamMemberIndex )
+				RunUIScript( "ClientCallback_UpdatePlayerOverlayButton", panel, overlayButton, "", "", "", "", "", teamMemberIndex )
 
 			SetIsVisible( muteChatButton, false )
 			SetIsVisible( mutePingButton, false )

@@ -13,6 +13,7 @@ global function ClientToUI_NEW_SurvivalGroundList_RefreshQuickSwap
 global function ClientToUI_NEW_SurvivalGroundList_CloseQuickSwap
 global function ClientToUI_LootVaultConfirmDialog_Open
 global function ClientToUI_BloodTTStealConfirmDialog_Open
+global function ClientToUI_CausticTTStealConfirmDialog_Open
 #endif
 
 #if(CLIENT)
@@ -26,6 +27,7 @@ global function UIToClient_NEW_SurvivalGroundList_OnQuickSwapItemClick
 global function UIToClient_NEW_SurvivalGroundList_OnMouseLeftPressed
 global function UIToClient_LootVaultConfirmDialog_DoIt
 global function UIToClient_BloodTTRewardChamberConfirmDialog_DoIt
+global function UIToClient_CausticTTExperimentationChamberConfirmDialog_DoIt
 global function UIToClient_NEW_CloseQuickSwapIfOpen
 #endif
 
@@ -60,6 +62,7 @@ struct DeathBoxEntryData
 	int           useCounter
 	bool          isVaultItem
 	bool          isBloodTTItem
+	bool		  isCausticTTItem
 
 	int            totalCount = 0
 	int            lastSeenTotalCount = 0
@@ -584,6 +587,16 @@ void function NEW_UpdateSurvivalGroundList( NEW_SurvivalGroundListUpdateParams p
 			else if ( !lootEntIsBloodTTItem && otherLootEntIsBloodTTItem )
 				break //
 
+			//
+			entity lootEntCausticTT      = GetCausticTTCanisterFrameForLoot( lootEnt )
+			bool lootEntIsCausticTTItem      = (IsValid( lootEntCausticTT ) && AreCausticTTCanistersClosed())
+			entity otherLootEntCausticTT = GetCausticTTCanisterFrameForLoot( otherLootEnt )
+			bool otherLootEntIsCausticTTItem  = (IsValid( otherLootEntCausticTT ) && AreCausticTTCanistersClosed())
+			if ( lootEntIsCausticTTItem && !otherLootEntIsCausticTTItem )
+				continue //
+			else if ( !lootEntIsCausticTTItem && otherLootEntIsCausticTTItem )
+				break //
+
 			if ( hasSpecialAmmo && lootEnt.GetClipCount() < otherLootEnt.GetClipCount() )
 				break //
 
@@ -995,6 +1008,7 @@ void function UpdateItem( DeathBoxListPanelItem item )
 
 	entryData.isVaultItem = false
 	entryData.isBloodTTItem = false
+	entryData.isCausticTTItem = false
 
 	bool hasTooltip = false
 	if ( IsValid( bestLootEnt ) && entryData.isUsable )
@@ -1008,6 +1022,10 @@ void function UpdateItem( DeathBoxListPanelItem item )
 			entity bloodTTPanel = GetBloodTTRewardPanelForLoot( bestLootEnt )
 			if ( IsValid( bloodTTPanel ) && IsBloodTTRewardPanelLocked( bloodTTPanel ) )
 				entryData.isBloodTTItem = true
+
+			entity causticTTPanel = GetCausticTTCanisterFrameForLoot( bestLootEnt )
+			if ( IsValid( causticTTPanel ) && AreCausticTTCanistersClosed() )
+				entryData.isCausticTTItem = true
 		}
 
 		if ( !entryData.isBlocked )
@@ -1040,8 +1058,8 @@ void function UpdateItem( DeathBoxListPanelItem item )
 		RunUIScript( "ClientToUI_Tooltip_Clear", button )
 	}
 
-	RuiSetBool( rui, "isVaultItem", entryData.isVaultItem )
-	RuiSetBool( rui, "isBloodTTItem", entryData.isBloodTTItem )
+	bool isSpecialItem = entryData.isVaultItem || entryData.isBloodTTItem || entryData.isCausticTTItem
+	RuiSetBool( rui, "isSpecialItem", isSpecialItem )
 
 	RuiSetInt( rui, "useCounter", entryData.useCounter )
 	RuiSetInt( rui, "pingCounter", entryData.pingCounter )
@@ -1241,6 +1259,11 @@ void function PerformItemAction( DeathBoxListPanelItem item, bool isAltAction, b
 			wtfLootVaultConfirmDialogDoItFunc = doIt
 			RunUIScript( "ClientToUI_BloodTTStealConfirmDialog_Open", deathBox.GetOwner() == player )
 		}
+		else if ( isBlackMarket && entryData.isCausticTTItem )
+		{
+			wtfLootVaultConfirmDialogDoItFunc = doIt
+			RunUIScript( "ClientToUI_CausticTTStealConfirmDialog_Open", deathBox.GetOwner() == player )
+		}
 		else
 		{
 			doIt()
@@ -1311,6 +1334,29 @@ void function ClientToUI_BloodTTStealConfirmDialog_Open( bool isBlackMarketOwner
 }
 #endif
 
+#if(UI)
+void function ClientToUI_CausticTTStealConfirmDialog_Open( bool isBlackMarketOwner )
+{
+	ConfirmDialogData data
+	data.headerText = Localize( "#LOBA_ULT_BLACK_MARKET_CAUSTICTT_CONFIRM_HEADER" )
+
+	if ( isBlackMarketOwner )
+	{
+		data.messageText = Localize( "#LOBA_ULT_BLACK_MARKET_CAUSTICTT_CONFIRM_BODY" )
+
+		data.resultCallback = void function( int result ) {
+			if ( result == eDialogResult.YES )
+				RunClientScript( "UIToClient_CausticTTExperimentationChamberConfirmDialog_DoIt" )
+		}
+		OpenConfirmDialogFromData( data )
+	}
+	else
+	{
+		data.messageText = Localize( "#LOBA_ULT_BLACK_MARKET_CAUSTICTT_DENY_BODY" )
+		OpenOKDialogFromData( data )
+	}
+}
+#endif
 
 #if(CLIENT)
 void function UIToClient_LootVaultConfirmDialog_DoIt()
@@ -1323,6 +1369,14 @@ void function UIToClient_LootVaultConfirmDialog_DoIt()
 
 #if(CLIENT)
 void function UIToClient_BloodTTRewardChamberConfirmDialog_DoIt()
+{
+	wtfLootVaultConfirmDialogDoItFunc()
+	wtfLootVaultConfirmDialogDoItFunc = null
+}
+#endif
+
+#if(CLIENT)
+void function UIToClient_CausticTTExperimentationChamberConfirmDialog_DoIt()
 {
 	wtfLootVaultConfirmDialogDoItFunc()
 	wtfLootVaultConfirmDialogDoItFunc = null
@@ -1376,7 +1430,8 @@ void function SendItemActionCommand( DeathBoxEntryData entryData, int count, ent
 		pickupFlags,
 		(backpackSwapSlot != null ? expect int(backpackSwapSlot) : -1),
 		entryData.isVaultItem,
-		entryData.isBloodTTItem
+		entryData.isBloodTTItem,
+		entryData.isCausticTTItem
 	)
 	//
 

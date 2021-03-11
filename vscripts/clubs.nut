@@ -26,6 +26,7 @@ global function Clubs_KickMember
 
 //
 #if(UI)
+global function Clubs_JoinClub
 global function Clubs_FinalizeJoinClub
 global function Clubs_GetJoinRequestsString
 global function Clubs_DoesMeetJoinRequirements
@@ -87,6 +88,10 @@ global function ClubSearchTag_GetNamesOfSearchTagsFromArray
 #endif
 
 //
+#if CLIENT || UI 
+global function Clubs_AreObituaryTagsEnabledByPlaylist
+#endif
+
 #if(UI)
 global function ClubTag_CreateNestedClubTag
 #endif
@@ -121,9 +126,15 @@ global function ClubRegulation_GetComplaintsForMember
 global function Clubs_IsEnabled
 global function Clubs_AreDisabledByPlaylist
 
+#if(false)
+
+#endif
+
 #if(CLIENT)
 global function Clubs_UpdateCrossplayVar
 global function Clubs_UIToClient_SetCrossplayVar
+global function Clubs_SetMyStoredClubName
+global function Clubs_GetMyStoredClubName
 #endif
 
 #if(UI)
@@ -145,11 +156,12 @@ global function Clubs_TryCloseAllClubMenus
 global function Clubs_SetClubTabUserCount
 global function Clubs_DoIMeetMinimumLevelRequirement
 global function Clubs_MonitorCrossplayChangeThread
-global function Clubs_ShortenMemberNameIfNecessary
 
-global function Clubs_IsClubQueryCompleted
-global function Clubs_SetClubQueryCompleted
 global function Clubs_AttemptRequeryThread
+global function Clubs_SetClubQueryState
+global function Clubs_GetClubQueryState
+global function Clubs_IsClubQueryProcessing
+global function AddCallback_OnClubQuerySuccessful
 #endif
 
 //
@@ -176,9 +188,11 @@ global function Clubs_OpenAcceptInviteConfirmationDialog
 global function Clubs_OpenKickTargetIsNotAMemberDialog
 global function Clubs_OpenJoinReqsChangedDialog
 global function Clubs_OpenTooLowRankToInviteDialog
+global function Clubs_OpenJoinRegionConfirmationDialog
 #endif
 
 global const int CLUB_QUERY_RETRY_MAX = 5
+global const string CLUB_REQUERY_SIGNAL = "ClubAttemptRequery"
 
 global const int CLUB_LOGO_LAYER_MAX = 3
 global const int CLUB_LOGO_LAYER_PROPERTY_COUNT = 3
@@ -343,6 +357,15 @@ global enum eClubInternalReportReason
 	_count,
 }
 
+global enum eClubQueryState
+{
+	INACTIVE,
+	PROCESSING,
+	FAILED,
+	SUCCESSFUL,
+	_count,
+}
+
 global const string CLUBCMD_REPORT_PLACEMENT_ADDPLAYER = "ServerToUI_AddPlayerDataForPlacementReport"
 struct ClubSquadSummaryPlayerData
 {
@@ -361,8 +384,11 @@ struct
 {
 	table< int, array<vector> > logoColorPalette
 
-	bool isClubQueryCompleted = false
 	int clubQueryRetryCount = 0
+
+	#if(CLIENT)
+		string myClubName
+	#endif
 
 	#if CLIENT || UI 
 		bool crossplayEnabled
@@ -370,6 +396,8 @@ struct
 	#endif
 
 	#if(UI)
+		table<int, int> queryProcessingStateMap
+		table< int, array<void functionref()> > clubQuerySuccessCallbacks
 		table< int, string > errorCodeMap
 
 		array<void functionref()> myClubUpdatedCallbacks
@@ -383,6 +411,7 @@ struct
 		ClubSquadSummaryData postMatchSummaryData
 
 		ClubHeader& selectedClubInvite
+		ClubHeader& selectedOutOfRegionClub
 	#endif
 } file
 
@@ -415,6 +444,32 @@ void function Clubs_Init()
 	#endif //
 
 	#if(UI)
+		RegisterSignal( CLUB_REQUERY_SIGNAL )
+
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+
+
 		file.errorCodeMap[CLUB_ERROR_CODE_CROSSPLAY_INCOMPAT] <- "#CLUB_OP_FAIL_CROSSPLAY_INCOMPAT"
 		file.errorCodeMap[CLUB_ERROR_CODE_INSUFFICENT_PERMISSIONS] <- "#CLUB_OP_FAIL_INSUFFICIENT_PERMISSIONS"
 		file.errorCodeMap[CLUB_ERROR_CODE_VALIDATION] <- "#CLUB_OP_FAIL_VALIDATION"
@@ -462,6 +517,8 @@ void function Clubs_CreateNewClub( ClubHeader clubHeader )
 {
 	if ( ClubIsValid() )
 		return
+
+	Clubs_SetClubQueryState( CLUB_OP_CREATE, eClubQueryState.PROCESSING )
 
 	file.newClubSettings = clubHeader
 	ClubCreate( clubHeader.name, clubHeader.tag, clubHeader.privacySetting )
@@ -542,10 +599,17 @@ void function Clubs_LeaveClub()
 	ClubLeave()
 }
 
-void function Clubs_FinalizeLeaveClub()
+void function Clubs_FinalizeLeaveClub( bool wasKicked = false )
 {
 	if ( !IsConnected() )
 		WaitFrame()
+
+	int lastQueryError = ClubGetLastQueryError()
+	if ( lastQueryError > 0 )
+	{
+		ClubLeave()
+		return
+	}
 
 	Clubs_TryCloseAllClubMenus()
 	Remote_ServerCallFunction( "ClientCallback_SetClubID", INVALID_CLUB_ID )
@@ -556,6 +620,9 @@ void function Clubs_FinalizeLeaveClub()
 	Clubs_UpdateMyData()
 	ClubLanding_ClearMemberLists()
 	ClubLanding_UpdateUIPresentation()
+
+	if ( wasKicked )
+		Clubs_OpenClubKickedDialog()
 }
 
 string function Clubs_GetDescStringForPrivacyLevel( int privacyLevel )
@@ -737,6 +804,15 @@ void function Clubs_KickMember( ClubMember clubMember )
 //
 
 #if(UI)
+void function Clubs_JoinClub( string clubID )
+{
+	if ( clubID == "" )
+		return
+
+	Clubs_SetClubQueryState( CLUB_OP_JOIN, eClubQueryState.PROCESSING )
+	ClubJoin( clubID )
+}
+
 void function Clubs_FinalizeJoinClub()
 {
 	//
@@ -841,6 +917,11 @@ void function Clubs_Search( string clubName, string clubTag, int privacySetting,
 	if ( !Clubs_IsEnabled() )
 		return
 
+	if ( Clubs_IsClubQueryProcessing( CLUB_OP_SEARCH ) )
+		return
+
+	Clubs_SetClubQueryState( CLUB_OP_SEARCH, eClubQueryState.PROCESSING )
+
 	int searchTagBitmask = ClubSearchTag_CreateSearchTagBitMask( searchTags )
 
 	//
@@ -849,7 +930,6 @@ void function Clubs_Search( string clubName, string clubTag, int privacySetting,
 
 void function Clubs_CompletedSearch()
 {
-	printf( "ClubSearchDebug: CompletedSearch()" )
 	//
 	ClubDiscovery_ProcessSearchResults()
 	ClubSearch_ProcessSearchResults()
@@ -1806,6 +1886,13 @@ string function ClubSearchTag_GetNamesOfSearchTagsFromArray( array<string> searc
 //
 //
 
+#if CLIENT || UI 
+bool function Clubs_AreObituaryTagsEnabledByPlaylist()
+{
+	return GetCurrentPlaylistVarBool( "ClubTagsInObituaryEnabled", true )
+}
+#endif
+
 #if(UI)
 var function ClubTag_CreateNestedClubTag( var parentRui, string arg, string clubTag )
 {
@@ -1860,7 +1947,8 @@ void function ServerToUI_AddPlayerDataForPlacementReport( int placement )
 		playerData.kills = GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].kills" )
 		playerData.damageDealt = GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].damageDealt" )
 
-		file.postMatchSummaryData.playerData.append( playerData )
+		if ( file.postMatchSummaryData.playerData.contains( playerData ) == false )
+			file.postMatchSummaryData.playerData.append( playerData )
 	}
 
 	file.postMatchSummaryData.squadplacement = placement
@@ -2113,10 +2201,47 @@ bool function Clubs_AreDisabledByPlaylist()
 }
 
 
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
 #if(CLIENT)
 void function OnSettingsUpdated()
 {
-	printf( "ClubsCrossplayDebug" )
 	bool crossplayEnabled = GetConVarBool( "CrossPlay_user_optin" )
 	if ( crossplayEnabled != file.crossplayEnabled )
 	{
@@ -2139,6 +2264,18 @@ void function Clubs_UIToClient_SetCrossplayVar( bool isEnabled )
 	SetConVarBool( "CrossPlay_user_optin", isEnabled )
 	Clubs_UpdateCrossplayVar()
 }
+
+
+void function Clubs_SetMyStoredClubName( string clubName )
+{
+	file.myClubName = clubName
+}
+
+
+string function Clubs_GetMyStoredClubName()
+{
+	return file.myClubName
+}
 #endif //
 
 #if(UI)
@@ -2152,11 +2289,21 @@ void function ClubDataUpdateThread()
 void function Clubs_UpdateMyData()
 {
 	printf( "Clubs_UpdateMyData()" )
-	thread Clubs_SetClubTabUserCount()
-	Clubs_SetClubQueryCompleted( true )
 
-	foreach ( callbackFunc in file.myClubUpdatedCallbacks )
-		callbackFunc()
+	int lastQueryError = ClubGetLastQueryError()
+	if ( lastQueryError <= 0 )
+	{
+		thread Clubs_SetClubTabUserCount()
+
+		foreach ( callbackFunc in file.myClubUpdatedCallbacks )
+			callbackFunc()
+	}
+	else
+	{
+		Warning( "ClubsError: UpdateMyData called when previous query failed. Attempting requery." )
+		printf( "ClubQueryDebug: %s(): Forced to attempt requery due to error %i", FUNC_NAME(), lastQueryError )
+		thread Clubs_AttemptRequeryThread()
+	}
 }
 
 void function AddCallback_OnClubDataUpdated( void functionref() callbackFunc )
@@ -2539,24 +2686,105 @@ void function Clubs_MonitorCrossplayChangeThread()
 	}
 }
 
-
-bool function Clubs_IsClubQueryCompleted()
+//
+void function Clubs_SetClubQueryState( int operation, int queryState )
 {
-	return file.isClubQueryCompleted
+	printf( "ClubQueryDebug: %s(): Setting query state for operation %i to %i", FUNC_NAME(), operation, queryState )
+
+	file.queryProcessingStateMap[operation] <- queryState
+
+	bool doesOpHaveSuccessCallbacks = operation in file.clubQuerySuccessCallbacks
+	if ( !doesOpHaveSuccessCallbacks )
+	{
+		printf( "ClubQueryDebug: %s(): Initializing Op success callback array for operation %i", FUNC_NAME(), operation )
+		array<void functionref()> funcArray = []
+		file.clubQuerySuccessCallbacks[operation] <- funcArray
+	}
+
+	if ( doesOpHaveSuccessCallbacks && queryState == eClubQueryState.SUCCESSFUL )
+	{
+		foreach ( callbackFunc in file.clubQuerySuccessCallbacks[operation] )
+			callbackFunc()
+	}
 }
 
 
-void function Clubs_SetClubQueryCompleted( bool isCompleted )
+int function Clubs_GetClubQueryState( int operation )
 {
-	if ( file.isClubQueryCompleted != isCompleted )
-		file.isClubQueryCompleted = isCompleted
+	if ( !Clubs_IsClubQueryOperationStateInitialized( operation ) )
+	{
+		Warning( format("ClubsError: Operation %i not yet found in Query State table. Adding.", operation) )
+		file.queryProcessingStateMap[ operation ] <- eClubQueryState.INACTIVE
+	}
+
+	int queryState = file.queryProcessingStateMap[operation]
+	printf( "ClubQueryDebug: %s(): Query State for operation %i is %i", FUNC_NAME(), operation, queryState )
+
+	return file.queryProcessingStateMap[operation]
+}
+
+
+bool function Clubs_IsClubQueryProcessing( int operation )
+{
+	if ( !Clubs_IsClubQueryOperationStateInitialized( operation ) )
+		return false
+
+	return file.queryProcessingStateMap[operation] == eClubQueryState.PROCESSING
+}
+
+
+bool function Clubs_IsClubQueryOperationStateInitialized( int operation )
+{
+	return operation in file.queryProcessingStateMap
+}
+
+
+void function AddCallback_OnClubQuerySuccessful( int operation, void functionref() callbackFunc )
+{
+	bool operationIsInTable = operation in file.clubQuerySuccessCallbacks
+	if ( !operationIsInTable )
+	{
+		printf( "ClubQueryDebug: %s(): Initializing Op Completed callback array for operation %i", FUNC_NAME(), operation )
+		array<void functionref()> funcArray = []
+		file.clubQuerySuccessCallbacks[operation] <- funcArray
+	}
+
+	Assert( !file.clubQuerySuccessCallbacks[operation].contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with AddCallback_OnClubQueryCompleted" )
+	file.clubQuerySuccessCallbacks[operation].append( callbackFunc )
+}
+
+
+void function RemoveCallback_OnClubQuerySuccessful( int operation, void functionref() callbackFunc )
+{
+	bool operationIsInTable = operation in file.clubQuerySuccessCallbacks
+	Assert( !operationIsInTable, "Attempted to remove callback " + string( callbackFunc ) + " for operation + " + string( operation ) + " which has no callbacks" )
+
+	Assert( file.clubQuerySuccessCallbacks[operation].contains( callbackFunc ), "Callback " + string( callbackFunc ) + " doesn't exist" )
+	file.clubQuerySuccessCallbacks[operation].fastremovebyvalue( callbackFunc )
 }
 
 
 void function Clubs_AttemptRequeryThread()
 {
-	if ( Clubs_IsClubQueryCompleted() )
+	printf( "ClubQueryDebug: %s()", FUNC_NAME() )
+
+	Signal( uiGlobal.signalDummy, CLUB_REQUERY_SIGNAL )
+	EndSignal( uiGlobal.signalDummy, CLUB_REQUERY_SIGNAL )
+
+	while( !IsFullyConnected() )
+		WaitFrame()
+
+	printf( "ClubQueryDebug: %s(): User connected. Checking Clubs_IsEnabled()", FUNC_NAME() )
+
+	if ( !Clubs_IsEnabled() )
 		return
+
+	printf( "ClubQueryDebug: %s(): User connected. Checking CLUB_OP_GET_CURRENT query state", FUNC_NAME() )
+
+	if ( Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT ) == eClubQueryState.SUCCESSFUL )
+		return
+
+	printf( "ClubQueryDebug: %s(): User connected. CLUB_OP_GET_CURRENT query state is SUCCESSFUL, counting requery attempts (%i/%i)", FUNC_NAME(), file.clubQueryRetryCount, CLUB_QUERY_RETRY_MAX )
 
 	if ( file.clubQueryRetryCount >= CLUB_QUERY_RETRY_MAX )
 		return
@@ -2565,23 +2793,10 @@ void function Clubs_AttemptRequeryThread()
 	file.clubQueryRetryCount++
 }
 
-//
-//
-string function Clubs_ShortenMemberNameIfNecessary( string memberName )
-{
-	return memberName
 
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
+void function Clubs_AttemptLeaveRequestThread()
+{
+
 }
 #endif //
 
@@ -2647,7 +2862,7 @@ bool function Clubs_ShouldShowClubJoinedDialog()
 	if ( !IsPersistenceAvailable()  )
 		return false
 
-	if ( !Clubs_IsClubQueryCompleted() )
+	if ( Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT ) != eClubQueryState.SUCCESSFUL )
 		return false
 
 	if ( !Clubs_IsEnabled() )
@@ -2707,7 +2922,7 @@ bool function Clubs_ShouldShowClubKickedDialog()
 	if ( !IsPersistenceAvailable()  )
 		return false
 
-	if ( !Clubs_IsClubQueryCompleted() )
+	if ( Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT ) != eClubQueryState.SUCCESSFUL )
 		return false
 
 	if ( !IsConnected() )
@@ -2759,7 +2974,7 @@ bool function Clubs_ShouldShowClubJoinRequestDeniedDialog()
 	if ( !IsPersistenceAvailable()  )
 		return false
 
-	if ( !Clubs_IsClubQueryCompleted() )
+	if ( Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT ) != eClubQueryState.SUCCESSFUL )
 		return false
 
 	if ( !Clubs_IsEnabled() )
@@ -2794,7 +3009,8 @@ void function OnJoinClubDespiteReqsDialogResult( int result )
 		Assert( clubHeader.clubID != "" )
 		if ( clubHeader.clubID != "" )
 		{
-			ClubJoin( clubHeader.clubID )
+			Clubs_JoinClub( clubHeader.clubID )
+			//
 			if ( clubHeader.privacySetting == CLUB_PRIVACY_BY_REQUEST )
 				Remote_ServerCallFunction( "ClientCallback_SetClubID", PENDING_CLUB_REQUEST )
 		}
@@ -2870,7 +3086,7 @@ bool function Clubs_ShouldShowClubAnnouncementDialog()
 	if ( !IsPersistenceAvailable() )
 		return false
 
-	if ( !Clubs_IsClubQueryCompleted() )
+	if ( Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT ) != eClubQueryState.SUCCESSFUL )
 		return false
 
 	if ( !IsLobby() )
@@ -2981,7 +3197,8 @@ void function AcceptClubInviteResult( int result )
 		}
 
 		SocialEventUpdate()
-		ClubJoin( file.selectedClubInvite.clubID )
+		Clubs_JoinClub( file.selectedClubInvite.clubID )
+		//
 	}
 }
 
@@ -3034,5 +3251,26 @@ void function Clubs_OpenTooLowRankToInviteDialog()
 	dialogData.messageText = "#CLUB_DIALOG_INVITE_UNDERRANK"
 
 	OpenOKDialogFromData( dialogData )
+}
+
+void function Clubs_OpenJoinRegionConfirmationDialog( ClubHeader clubHeader )
+{
+	ConfirmDialogData dialogData
+	file.selectedOutOfRegionClub = clubHeader
+
+	dialogData.headerText = "#CLUB_DIALOG_JOIN_NAME"
+	dialogData.messageText = "#CLUB_DIALOG_JOIN_DIFFERENT_DATACENTER"
+	dialogData.resultCallback = AcceptClubDifferentDataCenterResult
+
+	OpenConfirmDialogFromData( dialogData )
+}
+
+void function AcceptClubDifferentDataCenterResult( int result )
+{
+	if ( result == eDialogResult.YES )
+	{
+		Clubs_JoinClub( file.selectedOutOfRegionClub.clubID )
+		//
+	}
 }
 #endif

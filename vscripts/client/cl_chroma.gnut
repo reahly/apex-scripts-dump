@@ -640,7 +640,7 @@ void function Chroma_LootPickupEffects( LootData lootData )
 			//
                    
 
-                        
+		case eLootType.GADGET:
       
 			//
 
@@ -758,6 +758,12 @@ void function Chroma_TookDamage( float damage, vector damageOrigin, int damageTy
                        
                                                                      
          
+       
+
+                               
+		//
+		if ( damageSourceId == eDamageSourceId.ringcollapsemode_ring_fissure )
+			return
        
 
 	float duration = GraphCapped( damage, 20.0, 100.0, 1.0, 5.0 )

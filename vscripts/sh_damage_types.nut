@@ -157,6 +157,9 @@ global enum eDamageSourceId
 	melee_caustic_hammer
 	mp_weapon_caustic_hammer
 
+	melee_bangalore_heirloom
+	mp_weapon_bangalore_heirloom
+
                        
 		melee_gibraltar_club
 		mp_weapon_gibraltar_club
@@ -200,6 +203,7 @@ global enum eDamageSourceId
                 
                              
                         
+                              
           
                           
                              
@@ -302,6 +306,9 @@ global enum eDamageSourceId
 	splat
 	crushed
 	burn
+                   
+		caustic_toxin
+          
 	lasergrid
 	outOfBounds
 	deathField
@@ -327,6 +334,9 @@ global enum eDamageSourceId
        
 
 	mp_weapon_spectre_spawner
+                               
+		ringcollapsemode_ring_fissure
+       
 
 	//
 	weapon_cubemap
@@ -382,7 +392,7 @@ global enum eDamageSourceId
                            
        
                        
-                      
+		mp_ability_void_ring
        
                     
 		mp_weapon_3030
@@ -486,6 +496,9 @@ void function DamageTypes_Init()
 		[ eDamageSourceId.rodeo_trap ] = "#DEATH_RODEO_TRAP",
 		[ eDamageSourceId.round_end ] = "#DEATH_ROUND_END",
 		[ eDamageSourceId.burn ] = "#DEATH_BURN",
+                    
+			[ eDamageSourceId.caustic_toxin ] = "#DEATH_CAUSTIC_TOXIN",
+           
 		[ eDamageSourceId.mind_crime ] = "Mind Crime",
 		[ eDamageSourceId.charge_ball ] = "Charge Ball",
 
@@ -509,6 +522,9 @@ void function DamageTypes_Init()
 		[ eDamageSourceId.titanEmpField ] = "#DEATH_TITAN_EMP_FIELD",
 		[ eDamageSourceId.deadly_fog ] = "#DEATH_DEADLY_FOG",
 		[ eDamageSourceId.crushed ] = "#DEATH_CRUSHED",
+                                
+			[ eDamageSourceId.ringcollapsemode_ring_fissure ] = "#DEATH_RING_FISSURE",
+        
 
 		//
 		[ eDamageSourceId.phase_shift ] = "#WPN_SHIFTER",
@@ -550,6 +566,11 @@ void function DamageTypes_Init()
 
 		[ eDamageSourceId.melee_caustic_hammer ] =  "#DEATH_MELEE_CAUSTIC_HAMMER",
 		[ eDamageSourceId.mp_weapon_caustic_hammer ] = "#DEATH_MELEE_CAUSTIC_HAMMER",
+
+//
+			[ eDamageSourceId.melee_bangalore_heirloom ] =  "#DEATH_MELEE_BANGALORE_HEIRLOOM",
+			[ eDamageSourceId.mp_weapon_bangalore_heirloom ] = "#DEATH_MELEE_BANGALORE_HEIRLOOM",
+//
 
                         
 			[ eDamageSourceId.melee_gibraltar_club ] = "#DEATH_MELEE_GIBRALTAR_CLUB",

@@ -119,10 +119,10 @@ WeaponData
     "damage_near_distance"							"450"
     "damage_far_distance" 							"850"
                        
-    "damage_near_value"   							"13"
-    "damage_far_value"								"13"
-    "damage_near_value_titanarmor"					"13"
-    "damage_far_value_titanarmor" 					"13"
+    "damage_near_value"   							"11"
+    "damage_far_value"								"11"
+    "damage_near_value_titanarmor"					"11"
+    "damage_far_value_titanarmor" 					"11"
 
     "damage_headshot_scale"							"1.25"
      
@@ -188,7 +188,7 @@ WeaponData
 
 	// Behavior
                        
-	"fire_rate"   									"1.0"
+	"fire_rate"   									"1.1"
      
                              
       

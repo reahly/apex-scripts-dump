@@ -1,6 +1,7 @@
 global function InitSeasonPanel
 global function InitSeasonWelcomeMenu
 global function JumpToSeasonTab
+global function IsSeaonPanelCurrentlyTopLevel
 
 global function SeasonPanel_GetLastMenuNavDirectionTopLevel
 
@@ -29,6 +30,10 @@ void function InitSeasonPanel( var panel )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_HIDE, SeasonPanel_OnHide )
 }
 
+bool function IsSeaonPanelCurrentlyTopLevel()
+{
+	return GetActiveMenu() == GetMenu( "LobbyMenu" ) && IsPanelActive( file.panel )
+}
 
 void function SeasonPanel_OnShow( var panel )
 {

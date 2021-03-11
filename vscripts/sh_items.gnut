@@ -140,6 +140,9 @@ global enum eItemType
 	calevent_themedshop
 	calevent_buffet
 	calevent_rankedperiod
+                        
+                               
+       
 	calevent_login
 	calevent_story_challenges
 	calevent_skustore
@@ -568,8 +571,10 @@ const table<asset, asset> sourceTagToIcon = {
 	[ $"settings/itemflav/tag/source_s08bp.rpak" ] = $"rui/events/s08bp/item_source_icon",
 	[ $"settings/itemflav/tag/source_s08ace.rpak" ] = $"rui/events/s08ace/item_source_icon",
 	[ $"settings/itemflav/tag/source_s08e01.rpak" ] = $"rui/events/s08e01/item_source_icon",
+	[ $"settings/itemflav/tag/source_s08e02.rpak" ] = $"rui/events/s08e02/item_source_icon",
 	[ $"settings/itemflav/tag/source_s09bp.rpak" ] = $"rui/events/s09bp/item_source_icon",
 	[ $"settings/itemflav/tag/source_s10bp.rpak" ] = $"rui/events/s10bp/item_source_icon",
+	[ $"settings/itemflav/tag/source_algs.rpak" ] = $"rui/events/algs/item_source_icon",
 }
 
 void function RegisterTags()
@@ -1835,6 +1840,11 @@ ItemFlavor ornull function GetItemFlavorAssociatedCharacterOrWeapon( ItemFlavor 
 
 		case eItemType.melee_skin:
 			return MeleeSkin_GetCharacterFlavor( itemFlav )
+
+                
+                                 
+                                                      
+        
 
 		case eItemType.skydive_emote:
 			return CharacterSkydiveEmote_GetCharacterFlavor( itemFlav )

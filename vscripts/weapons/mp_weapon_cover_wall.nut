@@ -158,9 +158,6 @@ void function CoverWall_Precache()
 		AddCreateCallback( "prop_script", CoverWall_OnPropScriptCreated )
 		AddDestroyCallback( "prop_script", CoverWall_OnPropScriptDestroyed )
 
-		StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_cover_wall, CoverWall_OnBeginPlacement )
-		StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_cover_wall, CoverWall_OnEndPlacement )
-
 		AddCallback_ModifyDamageFlyoutForScriptName( BASE_WALL_SCRIPT_NAME, CoverWall_OffsetDamageNumbersLower )
 	#endif
 }
@@ -226,14 +223,6 @@ void function OnWeaponActivate_weapon_cover_wall( entity weapon )
 	if ( !InPrediction() ) //
 		return
 	#endif
-
-/*
-
-
-
-
-*/
-	//
 }
 
 
@@ -251,13 +240,6 @@ void function OnWeaponDeactivate_weapon_cover_wall( entity weapon )
 	if ( !InPrediction() ) //
 		return
 	#endif
-/*
-
-
-
-
-*/
-	//
 }
 
 #if(CLIENT)
@@ -908,28 +890,7 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_cover_wall( entity weapon )
 
 
 
-
-
-
-
-
 //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1337,22 +1298,6 @@ bool function CoverWall_ShouldShowIcon( entity localPlayer, entity wall )
 		return false
 
 	return true
-}
-
-void function CoverWall_OnBeginPlacement( entity player, int statusEffect, bool actuallyChanged )
-{
-	if ( player != GetLocalViewPlayer() )
-		return
-
-	string cancelText = IsControllerModeActive() ? Localize( "#WPN_COVER_WALL_PLAYER_DEPLOY_HINT" ) : Localize( "#WPN_COVER_WALL_PLAYER_DEPLOY_HINT_PC" )
-
-	AddPlayerHint( 120, 0, $"", cancelText )
-}
-
-void function CoverWall_OnEndPlacement( entity player, int statusEffect, bool actuallyChanged )
-{
-	HidePlayerHint( "#WPN_COVER_WALL_PLAYER_DEPLOY_HINT" )
-	HidePlayerHint( "#WPN_COVER_WALL_PLAYER_DEPLOY_HINT_PC" )
 }
 
 void function CoverWall_OnGainFocus( entity ent )

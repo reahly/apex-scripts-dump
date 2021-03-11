@@ -4,9 +4,6 @@ global function OnWeaponTossReleaseAnimEvent_weapon_dirty_bomb
 global function OnWeaponTossPrep_weapon_dirty_bomb
 
 global function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb
-global function OnWeaponPrimaryAttack_weapon_dirty_bomb
-global function OnWeaponActivate_weapon_dirty_bomb
-global function OnWeaponDeactivate_weapon_dirty_bomb
 
 #if(false)
 
@@ -88,77 +85,10 @@ void function DirtyBombPrecache()
 
 	#if(CLIENT)
 		RegisterSignal( "DirtyBomb_StopPlacementProxy" )
-		StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_caustic_barrel, DirtyBomb_OnBeginPlacement )
-		StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_caustic_barrel, DirtyBomb_OnEndPlacement )
 
 		AddCreateCallback( "prop_script", DirtyBomb_OnPropScriptCreated )
 	#endif
 }
-
-
-void function OnWeaponActivate_weapon_dirty_bomb( entity weapon )
-{
-	entity ownerPlayer = weapon.GetWeaponOwner()
-	weapon.w.startChargeTime = Time()
-
-	Assert( ownerPlayer.IsPlayer() )
-	#if(CLIENT)
-		if ( !InPrediction() ) //
-			return
-	#endif
-
-	int statusEffect = eStatusEffect.placing_caustic_barrel
-
-	StatusEffect_AddEndless( ownerPlayer, statusEffect, 1.0 )
-
-	#if(false)
-
-#endif
-}
-
-
-void function OnWeaponDeactivate_weapon_dirty_bomb( entity weapon )
-{
-	entity ownerPlayer = weapon.GetWeaponOwner()
-	Assert( ownerPlayer.IsPlayer() )
-	#if(CLIENT)
-		if ( !InPrediction() ) //
-			return
-	#endif
-	StatusEffect_StopAllOfType( ownerPlayer, eStatusEffect.placing_caustic_barrel )
-
-	#if(false)
-
-#endif
-}
-
-
-var function OnWeaponPrimaryAttack_weapon_dirty_bomb( entity weapon, WeaponPrimaryAttackParams attackParams )
-{
-	entity ownerPlayer = weapon.GetWeaponOwner()
-	Assert( ownerPlayer.IsPlayer() )
-
-	asset model = DIRTY_BOMB_CANISTER_MODEL
-
-	entity proxy                         = CreateProxyBombModel( model )
-	DirtyBombPlacementInfo placementInfo = GetDirtyBombPlacementInfo( ownerPlayer, proxy )
-	proxy.Destroy()
-
-	if ( !placementInfo.success )
-	{
-		#if(CLIENT)
-			EmitSoundOnEntity( ownerPlayer, "Wpn_ArcTrap_Beep" )
-		#endif
-		return 0
-	}
-	#if(false)
-
-#endif
-
-	PlayerUsedOffhand( ownerPlayer, weapon, true, null, {pos = placementInfo.origin} )
-	return weapon.GetAmmoPerShot()
-}
-
 
 bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 {
@@ -240,6 +170,7 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 //
 //
 //
+//
 
 
 
@@ -312,95 +243,6 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
 
 
 
@@ -485,6 +327,95 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
 
 
 
@@ -803,11 +734,6 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 //
-
-
-
-
-
 
 
 
@@ -865,82 +791,6 @@ string function DirtyBomb_UseTextOverride( entity ent )
 
 	return "#WPN_DIRTY_BOMB_NO_INTERACTION"
 }
-
-void function DirtyBomb_OnBeginPlacement( entity player, int statusEffect, bool actuallyChanged )
-{
-	if ( player != GetLocalViewPlayer() )
-		return
-
-	thread DirtyBombPlacement( player )
-}
-
-void function DirtyBomb_OnEndPlacement( entity player, int statusEffect, bool actuallyChanged )
-{
-	if ( player != GetLocalViewPlayer() )
-		return
-
-	player.Signal( "DirtyBomb_StopPlacementProxy" )
-}
-
-void function DirtyBombPlacement( entity player )
-{
-	player.EndSignal( "DirtyBomb_StopPlacementProxy" )
-
-	entity bomb = CreateProxyBombModel( DIRTY_BOMB_CANISTER_MODEL )
-	bomb.EnableRenderAlways()
-	bomb.Show()
-	DeployableModelHighlight( bomb )
-
-	var placementRui        = CreateCockpitRui( $"ui/generic_trap_placement.rpak", RuiCalculateDistanceSortKey( player.EyePosition(), bomb.GetOrigin() ) )
-	int placementAttachment = bomb.LookupAttachment( "fx_top" )
-	RuiSetBool( placementRui, "staticPosition", true )
-	RuiSetInt( placementRui, "trapLimit", DIRTY_BOMB_MAX_GAS_CANISTERS )
-	RuiTrackFloat3( placementRui, "mainTrapPos", bomb, RUI_TRACK_POINT_FOLLOW, placementAttachment )
-	RuiKeepSortKeyUpdated( placementRui, true, "mainTrapPos" )
-	RuiSetImage( placementRui, "trapIcon", $"rui/pilot_loadout/ordnance/electric_smoke" )
-
-	OnThreadEnd(
-		function() : ( bomb, placementRui )
-		{
-			if ( IsValid( bomb ) )
-				bomb.Destroy()
-
-			RuiDestroy( placementRui )
-		}
-	)
-
-	while ( true )
-	{
-		DirtyBombPlacementInfo placementInfo = GetDirtyBombPlacementInfo( player, bomb )
-
-		if ( !placementInfo.success )
-			DeployableModelInvalidHighlight( bomb )
-		else if ( placementInfo.success )
-			DeployableModelHighlight( bomb )
-
-		RuiSetBool( placementRui, "success", placementInfo.success )
-		RuiSetInt( placementRui, "trapCount", DirtyBomb_GetOwnedTrapCountOnClient( player ) )
-
-		bomb.SetOrigin( placementInfo.origin )
-		bomb.SetAngles( placementInfo.angles )
-
-		WaitFrame()
-	}
-}
-
-int function DirtyBomb_GetOwnedTrapCountOnClient( entity player )
-{
-	int count
-	array<entity> traps = GetEntArrayByScriptName( "dirty_bomb" )
-	foreach ( entity trap in traps )
-	{
-		if ( trap.GetBossPlayer() == player )
-			count++
-	}
-
-	return count
-}
-
 #endif //
 
 entity function CreateProxyBombModel( asset modelName )
@@ -1141,8 +991,7 @@ void function RestoreDirtyBombAmmo( entity owner )
 		entity weapon = owner.GetOffhandWeapon( OFFHAND_SPECIAL )
 		if ( IsValid( weapon ) && weapon.GetWeaponClassName() == "mp_weapon_dirty_bomb" )
 		{
-			int ammoReq = weapon.GetAmmoPerShot()
-			weapon.SetWeaponPrimaryClipCount( minint( weapon.GetWeaponPrimaryClipCount() + ammoReq, weapon.GetWeaponPrimaryClipCountMax() ) )
+			Weapon_AddSingleCharge( weapon )
 		}
 	}
 }

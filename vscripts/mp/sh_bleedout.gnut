@@ -47,7 +47,9 @@ const bool DEFAULT_DEATH_ON_TEAM_BLEEDOUT = true
 const float MEDIC_FIRSTAID_TIME = 4.5
 const float GIB_DOME_REVIVE_TIME = 4.5
                       
-                                       
+global const float VOID_RING_REVIVE_TIME = 4.5
+global const float VOID_RING_SELF_REVIVE_TIME = 9
+global const bool VOID_RING_CAN_FAST_REVIVE = true
       
               
   
@@ -321,6 +323,13 @@ float function Bleedout_GetFirstAidTime( entity player )
 float function Bleedout_GetFirstAidTimeSelf( entity player )
 {
 	int type = player.GetPlayerNetInt( "bleedoutType" )
+                       
+		if ( (StatusEffect_GetSeverity( player, eStatusEffect.ring_immunity ) > 0) && GetCurrentPlaylistVarBool( "heatshield_allow_fast_revive", VOID_RING_CAN_FAST_REVIVE) )
+		{
+			return GetCurrentPlaylistVarFloat( "heatshield_self_revive_time", VOID_RING_SELF_REVIVE_TIME)
+		}
+       
+
                
                                                                                            
    

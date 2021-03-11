@@ -319,6 +319,12 @@ void function AttemptDroneRecall( entity player )
 
 
 
+//
+
+
+
+
+
 
 
 
@@ -356,7 +362,11 @@ bool function OnWeaponAttemptOffhandSwitch_ability_crypto_drone( entity weapon )
 	if ( StatusEffect_GetSeverity( player, eStatusEffect.crypto_camera_is_recalling ) > 0.0 )
 		return false
 
-	return PlayerCanUseCamera( player )
+	if ( !PlayerCanUseCamera( player ) )
+		return false
+
+	Holospray_DisableForTime( player, 2.0 )
+	return true
 }
 
 
@@ -513,37 +523,6 @@ void function OnWeaponTossPrep_ability_crypto_drone( entity weapon, WeaponTossPr
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //
 
@@ -574,34 +553,6 @@ void function OnWeaponTossPrep_ability_crypto_drone( entity weapon, WeaponTossPr
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
 
 
 
@@ -661,6 +612,66 @@ void function OnWeaponTossPrep_ability_crypto_drone( entity weapon, WeaponTossPr
 
 
 
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //
 
@@ -753,6 +764,13 @@ void function OnWeaponTossPrep_ability_crypto_drone( entity weapon, WeaponTossPr
 //
 
 //
+
+
+
+
+
+
+
 
 
 
@@ -1586,6 +1604,17 @@ bool function PlayerCanUseCamera( entity ownerPlayer )
 			return false
        
 
+	array <entity> activeWeapons = ownerPlayer.GetAllActiveWeapons()
+	if ( activeWeapons.len() > 1 )
+	{
+		entity offhandWeapon = activeWeapons[1]
+
+		if ( IsValid( offhandWeapon ) && offhandWeapon.GetWeaponClassName() == HOLO_PROJECTOR_WEAPON_NAME )
+		{
+			return false
+		}
+	}
+
 	return true
 }
 
@@ -2091,7 +2120,16 @@ var function GetCameraCircleStatusRui()
 
 var function CreateCameraCircleStatusRui()
 {
-	file.cameraCircleStatusRui = CreateFullscreenRui( $"ui/camera_circle_status.rpak" )
+                           
+		if ( IsDeathTriggerGameMode() )
+		{
+			file.cameraCircleStatusRui = CreateFullscreenRui( $"ui/camera_circle_status_death_trigger.rpak" )
+		} else {
+			file.cameraCircleStatusRui = CreateFullscreenRui( $"ui/camera_circle_status.rpak" )
+		}
+      
+                                                                                     
+       
 	entity localViewPlayer = GetLocalViewPlayer()
 	RuiTrackFloat( file.cameraCircleStatusRui, "deathfieldDistance", localViewPlayer, RUI_TRACK_DEATHFIELD_DISTANCE )
 	RuiTrackFloat( file.cameraCircleStatusRui, "cameraViewFrac", localViewPlayer, RUI_TRACK_STATUS_EFFECT_SEVERITY, eStatusEffect.camera_view )
@@ -2136,6 +2174,7 @@ void function UpdateCryptoAnimatedTacticalRui()
 		entity offhandWeapon = localViewPlayer.GetOffhandWeapon( OFFHAND_LEFT )
 		if ( IsValid( offhandWeapon ) )
 		{
+			RuiTrackFloat( file.cryptoAnimatedTacticalRui, "stockAmmoFrac", offhandWeapon, RUI_TRACK_WEAPON_REMAINING_AMMO_FRACTION )
 			RuiTrackFloat( file.cryptoAnimatedTacticalRui, "clipAmmoFrac", offhandWeapon, RUI_TRACK_WEAPON_CLIP_AMMO_FRACTION )
 			RuiTrackFloat( file.cryptoAnimatedTacticalRui, "regenAmmoRate", offhandWeapon, RUI_TRACK_WEAPON_AMMO_REGEN_RATE )
 

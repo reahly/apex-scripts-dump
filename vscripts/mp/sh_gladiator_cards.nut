@@ -26,6 +26,9 @@ global function SetNestedGladiatorCardIsKiller
 global function SetNestedGladiatorCardDisableBlur
 
 global function SetNestedGladiatorCardOverrideRankedDetails
+                       
+                                                                 
+      
 #endif //
 
 #if CLIENT || UI 
@@ -199,6 +202,10 @@ global enum eGladCardPreviewCommandType
 	TRACKER,
 	RANKED_SHOULD_SHOW,
 	RANKED_DATA,
+                        
+                            
+                     
+       
 	NAME,
 }
 
@@ -297,6 +304,12 @@ global struct NestedGladiatorCardHandle
 	int ornull  rankedScoreOrNull = null
 	int ornull  rankedLadderPosOrNull = null
 	bool ornull rankedForceShowOrNull = null
+
+                        
+                                            
+                                                
+                                                
+       
 
 	bool disableBlur = false
 	bool isKiller = false
@@ -542,9 +555,9 @@ void function ChangeNestedGladiatorCardPresentation( NestedGladiatorCardHandle h
 		else if ( handle.isBackFace )
 			ruiAsset = $"ui/gladiator_card_backface.rpak"
 
+		RuiDestroyNestedIfAlive( handle.parentRui, handle.argName )
 		if ( handle.cardRui != null )
 		{
-			RuiDestroyNested( handle.parentRui, handle.argName )
 			handle.cardRui = null
 			handle.fgFrameNWS.rui = null
 			handle.bgFrameNWS.rui = null
@@ -659,11 +672,27 @@ void function SetNestedGladiatorCardOverrideRankedShouldShow( NestedGladiatorCar
 	handle.rankedForceShowOrNull = shouldShowData > 0
 }
 
+                       
+                                                                                                                          
+ 
+                                                        
+ 
+      
+
 void function SetNestedGladiatorCardOverrideRankedDetails( NestedGladiatorCardHandle handle, int rankScore, int ladderPos )
 {
 	handle.rankedScoreOrNull = rankScore
 	handle.rankedLadderPosOrNull = ladderPos
 }
+
+                       
+                                                                                                                                 
+ 
+                                           
+                                               
+ 
+      
+
 #endif //
 
 
@@ -987,11 +1016,27 @@ void function MenuGladCardThread( bool isForLocalPlayer )
 					break
 				}
 
+                           
+                                                                
+      
+                                                                                                              
+           
+      
+          
+
 				case eGladCardPreviewCommandType.RANKED_DATA:
 				{
 					SetNestedGladiatorCardOverrideRankedDetails( fileLevel.currentMenuGladCardHandle, mgcpc.dataInteger, mgcpc.index )
 					break
 				}
+
+                           
+                                                         
+      
+                                                                                                                              
+           
+      
+          
 			}
 		}
 	}
@@ -1575,9 +1620,6 @@ void function ActualUpdateNestedGladiatorCard( NestedGladiatorCardHandle handle 
 	ItemFlavor ornull frameOrNull     = null
 	ItemFlavor ornull stanceOrNull    = null
 
-	int ornull rankedScoreOrNull     = null
-	int ornull rankedLadderPosOrNull = null
-
 	string platformString		= ""
 
 	string frameRpakPath                               = ""
@@ -1708,12 +1750,6 @@ void function ActualUpdateNestedGladiatorCard( NestedGladiatorCardHandle handle 
 				}
 			}
 		}
-
-		if ( handle.presentation == eGladCardPresentation.FULL_BOX )
-		{
-			rankedScoreOrNull = handle.rankedScoreOrNull
-			rankedLadderPosOrNull = handle.rankedLadderPosOrNull
-		}
 	}
 
 	//
@@ -1790,22 +1826,6 @@ void function ActualUpdateNestedGladiatorCard( NestedGladiatorCardHandle handle 
 
 	if ( handle.cardRui != null )
 	{
-		int rankScore = RANKED_INVALID_RANK_SCORE
-		int ladderPos = RANKED_INVALID_LADDER_POSITION
-
-		if ( handle.presentation == eGladCardPresentation.FULL_BOX )
-		{
-			if ( rankedScoreOrNull != null )
-				rankScore = expect int( rankedScoreOrNull )
-			else if ( EEHHasValidScriptStruct( handle.currentOwnerEHI ) )
-				rankScore = GetPlayerRankScoreFromEHI( handle.currentOwnerEHI )
-
-			if ( rankedLadderPosOrNull != null )
-				ladderPos = expect int( rankedLadderPosOrNull )
-			else if ( EEHHasValidScriptStruct( handle.currentOwnerEHI ) )
-				ladderPos = GetPlayerLadderPosFromEHI( handle.currentOwnerEHI )
-		}
-
 		RuiSetString( handle.cardRui, "playerName", playerName )
 		RuiSetInt( handle.cardRui, "teamMemberIndex", teamMemberIndex )
 		RuiSetBool( handle.cardRui, "shouldShowDetails", handle.shouldShowDetails )
@@ -1882,17 +1902,55 @@ void function ActualUpdateNestedGladiatorCard( NestedGladiatorCardHandle handle 
 		if ( handle.presentation == eGladCardPresentation.FULL_BOX )
 		{
 			RuiSetBool( handle.cardRui, "frameHasOwnRUI", frameHasOwnRUI )
-
-			bool showRanked = IsRankedGame()
-			if ( handle.rankedForceShowOrNull != null )
-				showRanked = expect bool( handle.rankedForceShowOrNull )
-			RuiSetBool( handle.cardRui, "showRanked", showRanked )
-			if ( showRanked )
-				PopulateRuiWithRankedBadgeDetails( handle.cardRui, rankScore, ladderPos )
-
 			RuiSetBool( handle.cardRui, "isKiller", handle.isKiller )
 			RuiSetBool( handle.cardRui, "disableBlur", handle.disableBlur )
 			RuiSetString( handle.cardRui, "platformString", platformString )
+
+			//
+			{
+				bool forceShowRanked = handle.rankedForceShowOrNull != null ? expect bool( handle.rankedForceShowOrNull ) : false
+                           
+                                                                                                                                        
+          
+
+				bool showRanked = false
+				if ( forceShowRanked )
+				{
+					int rankScore = handle.rankedScoreOrNull != null ? expect int( handle.rankedScoreOrNull ) : RANKED_INVALID_RANK_SCORE
+					int ladderPos = handle.rankedLadderPosOrNull != null ? expect int( handle.rankedLadderPosOrNull ) : RANKED_INVALID_LADDER_POSITION
+
+					PopulateRuiWithRankedBadgeDetails( handle.cardRui, rankScore, ladderPos )
+					showRanked = true
+				}
+                           
+                                      
+      
+                                                                                                                                        
+                                                                                                                                                    
+
+                                                                                     
+                       
+      
+          
+				else if ( IsRankedGame() )
+				{
+					int rankScore = EEHHasValidScriptStruct( handle.currentOwnerEHI ) ? GetPlayerRankScoreFromEHI( handle.currentOwnerEHI ) : RANKED_INVALID_RANK_SCORE
+					int ladderPos = EEHHasValidScriptStruct( handle.currentOwnerEHI ) ? GetPlayerLadderPosFromEHI( handle.currentOwnerEHI ) : RANKED_INVALID_LADDER_POSITION
+					PopulateRuiWithRankedBadgeDetails( handle.cardRui, rankScore, ladderPos )
+					showRanked = true
+				}
+                           
+                                     
+      
+                                                                                                                                                               
+                                                                                                                                                                    
+                                                                                     
+                       
+      
+          
+
+				RuiSetBool( handle.cardRui, "showRanked", showRanked )
+			}
 		}
 
 		if ( handle.situation == eGladCardDisplaySituation.GAME_INTRO_CHAMPION_SQUAD_STILL

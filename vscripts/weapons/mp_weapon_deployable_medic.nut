@@ -31,7 +31,9 @@ const int DEPLOYABLE_MEDIC_HEAL_AMOUNT = 150
 const float DEPLOYABLE_MEDIC_MAX_LIFETIME = 20
 //
 const float DEPLOYABLE_MEDIC_HEAL_PER_SEC = 5
-
+                        
+                                                     
+      
 const ROPE_LENGTH = DEPLOYABLE_MEDIC_HEAL_RADIUS + 50
 const ROPE_NODE_COUNT = 10
 const ROPE_SHOOT_OUT_TIME = 0.25
@@ -1106,59 +1108,6 @@ void function OnDeployableMedicPlanted( entity projectile )
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-
-
-//
-//
-
-
-
-
-//
-//
-//
-//
-//
-//
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
 
 
 
@@ -1179,6 +1128,50 @@ void function OnDeployableMedicPlanted( entity projectile )
 
 
 
+//
+//
+//
+//
+//
+//
+
+
+//
+//
+
+
+
+
+//
+//
+//
+//
+//
+//
+
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+//
 
 
 
@@ -1194,6 +1187,29 @@ void function OnDeployableMedicPlanted( entity projectile )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 

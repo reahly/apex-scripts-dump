@@ -1,4 +1,3 @@
-
 #base "_base_ability_tactical.txt"
 
 WeaponData
@@ -38,7 +37,7 @@ WeaponData
 	"damage_indicator_model"					    "GRENADE_INDICATOR_CLUSTER_BOMB_MODEL"
 
 	// Menu Stats
-    "trophy_system_ignore"                          "0"
+    "trophy_system_ignores"                         "none"
 
 	"projectile_killreplay_enabled"					"1"
 
@@ -62,7 +61,7 @@ WeaponData
     "regen_ammo_refill_rate"						"10"
     "regen_ammo_refill_start_delay"					"0.0"
 
-    "sound_weapon_ready"							"HUD_ordinance_meter_replenished_1P"
+	"sound_weapon_ready"							"survival_ui_tactical_ready"
 
 
 	"cooldown_type"									"ammo_instant"
@@ -139,7 +138,8 @@ WeaponData
 	"toss_pullout_time"								"0.37" //"0.25"
 	"toss_time"										"0.93" //"0.4"
 	"toss_overhead_time"							"0.7"
-	"zoom_effects" 									"0"
+	"zoom_effects"									"1"
+	"zoom_fov"									    "65"
 	"deploy_time"									"0.6"
 	"vortex_refire_behavior"  						"grenade"
 	"allow_empty_fire"								"0"
@@ -307,6 +307,13 @@ WeaponData
                                          
                                        
                                           
+         
+
+                               
+         
+                                                               
+                                                               
+                                                               
          
            
 

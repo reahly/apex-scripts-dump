@@ -706,9 +706,8 @@ string function CodeCallback_CheckPassThroughAddsMods( entity player, entity hit
 
 string function CodeCallback_GetLatestRankedPeriodName()
 {
-	ItemFlavor rankedPeriod = GetLatestRankedPeriod( GetUnixTimestamp() )
+	//
 	return Ranked_GetStryderLadderNameForLatestRankedPeriod()
-
 }
 
 #if(CLIENT)

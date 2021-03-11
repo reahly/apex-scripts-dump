@@ -188,8 +188,6 @@ void function MountedTurretPlaceable_Precache()
 
 	#if(CLIENT)
 		RegisterSignal( "MountedTurretPlaceable_StopPlacementProxy" )
-		StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_mounted_turret_placeable, MountedTurretPlaceable_OnBeginPlacement )
-		StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_mounted_turret_placeable, MountedTurretPlaceable_OnEndPlacement )
 
 		AddCreateCallback( "turret", MountedTurretPlaceable_OnTurretCreated )
 		AddDestroyCallback( "turret", MountedTurretPlaceable_OnTurretDestroyed )
@@ -273,10 +271,6 @@ void function OnWeaponActivate_weapon_mounted_turret_placeable( entity weapon )
 			return
 	#endif
 
-	int statusEffect = eStatusEffect.placing_mounted_turret_placeable
-
-	StatusEffect_AddEndless( ownerPlayer, statusEffect, 1.0 )
-
 	#if(false)
 
 #endif
@@ -296,7 +290,6 @@ void function OnWeaponDeactivate_weapon_mounted_turret_placeable( entity weapon 
 		if ( !InPrediction() ) //
 			return
 	#endif
-	StatusEffect_StopAllOfType( ownerPlayer, eStatusEffect.placing_mounted_turret_placeable )
 
 	#if(false)
 
@@ -665,220 +658,10 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_mounted_turret_placeable( enti
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
 //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -930,6 +713,206 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_mounted_turret_placeable( enti
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 
@@ -1294,88 +1277,6 @@ bool function CanReclaimTurret( entity turret )
 
 		return true
 	}
-
-	void function MountedTurretPlaceable_OnBeginPlacement( entity player, int statusEffect, bool actuallyChanged )
-	{
-		if ( player != GetLocalViewPlayer() )
-			return
-
-		//
-	}
-
-	void function MountedTurretPlaceable_OnEndPlacement( entity player, int statusEffect, bool actuallyChanged )
-	{
-		if ( player != GetLocalViewPlayer() )
-			return
-
-		player.Signal( "MountedTurretPlaceable_StopPlacementProxy" )
-	}
-
-#if(false)//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
 #endif //
 
 bool function IsTurretEnabled( entity turret )

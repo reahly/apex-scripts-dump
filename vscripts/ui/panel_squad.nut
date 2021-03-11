@@ -17,7 +17,7 @@ struct SquadPlayerData
 	string uid
 	string hardware
 	string eaid
-
+	string unspoofedUid
 }
 
 struct
@@ -213,9 +213,9 @@ void function OnShowSquad( var panel )
 }
 
 
-void function ClientCallback_UpdatePlayerOverlayButton( var panel, var overlayButton, string name, string uid, string hardware, string eaid, int buttonIndex )
+void function ClientCallback_UpdatePlayerOverlayButton( var panel, var overlayButton, string name, string uid, string hardware, string eaid, string unspoofedUid, int buttonIndex )
 {
-	AssignPlayerToButton( overlayButton, name, uid, hardware, eaid )
+	AssignPlayerToButton( overlayButton, name, uid, hardware, eaid, unspoofedUid )
 
 	if ( uid == "" || hardware == "" )
 	{
@@ -323,7 +323,7 @@ void function OnOverlayClickRight( var button )
 		CommunityFriends friends = GetFriendInfo()
 		foreach ( id in friends.ids )
 		{
-			if ( playerData.uid == id || EADP_IsFriendByEAID( playerData.eaid ) )
+			if ( playerData.uid == id || playerData.unspoofedUid == id || EADP_IsFriendByEAID( playerData.eaid ) )
 			{
 				canAddFriend = false
 				break
@@ -342,7 +342,7 @@ void function OnOverlayClickRight( var button )
 	string hardware = GetUnspoofedPlayerHardware()
 	if ( hardware == playerData.hardware )
 	{
-		DoInviteToBeFriend( playerData.uid )
+		DoInviteToBeFriend( playerData.unspoofedUid )
 	}
 	else if ( CrossplayEnabled() && playerData.eaid != "" )
 	{
@@ -365,13 +365,14 @@ void function RegisterButtonForUID( var button )
 }
 
 
-void function AssignPlayerToButton( var button, string name, string uid, string hardware, string eaid )
+void function AssignPlayerToButton( var button, string name, string uid, string hardware, string eaid, string unspoofedUid )
 {
 	SquadPlayerData playerData
 	playerData.name = name
 	playerData.uid = uid
 	playerData.hardware = hardware
 	playerData.eaid = eaid
+	playerData.unspoofedUid = unspoofedUid
 
 	file.buttonToPlayerData[ button ] <- playerData
 }

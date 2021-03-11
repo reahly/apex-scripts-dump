@@ -99,11 +99,23 @@ const array<string> EVENT_STRINGS_MATCH_COMPLETED =
 	"#CLUB_EVENT_MATCH_COMPLETED"
 ]
 
+enum eDiscoveryMenuLockReason
+{
+	UNDERLEVEL,
+	CLUBS_DISABLED,
+	ALREADY_IN_CLUB,
+
+	_count
+}
+
+const string REFRESH_LANDING_SIGNAL = "ClubRefreshLanding"
+
 struct
 {
 	var lobbyMenu
 	var panel
 
+	bool isWaitingForCurrent
 	var spinnerPanel
 
 	var selectedSearchResultButton
@@ -190,9 +202,13 @@ void function InitClubLandingPanel( var panel )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, ClubLandingPanel_OnShow )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_HIDE, ClubLandingPanel_OnHide )
 
+	RegisterSignal( REFRESH_LANDING_SIGNAL )
+
 	//
 	//
 	//
+
+	AddCallback_OnClubQuerySuccessful( CLUB_OP_GET_CURRENT, ClubLanding_OnGetCurrentCompleted )
 
 	file.spinnerPanel = Hud_GetChild( panel, "ClubLobbySpinner" )
 
@@ -287,7 +303,7 @@ void function InitClubLandingPanel( var panel )
 	SetClubFooterOptions( file.eventTimelinePanel )
 	SetClubFooterOptions( file.chatPanel )
 
-	AddCallback_OnClubDataUpdated( ClubLanding_RefreshLanding )
+	AddCallback_OnClubDataUpdated( ClubLanding_BeginLandingRefresh )
 }
 
 
@@ -371,9 +387,34 @@ void function ClubLandingPanel_OnMenuGetTopLevel()
 }
 
 
-void function ForceUpdateClubLandingThread()
+void function ClubLanding_OnGetCurrentCompleted()
 {
+	if ( file.isWaitingForCurrent )
+	{
+		printf( "ClubQueryDebug: %s(): CLUB_OP_GET_CURRENT completed. Beginning landing refresh.", FUNC_NAME() )
+		file.isWaitingForCurrent = false
+		ClubLanding_BeginLandingRefresh()
+	}
+}
+
+
+void function ClubLanding_BeginLandingRefresh()
+{
+	printf( "ClubQueryDebug: %s()", FUNC_NAME() )
+	thread ClubLanding_RefreshLandingThread()
+}
+
+
+void function ClubLanding_RefreshLandingThread()
+{
+	Signal( uiGlobal.signalDummy, REFRESH_LANDING_SIGNAL )
+	EndSignal( uiGlobal.signalDummy, REFRESH_LANDING_SIGNAL )
+
 	while ( !IsFullyConnected() )
+		WaitFrame()
+
+	int currentOPState = Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT )
+	if ( currentOPState == eClubQueryState.FAILED || currentOPState == eClubQueryState.PROCESSING )
 		WaitFrame()
 
 	ClubLanding_RefreshLanding()
@@ -382,15 +423,16 @@ void function ForceUpdateClubLandingThread()
 
 void function ClubLanding_RefreshLanding()
 {
-	if ( !IsFullyConnected() )
-		return
-
-	if ( !Clubs_IsClubQueryCompleted() )
+	int currentOPState = Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT )
+	if ( currentOPState == eClubQueryState.FAILED || currentOPState == eClubQueryState.PROCESSING )
 	{
+		printf( "ClubQueryDebug: %s(): Showing circle spinner due to Get Current operation state: %i", FUNC_NAME(), currentOPState )
 		file.lobbyIsShown = false
 		Hud_Show( file.spinnerPanel )
 		Hud_Hide( file.lobbyPanel )
 		Hud_Hide( file.discoveryPanel )
+		file.isWaitingForCurrent = true
+		return
 	}
 	else
 	{
@@ -417,16 +459,22 @@ void function ClubLanding_RefreshLanding()
 
 		if ( Clubs_IsEnabled() )
 		{
-			LockDiscoveryButtonsForClubsDisabled( false )
+			LockDiscoveryMenu( false, -1 )
 
 			bool isBelowMinLevel = Clubs_DoIMeetMinimumLevelRequirement() == false
-			LockDiscoveryButtonsForAccountRequirement( isBelowMinLevel )
+			if ( isBelowMinLevel )
+				LockDiscoveryMenu( isBelowMinLevel, eDiscoveryMenuLockReason.UNDERLEVEL )
 
-			RefreshDiscoverySearch( null )
+			bool alreadyInAClub = ClubIsMemberOnDifferentHardware()
+			if ( alreadyInAClub )
+				LockDiscoveryMenu( alreadyInAClub, eDiscoveryMenuLockReason.ALREADY_IN_CLUB )
+
+			if ( !isBelowMinLevel && !alreadyInAClub && !Clubs_IsClubQueryProcessing( CLUB_OP_JOIN ) && !Clubs_IsClubQueryProcessing( CLUB_OP_CREATE ) )
+				RefreshDiscoverySearch( null )
 		}
 		else
 		{
-			LockDiscoveryButtonsForClubsDisabled( true )
+			LockDiscoveryMenu( true, eDiscoveryMenuLockReason.CLUBS_DISABLED )
 		}
 
 		Hud_Hide( file.lobbyPanel )
@@ -515,28 +563,24 @@ void function DeregisterInputs()
 //
 
 
-void function LockDiscoveryButtonsForAccountRequirement( bool isLocked )
+void function LockDiscoveryMenu( bool isLocked, int reason )
 {
+	string reasonString = ""
+	switch ( reason )
+	{
+		case eDiscoveryMenuLockReason.ALREADY_IN_CLUB:
+			reasonString = "#CLUB_DISCOVERY_BUTTON_BLOCKER_ALREADYINACLUB"
+			break
+		case eDiscoveryMenuLockReason.CLUBS_DISABLED:
+			reasonString = "#CLUB_DISCOVERY_BUTTON_BLOCKER_DISABLED"
+			break
+		default:
+			reasonString = "#CLUB_DISCOVERY_BUTTON_BLOCKER"
+			break
+	}
+	
 	Hud_SetVisible( file.discoveryButtonBlocker, isLocked )
-	HudElem_SetRuiArg( file.discoveryButtonBlocker, "blockerText", "#CLUB_DISCOVERY_BUTTON_BLOCKER" )
-
-	bool isEnabled = !isLocked
-	Hud_SetEnabled( file.discoverySearchButton, isEnabled )
-	Hud_SetEnabled( file.discoveryCreateButton, isEnabled )
-	Hud_SetEnabled( file.discoverySearchCycleButton, isEnabled )
-	Hud_SetEnabled( file.clubInvitesButton, isEnabled )
-
-	Hud_SetLocked( file.discoverySearchButton, isLocked )
-	Hud_SetLocked( file.discoveryCreateButton, isLocked )
-	Hud_SetLocked( file.discoverySearchCycleButton, isLocked )
-	Hud_SetLocked( file.clubInvitesButton, isLocked )
-}
-
-
-void function LockDiscoveryButtonsForClubsDisabled( bool isLocked )
-{
-	Hud_SetVisible( file.discoveryButtonBlocker, isLocked )
-	HudElem_SetRuiArg( file.discoveryButtonBlocker, "blockerText", "#CLUB_DISCOVERY_BUTTON_BLOCKER_DISABLED" )
+	HudElem_SetRuiArg( file.discoveryButtonBlocker, "blockerText", reasonString )
 
 	bool isEnabled = !isLocked
 	Hud_SetEnabled( file.discoverySearchButton, isEnabled )
@@ -595,6 +639,7 @@ void function UpdateBlurbTimeStamp()
 
 void function RefreshDiscoverySearch( var button )
 {
+	printf( "DiscoverySearchDebug: %s()", FUNC_NAME() )
 	array<ItemFlavor> emptyArray
 	Clubs_Search( "", "", CLUB_PRIVACY_SEARCH_ANY, 0, 0, emptyArray, 54, false )
 	ClubInviteQueryClubsList( 0, 9 )
@@ -1329,8 +1374,20 @@ void function InviteClubMemberToParty( ClubMember clubMember )
 	//
 	if ( hardware == clubMember.memberHardware && hardware != HARDWARE_PC )
 	{
+	#if(NX_PROG)
+		//
+		if( DoInviteToParty( [clubMember.platformUserID] ) == false )
+		{
+			EADP_InviteToPlayByEAID( clubMember.memberID )
+		}
+		else
+		{
+			return
+		}
+	#else
 		//
 		DoInviteToParty( [clubMember.platformUserID] )
+	#endif
 	}
 	else if ( CrossplayEnabled() )
 	{
@@ -1948,7 +2005,10 @@ void function ClubLobby_SendChat()
 			return
 
 		if ( !ClubChatSend( sanitizedString ) )
+		{
+			Hud_SetUTF8Text( file.chatTextEntry, "" )
 			return
+		}
 
 		//
 		Hud_SetUTF8Text( file.chatTextEntry, "" )

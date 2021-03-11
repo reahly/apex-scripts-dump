@@ -7,7 +7,7 @@ global const array<string> SKUStore_EntitlementHumanReadableRefs =
 [
 	"entitlement_champion_sku_pack",
                    
-                               
+	"entitlement_mirage_sku_pack",
       
 	"entitlement_gibraltar_sku_pack",
 	"entitlement_pathfinder_sku_pack",
@@ -21,7 +21,7 @@ enum SKU_ID
 {
 	CHAMPION,
                    
-        
+	MIRAGE,
       
 	GIBRALTAR,
 	PATHFINDER,
@@ -38,7 +38,7 @@ const array<int> SKUStore_EntitlementEnums =
 [
 	CHAMPION_SKU,
                    
-            
+	MIRAGE_SKU,
       
 	GIBRALTAR_SKU,
 	PATHFINDER_SKU,
@@ -73,8 +73,16 @@ struct
 	table<int, SKUData> enumToSKUData
 	table<var, int> skuButtonToSKUID
 	int				numVisibleSKUs
+	
+#if(NX_PROG)
+	var	taxNoticeMessage
+#endif
 } file
 
+#if(NX_PROG)
+string	NXTaxString
+bool	ShowNXTaxString = false
+#endif
 
 void function SKUShopPanel_Init( var panel )
 {
@@ -88,6 +96,10 @@ void function SKUShopPanel_Init( var panel )
 	HudElem_SetRuiArg( file.infoBox, "headerText", "#SKU_STORE_HEADER_DESC" )
 
 	AddPanelFooterOption( panel, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
+	
+#if(NX_PROG)
+	file.taxNoticeMessage = Hud_GetChild( panel, "TaxNoticeMessage" )
+#endif
 }
 
 
@@ -117,9 +129,25 @@ void function SKUShopPanel_OnShow( var panel )
 		}
 		file.enumToSKUData[i] <- data
 	}
+	
+#if(NX_PROG)
+	ShowNXTaxString = GetNXShowTaxString()
+	if( ShowNXTaxString )
+	{
+		NXTaxString = GetNXTaxString()
+		Hud_SetVisible( file.taxNoticeMessage, true )
+		Hud_SetText( file.taxNoticeMessage, NXTaxString )
+	}
+	else
+	{
+		Hud_SetVisible( file.taxNoticeMessage, false )
+	}
+#endif
 
 	SKUShopPanel_UpdateGRXDependentElements()
 	OnOpenDLCStore()
+
+	thread SKUShopPanel_Think( panel )
 }
 
 void function SKUShopPanel_OnHide( var panel )
@@ -275,6 +303,29 @@ bool function SKUShopPanel_GetEntitlementVisibility( ItemFlavor flav )
 		return true
 
 	return false
+}
+
+void function SKUShopPanel_Think( var panel )
+{
+	var menu = GetParentMenu( panel )
+
+	while ( uiGlobal.activeMenu == menu && uiGlobal.activePanels.contains( panel ) )
+	{
+		var discountPanel = Hud_GetChild( panel, "DiscountPanel" )
+		Hud_SetVisible( discountPanel, Script_UserHasEAAccess() )
+		#if(PC_PROG)
+			HudElem_SetRuiArg( discountPanel, "discountImage", $"rui/menu/common/ea_access_pc", eRuiArgType.IMAGE )
+		#else
+			HudElem_SetRuiArg( discountPanel, "discountImage", $"rui/menu/common/ea_access", eRuiArgType.IMAGE )
+			#if(DURANGO_PROG)
+				HudElem_SetRuiArg( discountPanel, "discountText", "" )
+			#elseif(PLAYSTATION_PROG)
+				HudElem_SetRuiArg( discountPanel, "isPs4", true )
+			#endif
+		#endif
+
+		WaitFrame()
+	}
 }
 
 #if(DEV)

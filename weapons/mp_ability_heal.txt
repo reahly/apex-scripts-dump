@@ -50,38 +50,17 @@ WeaponData
 	// Sound
 	"charge_sound_1p"								"octane_stimpack_activate_1P"
 	"charge_sound_3p"								"octane_stimpack_activate_3P"
-	MP_BASE
-	{
-		"ammo_clip_size"   								"200"
-		"ammo_default_total"							"200"
-		"ammo_display"									"bar"
-		"ammo_drains_to_empty_on_fire"					"1"
-		"ammo_min_to_fire"								"200"
-		"ammo_no_remove_from_clip"						"0"
-		"ammo_per_shot"									"200"
-		"ammo_stockpile_max"							"200"
-		"regen_ammo_refill_rate"						"100"
-		"fire_duration"									"1.8"
 
-		"enable_highlight_networking_on_creation"		"<KEEP_DEFAULT>"
-	}
-
-	SP_BASE
-	{
-		"ammo_clip_size"   								"200"
-		"ammo_default_total"							"200"
-		"ammo_display"									"bar"
-		"ammo_drains_to_empty_on_fire"					"1"
-		"ammo_min_to_fire"								"200"
-		"ammo_no_remove_from_clip"						"1"
-		"ammo_per_shot"									"200"
-		"ammo_stockpile_max"							"200"
-		"regen_ammo_refill_rate"						"8"
-		"fire_duration"									"1.8"
-
-		"enable_highlight_networking_on_creation"		"1"
-	}
-
+	"ammo_clip_size"   								"200"
+	"ammo_default_total"							"200"
+	"ammo_display"									"bar"
+	"ammo_drains_to_empty_on_fire"					"1"
+	"ammo_min_to_fire"								"200"
+	"ammo_no_remove_from_clip"						"0"
+	"ammo_per_shot"									"200"
+	"ammo_stockpile_max"							"200"
+	"regen_ammo_refill_rate"						"100"
+	"fire_duration"									"1.8"
 
 	// Regen Ammo
 	"regen_ammo_refill_start_delay"					"0.0"
@@ -134,6 +113,13 @@ WeaponData
                                          
                                        
                                           
+         
+
+                               
+         
+                                                               
+                                                               
+                                                                
          
            
 

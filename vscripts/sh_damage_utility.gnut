@@ -373,6 +373,12 @@ bool function IsSuicide( entity attacker, entity victim, int damageSourceId )
 	if ( damageSourceId == eDamageSourceId.deathField )
 		return true
 
+                               
+		//
+		if ( damageSourceId == eDamageSourceId.ringcollapsemode_ring_fissure )
+			return true
+       
+
 	return false
 }
 

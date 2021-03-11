@@ -27,8 +27,6 @@ const string CAMPFIRE_HEAL_START_3P = "CampFire_Healing_Start_3P"
 const string CAMPFIRE_HEAL_LOOP_3P = "CampFire_Healing_Loop_3P"
 const string CAMPFIRE_HEAL_END_3P = "CampFire_Healing_End_3P"
 
-const string CAMPFIRE_CENTER_EMITTER = "CampFire_Center_Emitter"
-
 const asset CAMPFIRE_MODEL = $"mdl/Robots/mobile_hardpoint/mobile_hardpoint_static.rmdl"
 const asset CAMPFIRE_ICON = $"rui/hud/gametype_icons/survival/campfire"
 const asset CAMPFIRE_ICON_SMALL = $"rui/hud/gametype_icons/survival/crafting_small_alternate"
@@ -622,10 +620,6 @@ void function OnCampfireCreated( entity target )
 		return
 
 	file.campfireList.append( target )
-
-	int attachId = target.LookupAttachment( "FX_EMITTER" )
-	vector attachPos = target.GetAttachmentOrigin( attachId )
-	entity emitter = CreateClientSideAmbientGeneric( attachPos, CAMPFIRE_CENTER_EMITTER, float(target.GetShieldHealth()) )
 }
 
 void function CreateCampfireWorldIcon( entity campfire )
@@ -768,6 +762,12 @@ void function Campfire_3PSoundThread()
 		if ( file.isInCampfire )
 		{
 			mover.SetOrigin( <0,0,-50000> )
+			WaitFrame()
+			continue
+		}
+
+		if ( file.campfireList.len() <= 0 )
+		{
 			WaitFrame()
 			continue
 		}

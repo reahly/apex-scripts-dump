@@ -378,6 +378,8 @@ void function WinterExpress_Init()
 #endif
 
 	#if(CLIENT)
+		SetCustomScreenFadeAsset( $"ui/screen_fade_winter_express.rpak" )
+
 		CircleAnnouncementsEnable( false )
 		SetMapFeatureItem( 300, "#WINTER_EXPRESS_TRAIN_OBJECTIVE", "#WINTER_EXPRESS_TRAIN_DESC", $"rui/hud/gametype_icons/sur_train_minimap" ) //
 
@@ -2828,40 +2830,40 @@ void function WinterExpress_OnEpilogue()
 //
 //
 //
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 //
 //

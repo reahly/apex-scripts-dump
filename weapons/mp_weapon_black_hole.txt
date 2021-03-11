@@ -22,7 +22,7 @@ WeaponData
 	"offhand_interupts_weapon_anims"				"1"
 	"offhand_toss_activates_on_attack"				"1"
 	"offhand_toss_hold_is_resumable"				"1"
-	"trophy_system_ignore"							"1"
+	"trophy_system_ignores"							"always"
 
 
 
@@ -73,6 +73,8 @@ WeaponData
 	"grenade_arc_indicator_effect_first"			"P_arc_light_blue"
 	"grenade_arc_impact_indicator_effect"			"P_arc_light_blue_end"
 
+
+	"grenade_touch_triggers_on_impact"				"1"
 	"grenade_orient_to_velocity"					"0"
 	"grenade_inherit_owner_velocity"				"1"
     "projectile_inherit_owner_velocity_scale"		"0.2"
@@ -142,7 +144,7 @@ WeaponData
 	"aimassist_disable_hipfire"						"1"
 	"aimassist_disable_ads"							"1"
 	"cooldown_type"									"ammo_timed"
-	"toss_pullout_time"								"0.05"
+	"toss_pullout_time"								"0.5"
 	"toss_time"										"1"
 	"toss_overhead_time"							"1"
 	"offhand_hybrid_switch_on_lower"				"1"
@@ -239,11 +241,11 @@ WeaponData
 	"viewdrift_hipfire_speed_pitch"   				"0.6"
 	"viewdrift_hipfire_speed_yaw" 					"1.22"
 
-	"ammo_clip_size"								"120"
+	"ammo_clip_size"								"180"
 	"ammo_default_total"							"0"
 	"ammo_display"									"count"
-	"ammo_min_to_fire"								"120"
-	"ammo_per_shot"									"120"
+	"ammo_min_to_fire"								"180"
+	"ammo_per_shot"									"180"
 	"ammo_stockpile_max"							"6"
 	"regen_ammo_refill_rate"						"1"
 	"regen_ammo_refill_start_delay"					"0.0"

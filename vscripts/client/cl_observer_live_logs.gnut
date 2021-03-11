@@ -1,0 +1,173 @@
+global function ObserverLiveLogs_Init
+
+//
+global function ServerCallback_ObserverLiveLogs_LogNetwork_OnePlayer
+global function ServerCallback_ObserverLiveLogs_LogNetwork_TwoPlayer
+global function ServerCallback_ObserverLiveLogs_LogNetwork_CombatInstance
+global function ServerCallback_ObserverLiveLogs_LogNetwork_OnePlayerItem
+global function ServerCallback_ObserverLiveLogs_LogNetwork_Int
+
+//
+global function ObserverLiveLogs_GetPlayerIdentity
+global function ObserverLiveLogs_GetWeaponNameFromDamageSourceID
+
+//
+global function ObserverLiveLogs_OnPlayerKilled
+global function ObserverLiveLogs_OnPlayerDowned
+global function ObserverLiveLogs_OnLocalPlayerSpawned
+
+//
+string function ObserverLiveLogs_GetPlayerIdentity( entity player )
+{
+    if ( !IsValid( player ) ) 
+        return "Invalid Player"
+
+    if ( player.IsPlayer() )
+    {
+        return player.GetPlayerName()
+    }
+
+    return player.GetTargetName()
+}
+
+string function ObserverLiveLogs_GetWeaponNameFromDamageSourceID( int damageSourceID )
+{
+	string damageRef = GetRefFromDamageSourceID( damageSourceID )
+	string damageSourceName = "Unknown"
+	if ( SURVIVAL_Loot_IsRefValid( damageRef ) )
+		damageSourceName = GetWeaponInfoFileKeyField_GlobalString( damageRef, "shortprintname" )
+
+    return damageSourceName
+}
+
+string function ObserverLiveLogs_GetItemNameFromRef( string ref )
+{
+    LootData lootFlav = SURVIVAL_Loot_GetLootDataByRef( ref )
+    
+    return Localize( lootFlav.pickupString )
+}
+
+//
+
+//
+void function ServerCallback_ObserverLiveLogs_LogNetwork_OnePlayer( int eventIndex, entity playerOne )
+{
+    ObserverLiveLogs_WriteLog( ObserverLiveLogs_GetEventNameFromEnum( eventIndex ), {
+        playerOne = ObserverLiveLogs_GetPlayerIdentity( playerOne )
+    } )
+}
+
+void function ServerCallback_ObserverLiveLogs_LogNetwork_TwoPlayer( int eventIndex, entity playerOne, entity playerTwo )
+{
+    ObserverLiveLogs_WriteLog( ObserverLiveLogs_GetEventNameFromEnum( eventIndex ), {
+        playerOne = ObserverLiveLogs_GetPlayerIdentity( playerOne ),
+        playerTwo = ObserverLiveLogs_GetPlayerIdentity( playerTwo )
+    } )
+}
+
+void function ServerCallback_ObserverLiveLogs_LogNetwork_CombatInstance( int eventIndex, entity attacker, entity victim, int damageSourceId )
+{
+    ObserverLiveLogs_WriteLog( ObserverLiveLogs_GetEventNameFromEnum( eventIndex ), {
+        attacker = ObserverLiveLogs_GetPlayerIdentity( attacker ),
+        victim = ObserverLiveLogs_GetPlayerIdentity( victim ),
+		weapon = ObserverLiveLogs_GetWeaponNameFromDamageSourceID( damageSourceId )
+    } )
+}
+
+void function ServerCallback_ObserverLiveLogs_LogNetwork_OnePlayerItem( int eventIndex, entity player, string itemRef )
+{
+    ObserverLiveLogs_WriteLog( ObserverLiveLogs_GetEventNameFromEnum( eventIndex ), {
+        player = ObserverLiveLogs_GetPlayerIdentity( player ),
+		item = ObserverLiveLogs_GetItemNameFromRef( itemRef )
+    } )
+}
+
+void function ServerCallback_ObserverLiveLogs_LogNetwork_Int( int eventIndex, int argInt )
+{
+    ObserverLiveLogs_WriteLog( ObserverLiveLogs_GetEventNameFromEnum( eventIndex ), {
+        index = argInt
+    } )
+}
+
+//
+
+//
+void function ObserverLiveLogs_OnPlayerDisconnected( entity player )
+{
+	ObserverLiveLogs_WriteLog( "playerDisconnected", {
+        player = ObserverLiveLogs_GetPlayerIdentity( player )
+    } )
+}
+//
+
+//
+void function ObserverLiveLogs_OnPlayerKilled( entity attacker, entity victim, int damageSourceId )
+{
+	ObserverLiveLogs_WriteLog( "playerKilled", {
+		attacker = ObserverLiveLogs_GetPlayerIdentity( attacker ),
+		victim = ObserverLiveLogs_GetPlayerIdentity( victim ),
+		weapon = ObserverLiveLogs_GetWeaponNameFromDamageSourceID( damageSourceId )
+	} )
+}
+
+void function ObserverLiveLogs_OnPlayerDowned( entity attacker, entity victim, int damageSourceId )
+{
+	ObserverLiveLogs_WriteLog( "playerDowned", {
+		attacker = ObserverLiveLogs_GetPlayerIdentity( attacker ),
+		victim = ObserverLiveLogs_GetPlayerIdentity( victim ),
+		weapon = ObserverLiveLogs_GetWeaponNameFromDamageSourceID( damageSourceId )
+	} )
+}
+//
+
+//
+void function ObserverLiveLogs_OnDeathFieldStartShrink( DeathFieldStageData deathFieldData )
+{
+    ObserverLiveLogs_WriteLog( "ringStartClosing", {
+        stage = SURVIVAL_GetCurrentDeathFieldStage()
+    } )
+}
+
+void function ObserverLiveLogs_OnDeathFieldStopShrink( DeathFieldStageData deathFieldData )
+{
+    ObserverLiveLogs_WriteLog( "ringFinishedClosing", {
+        stage = SURVIVAL_GetCurrentDeathFieldStage()
+    } )
+}
+//
+
+void function ObserverLiveLogs_Init()
+{
+    //
+    AddCallback_OnPlayerDisconnected( ObserverLiveLogs_OnPlayerDisconnected )
+
+    //
+    SURVIVAL_AddCallback_OnDeathFieldStartShrink( ObserverLiveLogs_OnDeathFieldStartShrink )
+    SURVIVAL_AddCallback_OnDeathFieldStopShrink( ObserverLiveLogs_OnDeathFieldStopShrink )
+
+    printf( "Initialized Observer Live Logs" )
+    
+    //
+	AddCallback_OnClientScriptInit( ObserverLiveLogs_OnLocalPlayerSpawned )
+}
+
+void function ObserverLiveLogs_OnLocalPlayerSpawned( entity localPlayer )
+{
+    //
+    Remote_ServerCallFunction( "ClientCallback_ObserverLiveLogs_JoinObservers" )
+}
+
+//
+void function ObserverLiveLogs_WriteLog( string category, table<string, var> data )
+{
+    if ( !ObserverLiveLogs_IsSystemEnabled() )
+        return
+    
+    if ( !IsConnected() )
+		return
+
+	data.timestamp <- GetUnixTimestamp()
+	data.category <- category
+
+	ObserverLiveLogs_LogRaw( data )
+}

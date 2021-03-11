@@ -172,7 +172,7 @@ void function Cl_Survival_InventoryInit()
 	file.itemTypeUseFunctions[ eLootType.HEALTH ] <- UseHealthPickupRefFromInventory
 	file.itemTypeUseFunctions[ eLootType.ORDNANCE ] <- EquipOrdnance
                     
-                                                             
+	file.itemTypeUseFunctions[ eLootType.GADGET ] <- EquipGadget
        
 	file.specialItemTypeUseFunctions[ eLootType.ATTACHMENT ] <- EquipAttachment
 
@@ -390,12 +390,12 @@ bool function EquipmentAction( int lootAction, string equipmentSlot )
 			{
 
                        
-                                                                              
-                                                                                 
-     
-                                  
-                                            
-     
+				string equipRef = EquipmentSlot_GetLootRefForSlot( player, equipmentSlot )
+				if( SURVIVAL_Loot_GetLootDataByRef( equipRef ).lootType == eLootType.GADGET )
+				{
+					EquipGadget(player, equipRef)
+					RunUIScript( "SurvivalMenu_AckAction" )
+				}
           
 
 				if ( EquipmentSlot_IsMainWeaponSlot( equipmentSlot ) )
@@ -930,9 +930,9 @@ bool function IsItemEquipped_Gadget( entity player, string ref )
 			return true
 
                      
-                                                                        
-                                                               
-              
+		entity gadget = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_GADGET )
+		if( IsValid( gadget ) && gadget.GetWeaponClassName() == ref )
+			return true
         
 	}
 
@@ -1059,21 +1059,21 @@ void function UICallback_UpdateEquipmentButton( var button )
 	}
 
                     
-                                                                                     
-                                                                          
-                            
-  
-                                                                              
-                                                                           
-   
-                                                       
-    
-                                                                             
-                                                                       
-                                    
-    
-   
-  
+	LootData lootData = EquipmentSlot_GetEquippedLootDataForSlot( player, "gadgetslot" )
+	string equipRef = EquipmentSlot_GetLootRefForSlot( player, "gadgetslot" )
+	if( equipment == equipRef )
+	{
+		entity gadgetWeapon = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_GADGET )
+		if( IsValid( gadgetWeapon ) && SURVIVAL_Loot_IsRefValid( lootData.ref ) )
+		{
+			if ( gadgetWeapon.GetWeaponPrimaryClipCount()  > 0 )
+			{
+				RuiSetInt( rui, "maxCount", gadgetWeapon.GetWeaponPrimaryClipCountMax() )
+				RuiSetInt( rui, "count", gadgetWeapon.GetWeaponPrimaryClipCount() )
+				RuiSetInt( rui, "numPerPip", 1 )
+			}
+		}
+	}
        
 
 	if ( EquipmentSlot_IsAttachmentSlot( equipmentSlot ) )
@@ -1084,7 +1084,7 @@ void function UICallback_UpdateEquipmentButton( var button )
 
 		LootData wData = SURVIVAL_GetLootDataFromWeapon( weapon )
 		//
-		RuiSetBool( rui, "isFullyKitted", SURVIVAL_Weapon_IsAttachmentLocked( wData.ref ) )
+		RuiSetBool( rui, "isFullyKitted", SURVIVAL_IsAttachmentPointLocked( wData.ref, attachmentPoint ) )
 		RuiSetBool( rui, "showBrackets", true )
 
 		if ( IsValid( weapon ) && SURVIVAL_Loot_IsRefValid( wData.ref ) && AttachmentPointSupported( attachmentPoint, wData.ref ) )
@@ -1100,7 +1100,7 @@ void function UICallback_UpdateEquipmentButton( var button )
 			{
 				RuiSetInt( rui, "count", 1 )
 
-				if ( SURVIVAL_Weapon_IsAttachmentLocked( wData.ref ) )
+				if ( SURVIVAL_IsAttachmentPointLocked( wData.ref, attachmentPoint ) )
 				{
 					RuiSetInt( rui, "lootTier", wData.tier )
 				}
@@ -2768,24 +2768,24 @@ void function EquipOrdnance( entity player, string ref )
 }
 
                    
-                                                      
- 
-                        
-        
+void function EquipGadget( entity player, string ref )
+{
+	if ( player.IsTitan() )
+		return
 
-                          
-        
+	if ( !IsAlive( player ) )
+		return
 
-                                             
-        
+	if ( !CanOpenInventoryInCurrentGameState() )
+		return
 
-                                        
-        
+	if ( Bleedout_IsBleedingOut( player ) )
+		return
 
-                                                                   
+	Remote_ServerCallFunction( "ClientCallback_Sur_EquipGadget", ref )
 
-                            
- 
+	ServerCallback_ClearHints()
+}
       
 
 void function EquipAttachment( entity player, string item, string weaponName )

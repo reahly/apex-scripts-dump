@@ -127,6 +127,13 @@ WeaponData
                                        
                                           
          
+
+                               
+         
+                                                               
+                                                               
+                                                               
+         
            
 
         survival_finite_ammo

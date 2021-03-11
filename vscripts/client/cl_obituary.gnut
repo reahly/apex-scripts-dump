@@ -73,7 +73,7 @@ ObitEntityInfo function Obituary_GetEntityInfo( entity ent, int damageSourceId, 
 	info.displayName = names.attackerName
 	info.petDisplayName = names.attackerPetName
 
-	entity localPlayer = GetLocalClientPlayer()
+	entity localPlayer = GetLocalViewPlayer()
 
 	info.displayColor = localPlayer.GetTeam() == ent.GetTeam() ? GetPlayerInfoColor( ent ) : <255, 255, 255>//
 
@@ -302,13 +302,13 @@ void function Obituary_Print_Localized( string localizedPrint, vector altColor1 
 	RuiSetGameTime( rui, "updateTime", Time() )
 	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
 
-	//
-
 	RuiSetString( rui, "obitString", localizedPrint )
 
 	RuiSetFloat3( rui, "string1Color", SrgbToLinear( altColor1 / 255.0 ) )
 	RuiSetFloat3( rui, "string2Color", SrgbToLinear( altColor2 / 255.0 ) )
 	RuiSetFloat3( rui, "string3Color", SrgbToLinear( altColor3 / 255.0 ) )
+
+	RuiSetBool( rui, "showObitsDuringSpectate", GetCurrentPlaylistVarBool( "show_obits_during_spectate", true ) )
 
 	ObituaryData newObituary
 	newObituary.rui = rui
@@ -338,11 +338,10 @@ void function Obituary_Print_PlayerDeath( string attackerString, asset weaponIco
 	RuiSetFloat3( rui, "victimColor", SrgbToLinear( victimColor / 255.0 ) )
 	RuiSetFloat3( rui, "weaponColor", SrgbToLinear( weaponColor / 255.0 ) )
 
-	//
-	//
-
 	RuiSetBool( rui, "tempIsMainWeapon", tempIsMainWeapon )
 	RuiSetBool( rui, "tempHasModifier", modifierIcon != $"" )
+
+	RuiSetBool( rui, "showObitsDuringSpectate", GetCurrentPlaylistVarBool( "show_obits_during_spectate", true ) )
 
 	ObituaryData newObituary
 	newObituary.rui = rui

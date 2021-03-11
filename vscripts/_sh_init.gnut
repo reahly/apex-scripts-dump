@@ -127,6 +127,9 @@ void function SV_CL_Init()
 	StoryChallengeEvents_Init()
 	ShSkydiveTrails_LevelInit()
 	Sh_Ranked_ItemRegistrationInit() //
+                        
+                                           
+       
 	ShWeapons_LevelInit()
 	ShWeaponCosmetics_LevelInit()
 	ShGladiatorCards_LevelInit()
@@ -158,9 +161,6 @@ void function SV_CL_Init()
 	ShPing_Init()
 	ShQuickchat_Init()
 	ShChallenges_LevelInit_PreStats()
-                        
-                 
-       
 	ShItems_LevelInit_Finish()
 	ShItemPerPlayerState_LevelInit()
 	ShLoadouts_LevelInit_Finish()
@@ -168,6 +168,9 @@ void function SV_CL_Init()
 	ShStats_LevelInit()
 	ShChallenges_LevelInit_PostStats()
 	Sh_Ranked_Init() //
+                        
+                           
+       
 	ShDoors_Init()
 	PlayerWaypoints_Init()
 	GameMode_RunSharedInits()
@@ -370,7 +373,7 @@ void function SV_CL_Init()
        
 
                                
-                         
+		RingCollapseMode_Init()
        
 
                
@@ -379,12 +382,12 @@ void function SV_CL_Init()
 
 
                            
-                               
-                                
-                             
-                                
-                             
-                             
+		ShGameMode_ShieldRegen_Init()
+		ShGameMode_DeathTrigger_Init()
+		ShGameMode_AutoCards_Init()
+		ShGameMode_SecondChance_Init()
+		ShGameMode_GlowZones_Init()
+		ShGameMode_ArmedDrop_Init()
        
 
                     
@@ -399,8 +402,16 @@ void function SV_CL_Init()
                 
        
 
+                                
+		AprilFools_S8_Mode_Init()
+       
+
 	NewScriptInit_VM()
 	NewScriptInit_Level()
+
+                   
+		Caustic_TT_Init()
+       
 }
 
 #if(false)
@@ -533,28 +544,6 @@ void function SV_CL_Init()
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -564,6 +553,28 @@ void function SV_CL_Init()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 
@@ -727,6 +738,9 @@ void function Shared_Lobby_Init()
 	StoryChallengeEvents_Init()
 	ShSkydiveTrails_LevelInit()
 	Sh_Ranked_ItemRegistrationInit() //
+                        
+                                           
+       
 	ShWeapons_LevelInit()
 	ShWeaponCosmetics_LevelInit()
 	ShGladiatorCards_LevelInit()
@@ -751,9 +765,6 @@ void function Shared_Lobby_Init()
 	#if(false)
 
 #endif
-                        
-                 
-       
 	ShItems_LevelInit_Finish()
 	ShItemPerPlayerState_LevelInit()
 	ShLoadouts_LevelInit_Finish()
@@ -761,6 +772,9 @@ void function Shared_Lobby_Init()
 	ShStats_LevelInit()
 	ShChallenges_LevelInit_PostStats()
 	Sh_Ranked_Init() //
+                        
+                           
+       
 
 	//
                 

@@ -36,6 +36,44 @@ void function GameModes_Init_SV_CL()
 #endif
 #endif
 
+                       
+                           
+           
+
+
+
+
+               
+                                                             
+       
+         
+                                                                 
+
+            
+
+      
+       
+      
+
+                        
+                            
+           
+
+
+
+
+               
+                                                             
+       
+         
+                                                                 
+
+            
+
+      
+       
+      
+
 	gameMode = GAMEMODE_FREELANCE
 #if(false)
 

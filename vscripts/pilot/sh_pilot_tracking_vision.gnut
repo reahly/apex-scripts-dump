@@ -111,12 +111,12 @@ global enum eTrackingVisionNetworkedPOITypes
 	PLAYER_TRAVERSAL_ELEVATOR_ENTER,
 	PLAYER_TRAVERSAL_ELEVATOR_EXIT,
                    
-                           
-                             
-                         
+	PLAYER_LOOT_PICKUP_GADGET,
+	PLAYER_LOOT_EXCHANGE_GADGET,
+	PLAYER_LOOT_DROP_GADGET,
       
                       
-                               
+	PLAYER_LOOT_ABILITY_VOID_RING,
       
             
 	PLAYER_ABILITY_MORTAR_RING_START,
@@ -166,7 +166,7 @@ int function TrackingVision_GetPriorityForPOIType( int poiEventID )
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_BLACK_MARKET:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_BLACK_HOLE:
                       
-                                                                      
+		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_ABILITY_VOID_RING:
       
 		case eTrackingVisionNetworkedPOITypes.PLAYER_DEATH:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_KILLER:
@@ -248,9 +248,9 @@ int function TrackingVision_GetPriorityForPOIType( int poiEventID )
 
 
                    
-                                                                  
-                                                                    
-                                                                
+		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_GADGET:
+		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_GADGET:
+		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_GADGET:
       
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_TRANSLOCATION_TOSS:
@@ -372,13 +372,13 @@ vector function TrackingVision_GetOffsetForPOI( int poiEventID )
       
 
                       
-                                                                         
+		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_ABILITY_VOID_RING: //
       
 
                    
-                                                                  
-                                                                    
-                                                                
+		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_GADGET:
+		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_GADGET:
+		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_GADGET:
       
 			return < 0, 0, 24.0 >
 

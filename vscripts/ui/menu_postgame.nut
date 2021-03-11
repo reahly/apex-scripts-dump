@@ -4,6 +4,7 @@ global function OpenPostGameMenu
 global function ClosePostGameMenu
 
 global function InitXPEarnedDisplay
+global function PopulateMatchRank
 
 const PROGRESS_BAR_FILL_TIME = 2.0
 const REWARD_AWARD_TIME = 2
@@ -114,33 +115,67 @@ void function InitSquadDataDisplay( var squadDataRui )
 	}
 }
 
-array< array< int > > xpDisplayGroups = [
-	[
-		eXPType.WIN_MATCH,
-		eXPType.TOP_FIVE,
-		eXPType.SURVIVAL_DURATION,
-		eXPType.KILL,
-		eXPType.DAMAGE_DEALT,
-		eXPType.REVIVE_ALLY,
-		eXPType.RESPAWN_ALLY,
+table<string,bool> gameModeIsHeadToHead = {
+	survival = false,
+
+                       
+               
+      
+}
+
+table<string, array< array< int > > > xpDisplayGroups = {
+	survival = [
+		[
+			eXPType.WIN_MATCH,
+			eXPType.TOP_FIVE,
+			eXPType.SURVIVAL_DURATION,
+			eXPType.KILL,
+			eXPType.DAMAGE_DEALT,
+			eXPType.REVIVE_ALLY,
+			eXPType.RESPAWN_ALLY,
+		],
+
+		[
+			eXPType.BONUS_FIRST_GAME,
+			eXPType.BONUS_FIRST_KILL,
+			eXPType.KILL_CHAMPION_MEMBER,
+			eXPType.KILL_LEADER,
+			eXPType.BONUS_CHAMPION,
+			eXPType.BONUS_FRIEND,
+			eXPType.BONUS_FIRST_KILL_AS,
+			eXPType.BONUS_FIRST_TOP_FIVE,
+		],
+
+		[
+			eXPType.TOTAL_MATCH,
+			eXPType.CHALLENGE_COMPLETED,
+		],
 	],
 
-	[
-		eXPType.BONUS_FIRST_GAME,
-		eXPType.BONUS_FIRST_KILL,
-		eXPType.KILL_CHAMPION_MEMBER,
-		eXPType.KILL_LEADER,
-		eXPType.BONUS_CHAMPION,
-		eXPType.BONUS_FRIEND,
-		eXPType.BONUS_FIRST_KILL_AS,
-		eXPType.BONUS_FIRST_TOP_FIVE,
-	],
+                        
+           
+   
+                     
+                      
+                             
+                
+    
 
-	[
-		eXPType.TOTAL_MATCH,
-		eXPType.CHALLENGE_COMPLETED,
-	],
-]
+   
+                       
+                            
+                            
+                        
+                               
+    
+
+   
+                       
+                               
+    
+  
+       
+}
 
 int function InitXPEarnedDisplay( var xpEarnedRui, array<int> xpTypes, string headerText, string subHeaderText, bool isBattlePass, vector sectionColor )
 {
@@ -262,6 +297,13 @@ var function DisplayPostGameSummary( bool isFirstTime )
 	if ( !player )
 		return
 
+	string lastGameMode = expect string( GetPersistentVar( "lastGameMode" ) )
+
+	if (!( lastGameMode in xpDisplayGroups ))
+	{
+		lastGameMode = "survival"
+	}
+
 	EmitUISound( "UI_Menu_MatchSummary_Appear" )
 	UpdatePostGameSummaryDisplayData()
 
@@ -301,7 +343,11 @@ var function DisplayPostGameSummary( bool isFirstTime )
 		SetupMenuGladCard( file.combinedCard, "card", true )
 		SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.CHARACTER, 0, character )
 
+		//
 		Ranked_SetupMenuGladCardForUIPlayer()
+                         
+                                              
+        
 	}
 
 	//
@@ -326,11 +372,7 @@ var function DisplayPostGameSummary( bool isFirstTime )
 	//
 	//
 
-	RuiSetInt( matchRankRui, "squadRank", GetPersistentVarAsInt( "lastGameRank" ) )
-	RuiSetInt( matchRankRui, "totalPlayers", GetPersistentVarAsInt( "lastGameSquads" ) )
-	int elapsedTime = GetUnixTimestamp() - GetPersistentVarAsInt( "lastGameTime" )
-
-	RuiSetString( matchRankRui, "lastPlayedText", Localize( "#EOG_LAST_PLAYED", GetFormattedIntByType( elapsedTime, eNumericDisplayType.TIME_MINUTES_LONG ) ) )
+	PopulateMatchRank( matchRankRui )
 
 	//
 	//
@@ -469,11 +511,11 @@ var function DisplayPostGameSummary( bool isFirstTime )
 		Hud_SetVisible( Hud_GetChild( file.menu, "ContinueButton" ), true )
 
 		RuiSetFloat( xpEarned1Rui, "startDelay", baseDelay )
-		int numLines = InitXPEarnedDisplay( xpEarned1Rui, xpDisplayGroups[0], "#EOG_MATCH_XP", "", false, COLOR_MATCH )
+		int numLines = InitXPEarnedDisplay( xpEarned1Rui, xpDisplayGroups[ lastGameMode ][0], "#EOG_MATCH_XP", "", false, COLOR_MATCH )
 		RuiSetFloat( xpEarned1Rui, "lineDisplayTime", LINE_DISPLAY_TIME )
 
 		RuiSetFloat( xpEarned2Rui, "startDelay", baseDelay + (numLines * LINE_DISPLAY_TIME) )
-		numLines += InitXPEarnedDisplay( xpEarned2Rui, xpDisplayGroups[1], "", "", false, COLOR_BONUS )
+		numLines += InitXPEarnedDisplay( xpEarned2Rui, xpDisplayGroups[ lastGameMode ][1], "", "", false, COLOR_BONUS )
 		RuiSetFloat( xpEarned2Rui, "lineDisplayTime", LINE_DISPLAY_TIME )
 
 		//
@@ -756,3 +798,20 @@ void function ClosePostGameMenu( var button )
 	if ( GetActiveMenu() == file.menu )
 		thread CloseActiveMenu()
 }
+
+
+void function PopulateMatchRank( var matchRankRui )
+{
+	RuiSetInt( matchRankRui, "squadRank", GetPersistentVarAsInt( "lastGameRank" ) )
+	RuiSetInt( matchRankRui, "totalPlayers", GetPersistentVarAsInt( "lastGameSquads" ) )
+	int elapsedTime = GetUnixTimestamp() - GetPersistentVarAsInt( "lastGameTime" )
+	RuiSetString( matchRankRui, "lastPlayedText", Localize( "#EOG_LAST_PLAYED", GetFormattedIntByType( elapsedTime, eNumericDisplayType.TIME_MINUTES_LONG ) ) )
+
+	string lastGameMode = expect string( GetPersistentVar( "lastGameMode" ) )
+	bool displayVictory = false
+	if ( lastGameMode in gameModeIsHeadToHead )
+	{
+		displayVictory = gameModeIsHeadToHead[ lastGameMode ]
+	}
+	RuiSetBool( matchRankRui, "displayVictory", displayVictory )
+}

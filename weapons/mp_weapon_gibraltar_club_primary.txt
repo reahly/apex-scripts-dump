@@ -1,4 +1,3 @@
-
 #base "mp_weapon_melee_survival.txt"
 
 WeaponData

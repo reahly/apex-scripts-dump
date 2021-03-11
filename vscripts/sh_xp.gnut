@@ -21,7 +21,6 @@ global function CapPlayerXPToLevel
 global function GetXPEventValue
 global function GetXPEventCount
 
-global function GetEventXPStyle
 #if(UI)
 global function GetXPEventNameDisplay
 global function GetXPEventValueDisplay
@@ -39,6 +38,7 @@ global function GetNextAccountLevel
 global function GetTotalXPToReachAccountLevel
 
 #if(false)
+
 
 
 
@@ -81,7 +81,7 @@ global enum eXPType
 	WIN_MATCH = 8,
 	KILL_CHAMPION_MEMBER = 9,
 	BONUS_FRIEND = 10,
-	UNUSED_11 = 11,
+	ROUNDS_WON = 11,
 	ACCOUNT_BOOST = 12,
 	BONUS_FIRST_KILL = 13,
 	BONUS_FIRST_KILL_AS = 14,
@@ -561,7 +561,27 @@ array<RewardData> function GetRewardsFromDataTable( var dataTable, int levelInde
 
 
 
-#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
 
 
 void function InitXPData()
@@ -656,6 +676,8 @@ void function InitXPData()
 	InitXpEventTypeData( eXPType.BONUS_FIRST_TOP_FIVE, "xp_first_top_five", "#EOG_XP_FIRST_TOP5" )
 
 	InitXpEventTypeData( eXPType.TOTAL_MATCH, "xp_total_match", "#EOG_XP_TOTAL_MATCH" )
+
+	InitXpEventTypeData( eXPType.ROUNDS_WON, "xp_round_won", "#EOG_XP_ROUNDS_WON" )
 }
 
 #if(UI)
@@ -781,9 +803,6 @@ string function GetXPEventValueDisplay( entity player, int xpType )
 	unreachable
 }
 
-#endif
-
-#if(UI)
 asset function GetImageForReward( RewardData reward )
 {
 	asset icon = $""
@@ -797,9 +816,7 @@ asset function GetImageForReward( RewardData reward )
 
 	return icon
 }
-#endif
 
-#if(UI)
 string function GetStringForReward( RewardData reward )
 {
 	if ( reward.quantity > 1 )
@@ -807,7 +824,7 @@ string function GetStringForReward( RewardData reward )
 
 	return ItemFlavor_GetShortName( reward.item )
 }
-#endif
+#endif //
 
 void function CapPlayerXPToLevel( entity player, int levelCap )
 {
@@ -835,17 +852,4 @@ void function CapPlayerXPToLevel( entity player, int levelCap )
 
 
 #endif
-}
-
-
-int function GetEventXPStyle()
-{
-	int eventXPStyle
-	string playlistEventXPStyle = GetCurrentPlaylistVarString( "event_xp_style", "default" ).toupper()
-
-	if ( playlistEventXPStyle in eEventXPStyle )
-		return eEventXPStyle[playlistEventXPStyle]
-
-	Assert( false, "Playlist event_xp_style '" + playlistEventXPStyle + "' is not a specified enumerator." )
-	return eEventXPStyle.DEFAULT
 }

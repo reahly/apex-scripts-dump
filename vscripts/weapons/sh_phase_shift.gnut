@@ -124,8 +124,6 @@ void function CancelPhaseShift( entity ent )
 
 
 
-
-
 #endif //
 }
 
@@ -195,8 +193,7 @@ int function PhaseShift( entity ent, float warmupTime, float duration, int shift
 			&& !ent.IsZiplining()
 			&& !ent.ContextAction_IsLeeching()
 			&& !ent.ContextAction_IsInVehicle()
-			&& !HoverVehicle_IsPlayerInAnyVehicle( ent )
-			&& !Crafting_IsPlayerAtWorkbench( ent ) )
+			&& !HoverVehicle_IsPlayerInAnyVehicle( ent ) )
 		{
 			return 0
 		}
@@ -216,8 +213,6 @@ int function PhaseShift( entity ent, float warmupTime, float duration, int shift
 			break
 			case eShiftStyle.Dash:
 				#if(false)
-
-
 
 #endif
 			default:

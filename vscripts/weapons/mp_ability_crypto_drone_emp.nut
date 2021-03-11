@@ -44,6 +44,7 @@ void function MpAbilityCryptoDroneEMP_Init()
 		StatusEffect_RegisterEnabledCallback( eStatusEffect.crypto_emp_warning, EMPWarningVisualsEnabled )
 		StatusEffect_RegisterDisabledCallback( eStatusEffect.crypto_emp_warning, EMPWarningVisualsDisabled )
 	#endif
+	RegisterNetworkedVariable( "isDoingEMPSequence", SNDC_PLAYER_EXCLUSIVE, SNVT_BOOL, false )
 }
 
 
@@ -71,6 +72,10 @@ bool function OnWeaponAttemptOffhandSwitch_ability_crypto_drone_emp( entity weap
 		//
 		return false
 	}
+
+	printt( "\t| Attempting offhand switch. Player net bool for emp sequence false?", player.GetPlayerNetBool( "isDoingEMPSequence" ) )
+	if ( player.GetPlayerNetBool( "isDoingEMPSequence" ) )
+		return false
 
 	return true
 }
@@ -129,7 +134,11 @@ var function OnWeaponPrimaryAttack_ability_crypto_drone_emp( entity weapon, Weap
 
 
 
+
+
 //
+
+
 
 
 

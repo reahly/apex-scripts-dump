@@ -50,8 +50,9 @@ global enum eCommsFlags
 	SILENCE = (1 << 2),
 	INCLUDE_DEAD = (1 << 3),
 	BROADCAST_TO_WAYPOINT_OWNER = (1 << 4),
+	NO_TEXT = (1 << 5),
 
-	_flagCount = 5
+	_flagCount = 6
 }
 #endif
 
@@ -460,23 +461,41 @@ int function GetInventoryLootCountForCommsAction( entity player, int commsAction
 	switch ( commsAction )
 	{
 		case eCommsAction.INVENTORY_NEED_AMMO_BULLET:
+                           
+                                             
+        
 			return player.AmmoPool_GetCount( eAmmoPoolType.bullet )
 
 		case eCommsAction.INVENTORY_NEED_AMMO_SPECIAL:
+                           
+                                              
+        
 			return player.AmmoPool_GetCount( eAmmoPoolType.special )
 
 		case eCommsAction.INVENTORY_NEED_AMMO_HIGHCAL:
+                           
+                                              
+        
 			return player.AmmoPool_GetCount( eAmmoPoolType.highcal )
 
 		case eCommsAction.INVENTORY_NEED_AMMO_SHOTGUN:
+                           
+                                              
+        
 			return player.AmmoPool_GetCount( eAmmoPoolType.shotgun )
 
                     
 		case eCommsAction.INVENTORY_NEED_AMMO_SNIPER:
+                           
+                                             
+        
 			return player.AmmoPool_GetCount( eAmmoPoolType.sniper )
        
                    
                                                
+                           
+                                             
+        
                                                           
        
 	}
@@ -739,7 +758,7 @@ void function HandleBroadcastCommsAction( entity player, int commsAction, entity
 	RunQuickChatCallbacks( player, commsAction, subjectEnt )
 
 	string chatText = act.chatText
-	if ( chatText != "" )
+	if ( chatText != "" && ! ( commsFlags & eCommsFlags.NO_TEXT ) )
 	{
 		string playerName          = opt.isFirstPerson ? Localize( "#OBITUARY_YOU" ) : player.GetPlayerName()
 		vector playerColor         = GetChatTitleColorForPlayer( player )

@@ -82,6 +82,7 @@ void function AnimEvents_Init()
 	RegisterImpactTable( "bounce_small_nosound" )
 	RegisterImpactTable( "rampart_execution_overkill" )
 	RegisterImpactTable( "pilot_landing" )
+	RegisterImpactTable( "pilot_footstep" )
 
 	AddGlobalAnimEvent( "hide", GlobalAnimEvent_Hide )
 	AddGlobalAnimEvent( "show", GlobalAnimEvent_Show )

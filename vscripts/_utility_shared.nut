@@ -22,6 +22,12 @@ global const CALCULATE_SEQUENCE_BLEND_TIME = -1.0
 
 global const string SILENT_PLAYER_VOICE = "_silent"
 
+global struct PlayerCanSeeVerboseData
+{
+	bool hasLOS
+	bool canSee
+}
+
 global struct ArrayDistanceEntry
 {
 	float  distanceSqr
@@ -259,6 +265,7 @@ void function InitWeaponScripts()
                 
                            
                              
+                           
     
     
     
@@ -355,7 +362,7 @@ void function InitWeaponScripts()
                            
        
                        
-                  
+		VOID_RING_Init()
        
 
                             
@@ -2035,7 +2042,7 @@ array<ArrayDistanceEntry> function ArrayDistance2DResultsVector( array<vector> v
 }
 
 
-GravityLandData function GetGravityLandData( vector startPos, vector parentVelocity, vector objectVelocity, float timeLimit, bool bDrawPath = false, float bDrawPathDuration = 0.0, array pathColor = [ 255, 255, 0 ] )
+GravityLandData function GetGravityLandData( vector startPos, vector parentVelocity, vector objectVelocity, float timeLimit, bool bDrawPath = false, int traceMask = TRACE_MASK_NPCWORLDSTATIC, float bDrawPathDuration = 0.0, array pathColor = [ 255, 255, 0 ] )
 {
 	GravityLandData returnData
 
@@ -2068,7 +2075,7 @@ GravityLandData function GetGravityLandData( vector startPos, vector parentVeloc
 		traceCount++
 		if ( traceFrac < 1.0 )
 		{
-			returnData.traceResults = TraceLine( traceStart, traceEnd, null, TRACE_MASK_NPCWORLDSTATIC, TRACE_COLLISION_GROUP_NONE )
+			returnData.traceResults = TraceLine( traceStart, traceEnd, null, traceMask, TRACE_COLLISION_GROUP_NONE )
 			return returnData
 		}
 		traceStart = traceEnd
@@ -4742,6 +4749,59 @@ bool function PlayerCanSee( entity player, entity ent, bool doTrace, float degre
 	unreachable
 }
 
+PlayerCanSeeVerboseData function PlayerCanSeeVerbose( entity player, entity ent, bool doTrace, float degrees, bool checkEyes, bool checkCenter, bool checkOrigin )
+{
+	PlayerCanSeeVerboseData data
+	data.canSee = false
+	data.hasLOS = false
+	float minDot = deg_cos( degrees )
+
+	//
+	float dot = DotProduct( Normalize( ent.GetWorldSpaceCenter() - player.EyePosition() ), player.GetViewVector() )
+	if ( dot > minDot )
+		data.canSee = true
+
+	//
+	if ( doTrace )
+	{
+		TraceResults trace
+
+		if ( checkCenter )
+		{
+
+			trace = TraceLine( player.EyePosition(), ent.GetWorldSpaceCenter(), null, TRACE_MASK_BLOCKLOS, TRACE_COLLISION_GROUP_NONE )
+
+			if ( trace.hitEnt == ent || trace.fraction >= 0.99 )
+			{
+				data.hasLOS = true
+				return data
+			}
+		}
+
+		if ( checkEyes )
+		{
+			trace = TraceLine( player.EyePosition(), ent.EyePosition(), null, TRACE_MASK_BLOCKLOS, TRACE_COLLISION_GROUP_NONE )
+			if ( trace.hitEnt == ent || trace.fraction >= 0.99 )
+			{
+				data.hasLOS = true
+				return data
+			}
+		}
+
+		if ( checkOrigin )
+		{
+			trace = TraceLine( player.EyePosition(), ent.GetOrigin(), null, TRACE_MASK_BLOCKLOS, TRACE_COLLISION_GROUP_NONE )
+			if ( trace.hitEnt == ent || trace.fraction >= 0.99 )
+			{
+				data.hasLOS = true
+				return data
+			}
+		}
+	}
+
+	return data
+}
+
 
 bool function PlayerCanSeePos( entity player, vector pos, bool doTrace, float degrees )
 {
@@ -5154,15 +5214,30 @@ bool function CanAttachToWeapon( string attachment, string weaponName )
 		return false
 
 	if ( SURVIVAL_Weapon_IsAttachmentLocked( weaponName ) )
-		return false
+	{
+		if ( SURVIVAL_IsAttachmentPointLocked( weaponName, GetAttachPointForAttachmentOnWeapon( weaponName, attachment ) ) )
+			return false
+
+		weaponName = GetBaseWeaponRef( weaponName )
+	}
 
 	AttachmentData aData = GetAttachmentData( attachment )
 
-	//
-	//
-	//
-
 	return (aData.compatibleWeapons.contains( weaponName ))
+}
+
+
+string function GetBaseWeaponRef( string weaponRef )
+{
+	if ( weaponRef.find( WEAPON_LOCKEDSET_SUFFIX_GOLD ) != -1 )
+		return weaponRef.slice( 0, weaponRef.len() - (WEAPON_LOCKEDSET_SUFFIX_GOLD.len()) )
+	if ( weaponRef.find( WEAPON_LOCKEDSET_SUFFIX_WHITESET ) != -1 )
+		return weaponRef.slice( 0, weaponRef.len() - (WEAPON_LOCKEDSET_SUFFIX_WHITESET.len()) )
+	if ( weaponRef.find( WEAPON_LOCKEDSET_SUFFIX_BLUESET ) != -1 )
+		return weaponRef.slice( 0, weaponRef.len() - (WEAPON_LOCKEDSET_SUFFIX_BLUESET.len()) )
+	if ( weaponRef.find( WEAPON_LOCKEDSET_SUFFIX_PURPLESET ) != -1 )
+		return weaponRef.slice( 0, weaponRef.len() - (WEAPON_LOCKEDSET_SUFFIX_PURPLESET.len()) )
+	return weaponRef
 }
 
 
@@ -6087,4 +6162,61 @@ int function GetWeaponIndex( entity player, entity weapon )
 			return slot
 	}
 	return -1
+}
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+void function OnEnterUpdraftTrigger( entity trigger, entity ent, float activationHeight )
+{
+	Assert( IsValid( trigger ) )
+	Assert( IsValid( ent ) )
+
+	if ( !ent.IsPlayer() )
+		return
+
+	float entZ = ent.GetOrigin().z
+
+	float minShakeActivationHeight = entZ + 500.0               //
+	float maxShakeActivationHeight = entZ - 400.0               //
+	float liftActivationHeight     = activationHeight			//
+	float liftSpeed                = 300.0                   	//
+	float liftAcceleration         = 100.0                 		//
+	float liftExitDuration         = 2.5                   		//
+	ent.Player_EnterUpdraft( minShakeActivationHeight, maxShakeActivationHeight, liftActivationHeight, liftSpeed, liftAcceleration, liftExitDuration );
+}
+
+void function OnLeaveUpdraftTrigger( entity trigger, entity ent )
+{
+	if ( !IsValid( trigger ) )
+		return
+
+	if ( !IsValid( ent ) )
+		return
+
+	if ( !ent.IsPlayer() )
+		return
+
+	ent.Player_LeaveUpdraft()
 }

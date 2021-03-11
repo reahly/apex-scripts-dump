@@ -1,6 +1,8 @@
 
 WeaponData
 {
+	"force_has_weapon_clone"						"1"
+
     "allow_gibraltar_shield"                        "0"
 	"flyoutEnabled"									"0"
 

@@ -287,6 +287,16 @@ void function CreateTeamUnitFrame( entity player )
 	if ( player == GetLocalViewPlayer() && ( !IsSpectating() || IsAlive( player ) ) )
 		return
 
+                           
+		if ( IsSecondChanceGameMode() )
+		{
+			if ( ( !IsAlive( player ) && ShGameMode_SecondChance_CanPlayerStillRespawn( player ) ) )
+			{
+				return
+			}
+		}
+       
+
 	if ( PlayerHasUnitFrame( player ) )
 		return
 

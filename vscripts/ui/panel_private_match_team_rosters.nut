@@ -114,11 +114,6 @@ void function InitPrivateMatchTeamRostersPanel( var panel )
 		file.kickDragTarget = Hud_GetChild( Hud_GetParent( panel ), "KickButton" )
 		HudElem_SetRuiArg( file.kickDragTarget, "kickTextString", Localize( "#TOURNAMENT_KICK_PLAYER" ) )	
 		
-		if( GetLocalClientPlayer().HasMatchAdminRole() == false )
-		{
-			Hud_SetEnabled( file.kickDragTarget, false )
-			Hud_Hide( file.kickDragTarget )
-		}
 	#endif
 }
 

@@ -6,7 +6,8 @@ global function BuffetEvents_Init
 
 
 #if CLIENT || UI 
-global function GetActiveBuffetEvent
+global function GetActiveBuffetEventArray
+global function GetActiveBuffetEventForIndex
 global function BuffetEvent_GetModesAndChallengesData
 global function BuffetEvent_GetCurrentChallenges_EXCLUDING_DAILIES
 global function BuffetEvent_GetDailyChallenges_TEMP
@@ -205,19 +206,28 @@ void function BuffetEvents_Init()
 //
 
 #if CLIENT || UI 
-ItemFlavor ornull function GetActiveBuffetEvent( int t )
+array<ItemFlavor> function GetActiveBuffetEventArray( int t )
 {
 	Assert( IsItemFlavorRegistrationFinished() )
-	ItemFlavor ornull event = null
+	array<ItemFlavor> events
 	foreach ( ItemFlavor ev in GetAllItemFlavorsOfType( eItemType.calevent_buffet ) )
 	{
 		if ( !CalEvent_IsActive( ev, t ) )
 			continue
 
-		Assert( event == null, format( "Multiple buffet events are active!! (%s, %s)", ItemFlavor_GetHumanReadableRef( expect ItemFlavor(event) ), ItemFlavor_GetHumanReadableRef( ev ) ) )
-		event = ev
+		events.append( ev )
 	}
-	return event
+	return events
+}
+
+ItemFlavor ornull function GetActiveBuffetEventForIndex( int t, int index )
+{
+	array<ItemFlavor> events = GetActiveBuffetEventArray( t )
+
+	if ( events.len() > index )
+		return events[ index ]
+
+	return null
 }
 #endif
 

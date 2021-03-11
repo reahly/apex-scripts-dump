@@ -95,10 +95,6 @@ void function MobileRespawnBeacon_Init()
 		PrecacheImpactEffectTable( MOBILE_RESPAWN_BEACON_IMPACT_TABLE )
 		PrecacheImpactEffectTable( "mobile_respawn_dust" )
 		RegisterSignal( "MobileBeaconLanded" )
-		#if(CLIENT)
-			StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_mobile_respawn, OnBeginPlacingMobileRespawn )
-			StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_mobile_respawn, OnEndPlacingMobileRespawn )
-		#endif
        
 
                           
@@ -106,10 +102,6 @@ void function MobileRespawnBeacon_Init()
                                           
                                                   
                                                             
-             
-                                                                                                                  
-                                                                                                              
-        
        
 
 	#if(CLIENT)
@@ -127,30 +119,28 @@ void function OnWeaponActivate_mobile_respawn( entity weapon )
 			return
 
 		RunUIScript( "CloseSurvivalInventoryMenu" )
-	#endif //
 
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-#endif //
+	string name = weapon.GetWeaponClassName()
+
+                          
+                                               
+   
+                                                        
+   
+      
+       
+		{
+                         
+				int skinIndex = weapon.GetSkinIndexByName( "mobile_respawn_beacon_clacker" )
+				if ( skinIndex != -1 )
+				{
+					weapon.SetSkin( skinIndex )
+				}
+
+				OnBeginPlacingMobileRespawn( weapon, ownerPlayer )
+            
+		}
+	#endif //
 }
 
 void function OnWeaponDeactivate_mobile_respawn( entity weapon )
@@ -160,26 +150,14 @@ void function OnWeaponDeactivate_mobile_respawn( entity weapon )
 
 	#if(CLIENT)
 		SetBeaconDeployed( false )
+                                                 
+			OnEndPlacingMobileRespawn( ownerPlayer )
+        
 		if ( !InPrediction() ) //
 			return
 	#endif
 
 	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //
 
 
@@ -337,7 +315,7 @@ float function GetRespawnStationUseTime_Mobile( entity ent )
 }
 
 #if(CLIENT)
-void function OnEndPlacingMobileRespawn( entity player, int statusEffect, bool actuallyChanged )
+void function OnEndPlacingMobileRespawn( entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
@@ -777,8 +755,10 @@ bool function MobileRespawn_ConditionalCheck( string ref, entity player )
 
 #if(CLIENT)
                       
-void function MobileRespawnPlacement( entity player, asset modelName )
+void function MobileRespawnPlacement( entity weapon, entity player, asset modelName )
 {
+	weapon.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
 	player.EndSignal( "MobileRespawnPlacement" )
 
 	entity beacon = CreateProxy( modelName )
@@ -823,12 +803,12 @@ void function MobileRespawnPlacement( entity player, asset modelName )
 
 #if(CLIENT)
                       
-void function OnBeginPlacingMobileRespawn( entity player, int statusEffect, bool actuallyChanged )
+void function OnBeginPlacingMobileRespawn( entity weapon, entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
 
-	thread MobileRespawnPlacement( player, MOBILE_RESPAWN_BEACON_MODEL )
+	thread MobileRespawnPlacement( weapon, player, MOBILE_RESPAWN_BEACON_MODEL )
 }
          
 #endif //
@@ -1162,14 +1142,14 @@ void function OnBeginPlacingMobileRespawn( entity player, int statusEffect, bool
 
 #if(CLIENT)
                          
-                                                                                                     
+                                                                            
  
                                       
         
 
                                                                              
   
-                                                                            
+                                                                                    
   
  
          
@@ -1177,8 +1157,10 @@ void function OnBeginPlacingMobileRespawn( entity player, int statusEffect, bool
 
 #if(CLIENT)
                          
-                                                                                
+                                                                                               
  
+                                
+                              
                                              
 
                                                

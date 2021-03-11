@@ -308,6 +308,9 @@ bool function ItemFlavor_CanEquipToWheel( ItemFlavor item )
 		case eItemType.gladiator_card_kill_quip:
 		case eItemType.gladiator_card_intro_quip:
 		case eItemType.emote_icon:
+                
+                                 
+        
 			return true
 	}
 

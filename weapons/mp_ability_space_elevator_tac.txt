@@ -26,7 +26,7 @@ WeaponData
     //"offhand_interupts_weapon_anims"				"1"
 	//"offhand_toss_activates_on_attack"				"0"
 	//"offhand_toss_hold_is_resumable"				"1"
-	"trophy_system_ignore"							"1"
+    "trophy_system_ignores"                         "always"
 
 
 	"OnWeaponAttemptOffhandSwitch"					"OnWeaponAttemptOffhandSwitch_weapon_space_elevator_tac"
@@ -83,6 +83,8 @@ WeaponData
 	"grenade_hull_mins"                             "-3.0 -3.0 -0.0"
 	"grenade_hull_maxs"                             "3.0 3.0 0.0"
 
+
+	"grenade_touch_triggers_on_impact"				"1"
 	"grenade_orient_to_velocity"					"0"
 	"grenade_inherit_owner_velocity"				"1"
     "projectile_inherit_owner_velocity_scale"		"0.2"
@@ -247,40 +249,15 @@ WeaponData
 	"viewdrift_hipfire_speed_pitch"   				"0.6"
 	"viewdrift_hipfire_speed_yaw" 					"1.22"
 
-
-
-
-	MP_BASE
-	{
-		"ammo_clip_size"								"150"
-		"ammo_default_total"							"150"
-		"ammo_display"									"bar"
-		"ammo_min_to_fire"								"150"
-		"ammo_per_shot"									"150"
-		"ammo_stockpile_max"							"150"
-		"regen_ammo_refill_rate"						"10"
-		"regen_ammo_refill_start_delay"					"0.5"
-		"ammo_no_remove_from_stockpile"					"0"
-
-		"enable_highlight_networking_on_creation"		"<KEEP_DEFAULT>"
-
-	}
-
-	SP_BASE
-	{
-		"ammo_clip_size"   								"100"
-		"ammo_default_total"							"100"
-		"ammo_display"									"bar"
-		"ammo_min_to_fire"								"100"
-		"ammo_per_shot"									"100"
-		"ammo_stockpile_max"							"100"
-		"regen_ammo_refill_rate"						"2"
-		"regen_ammo_refill_start_delay"					"0.0"
-		"ammo_no_remove_from_stockpile"					"<KEEP_DEFAULT>"
-
-		"enable_highlight_networking_on_creation"		"1"
-
-	}
+	"ammo_clip_size"								"150"
+	"ammo_default_total"							"150"
+	"ammo_display"									"bar"
+	"ammo_min_to_fire"								"150"
+	"ammo_per_shot"									"150"
+	"ammo_stockpile_max"							"150"
+	"regen_ammo_refill_rate"						"10"
+	"regen_ammo_refill_start_delay"					"0.5"
+	"ammo_no_remove_from_stockpile"					"0"
 
 	// Bob
 
@@ -318,6 +295,13 @@ WeaponData
                                          
                                        
                                           
+         
+
+                               
+         
+                                                               
+                                                               
+                                                               
          
            
 

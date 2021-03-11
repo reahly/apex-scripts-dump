@@ -79,7 +79,6 @@ void function ArmoryPanel_OnHide( var panel )
 	{
 		foreach ( var button, ItemFlavor category in file.buttonToCategory )
 		{
-			Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.WeaponCharmButton, OnNewnessQueryChangedUpdateButton, button )
 			if ( category in NEWNESS_QUERIES.WeaponCategoryButton ) //
 			{
 				Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.WeaponCategoryButton[ category ], OnNewnessQueryChangedUpdateButton, button )
@@ -118,7 +117,6 @@ void function CategoryButton_Init( var button, ItemFlavor category )
 	file.buttonToCategory[button] <- category
 
 	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.WeaponCategoryButton[ category ], OnNewnessQueryChangedUpdateButton, button )
-	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.WeaponCharmButton, OnNewnessQueryChangedUpdateButton, button )
 }
 
 

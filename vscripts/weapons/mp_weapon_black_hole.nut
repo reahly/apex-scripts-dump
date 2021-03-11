@@ -37,7 +37,6 @@ const BLACKHOLE_PLAYER_3P_FX = $"P_anti_grav_3P"
 const BLACKHOLE_ATOM_ONPLAYER_FX = $"P_wpn_nova_ultimate_3P_core"
 
 
-
 //
 const asset BLACKHOLETROPHY_MODEL = $"mdl/props/nova_trophy_system/nova_trophy_system.rmdl"
 
@@ -616,6 +615,15 @@ void function BLACKHOLE_ProjectileLanded( entity projectile, DeployableCollision
 
 
 
+//
+
+
+
+
+
+
+
+
 
 
 
@@ -929,13 +937,28 @@ void function BLACKHOLE_ProjectileLanded( entity projectile, DeployableCollision
 
 
 
-/*
 
 
 
 
 
-*/
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1140,6 +1163,9 @@ void function BLACKHOLE_InTriggerThread( entity trigger, entity player )
 }
 
 #if(false)
+
+
+
 
 
 

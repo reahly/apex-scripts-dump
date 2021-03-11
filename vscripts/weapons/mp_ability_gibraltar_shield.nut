@@ -39,6 +39,9 @@ const int PILOT_SHIELD_OFFHAND_INDEX = OFFHAND_EQUIPMENT
 struct
 {
 	var shieldRegenRui
+	#if(false)
+
+#endif
 } file
 
 void function MpAbilityGibraltarShield_Init()
@@ -59,6 +62,8 @@ void function MpAbilityGibraltarShield_Init()
 	#endif
 
 	#if(false)
+
+
 
 #endif
 }
@@ -322,7 +327,28 @@ var function OnWeaponPrimaryAttack_ability_gibraltar_shield( entity weapon, Weap
 
 
 
+
+
+
+
+
+
+
+
+
+
 //
+
+
+
+
+
+
+
+
+
+
+
 
 
 

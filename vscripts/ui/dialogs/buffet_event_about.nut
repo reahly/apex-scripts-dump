@@ -222,7 +222,7 @@ void function OnOpen()
 
 		bool isLocked = true
 		int currTierIdx = GetPlayerBadgeDataInteger( playerEHI, badge, 0, null )
-		if ( currTierIdx >= 0  )
+		if ( currTierIdx >= 0 || IsEverythingUnlocked() )
 			isLocked = false
 
 		HudElem_SetRuiArg( badgeBtn, "isLocked", isLocked )

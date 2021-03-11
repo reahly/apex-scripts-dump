@@ -1,4 +1,3 @@
-
 #base "_base_assault_rifle.txt"
 #base "_base_mags_heavy.txt"
 
@@ -156,7 +155,7 @@
 	"reload_is_segmented"                           "1"
     "ammo_size_segmented_reload"					"1"
 	"reload_time" 									".33"
-    "reloadempty_time"								".33"
+    "reloadempty_time"								".75"
     "reloadsegment_time_loop"						".40"
     "reloadsegment_time_end"						".45"
     "reloadsegmentempty_time_end"					".60"
@@ -238,6 +237,9 @@
     "spread_max_kick_stand_hip"   				"3.5"
     "spread_max_kick_crouch_hip"  				"3.0"
     "spread_max_kick_air_hip" 					"4.0"
+
+    "spread_moving_increase_rate" 			    "20"
+    "spread_moving_decay_rate" 					"25"
 
 	"spread_stand_ads"                         "0.0"
 	"spread_crouch_ads"                        "0.0"

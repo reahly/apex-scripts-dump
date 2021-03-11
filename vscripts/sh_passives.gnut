@@ -18,6 +18,8 @@ global function Pas_GetWattsonUltAccelExtraCount
 
 
 
+
+
 #endif
 
 #if CLIENT && DEV 
@@ -242,6 +244,10 @@ global const table<int, string> PASSIVE_DESCRIPTION_SHORT_MAP = {
 //
 struct
 {
+	#if(false)
+
+#endif
+
 	#if(CLIENT)
 		table<int, array<void functionref( entity, int, bool, bool )> > passiveChangedCallbackListMap
 
@@ -382,6 +388,21 @@ void function OnRegisterRootItemFlavors()
 
 #endif
 
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 #if(CLIENT)
 bool function PlayerHasPassive( entity player, int passive )

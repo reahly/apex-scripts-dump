@@ -725,11 +725,18 @@ AttackerDisplayNameStruct function GetAttackerDisplayNamesFromClassname( entity 
 
 	if ( ent == GetLocalClientPlayer() )
 	{
-		names.attackerName = ent.GetPlayerName()
+		names.attackerName = ent.GetPlayerNameWithClanTag()
 	}
 	else if ( ent.IsPlayer() )
 	{
-		names.attackerName = isAttacker ? GetKillerName( ToEHI( ent ) ) : GetPlayerName( ToEHI( ent ) )
+		string clubTag = ""
+
+		clubTag = ent.GetClubTag()
+		if ( clubTag != "" )
+			clubTag = "[" + clubTag + "]"
+
+		string attackerName = isAttacker ? GetKillerName( ToEHI( ent ) ) : GetPlayerName( ToEHI( ent ) )
+		names.attackerName = clubTag + attackerName
 	}
 	else if ( ent instanceof C_AI_BaseNPC )
 	{

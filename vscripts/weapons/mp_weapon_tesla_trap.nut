@@ -339,8 +339,6 @@ function MpWeaponTeslaTrap_Init()
 
 	#if(CLIENT)
 		PrecacheParticleSystem( TESLA_TRAP_PLACE_RANGE_FX )
-		StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_tesla_trap, TeslaTrap_OnBeginPlacement )
-		StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_tesla_trap, TeslaTrap_OnEndPlacement )
 		AddCreateCallback( "prop_script", TeslaTrap_OnPropScriptCreated )
 		AddDestroyCallback( "prop_script", TeslaTrap_OnPropScriptDestroyed )
 
@@ -407,10 +405,9 @@ void function OnWeaponActivate_weapon_tesla_trap( entity weapon )
 
 		if ( !InPrediction() ) //
 			return
-	#endif
 
-	int statusEffect = eStatusEffect.placing_tesla_trap
-	StatusEffect_AddEndless( ownerPlayer, statusEffect, 1.0 )
+		TeslaTrap_OnBeginPlacement( weapon, ownerPlayer )
+	#endif
 
 	#if(false)
 
@@ -437,12 +434,11 @@ void function OnWeaponDeactivate_weapon_tesla_trap( entity weapon )
 	#if(CLIENT)
 		thread TeslaTrap_TrackFocalTrapForPlayer( ownerPlayer )
 		ownerPlayer.Signal( "TeslaTrap_StopFocalTrapCancelUpdate" )
+		TeslaTrap_OnEndPlacement( ownerPlayer )
 
 		if ( !InPrediction() ) //
 			return
 	#endif //
-
-	StatusEffect_StopAllOfType( ownerPlayer, eStatusEffect.placing_tesla_trap )
 
 	#if(false)
 //
@@ -1214,17 +1210,17 @@ int function TeslaTrap_GetPlacementMaxLinks( entity player )
 }
 
 #if(CLIENT)
-void function TeslaTrap_OnBeginPlacement( entity player, int statusEffect, bool actuallyChanged )
+void function TeslaTrap_OnBeginPlacement( entity weapon, entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
 
 	asset model = TESLA_TRAP_PROXY_MODEL
 
-	thread TeslaTrap_PlacementProxy( player, model )
+	thread TeslaTrap_PlacementProxy( weapon, player, model )
 }
 
-void function TeslaTrap_OnEndPlacement( entity player, int statusEffect, bool actuallyChanged )
+void function TeslaTrap_OnEndPlacement( entity player )
 {
 	if ( player != GetLocalViewPlayer() )
 		return
@@ -1232,8 +1228,11 @@ void function TeslaTrap_OnEndPlacement( entity player, int statusEffect, bool ac
 	player.Signal( "TeslaTrap_StopPlacementProxy" )
 }
 
-void function TeslaTrap_PlacementProxy( entity player, asset model )
+void function TeslaTrap_PlacementProxy( entity weapon, entity player, asset model )
 {
+	EndSignal( weapon, "OnDestroy" )
+	EndSignal( player, "OnDeath" )
+
 	player.EndSignal( "TeslaTrap_StopPlacementProxy" )
 
 	entity proxy = TeslaTrap_CreateTrapPlacementProxy( model )
@@ -1279,7 +1278,7 @@ void function TeslaTrap_PlacementProxy( entity player, asset model )
 	)
 
 	entity lastFocalTrap
-	while ( true )
+	while ( IsValid( weapon ) )
 	{
 		proxy.ClearParent()
 		TeslaTrapPlacementInfo placementInfo = TeslaTrap_GetPlacementInfo( player, proxy )
@@ -1291,7 +1290,6 @@ void function TeslaTrap_PlacementProxy( entity player, asset model )
 			proxy.SetParent( placementInfo.parentTo )
 
 		//
-		entity weapon = player.GetOffhandWeapon( OFFHAND_TACTICAL )
 		int ammoReq   = weapon.GetAmmoPerShot()
 		int currAmmo  = weapon.GetWeaponPrimaryClipCount()
 		if ( currAmmo < ammoReq && !IsValid( placementInfo.snapTo ) )
@@ -2942,12 +2940,6 @@ void function OnFocusTrapChanged( entity player, entity oldEnt, entity newEnt, b
 
 
 
-
-
-
-
-
-
 //
 
 
@@ -3402,7 +3394,7 @@ void function TeslaTrap_UpdateHudMarkers( entity localClientPlayer )
 					RuiSetBool( rui, "shouldDraw", false )
 					RuiSetBool( rui, "extendMode", false )
 				}
-				else if ( StatusEffect_GetSeverity( localClientPlayer, eStatusEffect.placing_tesla_trap ) )
+				else if ( weapon.GetWeaponClassName() == "mp_weapon_tesla_trap" )
 				{
 					//
 					RuiSetImage( rui, "iconImage", icon )

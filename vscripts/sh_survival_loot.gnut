@@ -118,6 +118,7 @@ global function SURVIVAL_UpdateStringForEquipmentAction
 
 
 
+
 #endif
 
 global function SURVIVAL_GetRefFromProp
@@ -193,6 +194,7 @@ global function CleanupAltMods
 
 global function SURVIVAL_GetLootDataFromWeapon
 global function SURVIVAL_Weapon_IsAttachmentLocked
+global function SURVIVAL_IsAttachmentPointLocked
 global function SURVIVAL_Weapon_IsFullyKitted
 global function SURVIVAL_Weapon_GetBaseMods
 
@@ -219,6 +221,12 @@ global function GetPropSurvivalExtraPropertyFromEnt
 
 
 #endif
+
+                          
+#if(false)
+//
+#endif
+      
 
                           
 #if(CLIENT)
@@ -553,7 +561,7 @@ void function SURVIVAL_Loot_InitShared()
 	Remote_RegisterServerFunction( "ClientCallback_BackpackClosed" )
 	Remote_RegisterServerFunction( "ClientCallback_Sur_SwapPrimaryPositions" )
                            
-		Remote_RegisterServerFunction( "ClientCallback_PickupSurvivalLootFromDeathbox", "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "entity", "entity", "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "bool", "bool" )
+		Remote_RegisterServerFunction( "ClientCallback_PickupSurvivalLootFromDeathbox", "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "entity", "entity", "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "bool", "bool", "bool" )
        
 
                   
@@ -886,6 +894,9 @@ bool function CodeCallback_WeaponModCommandCheckMods( entity player, entity weap
                     
                         
         
+                          
+                             
+        
                    
 			"hopup_paintball",
         
@@ -1056,6 +1067,11 @@ string function SURVIVAL_Loot_GetDetailTypeString( LootData lootData )
 		case eLootType.RESOURCE:
 			return "#ITEM_TYPE_SHIELDS"
 
+                   
+		case eLootType.GADGET:
+				return "#GADGET_SLOT"
+      
+
 		case eLootType.BLANK:
 			return ""
 	}
@@ -1087,6 +1103,9 @@ string function SURVIVAL_Loot_GetGeneralTypeString( LootData data )
 		case eLootType.JUMPKIT:
 		case eLootType.BACKPACK:
 		case eLootType.HELMET:
+                   
+		case eLootType.GADGET:
+      
 			return "#SURVIVAL_GEAR"
 
 		case eLootType.ATTACHMENT:
@@ -1762,7 +1781,7 @@ void function SURVIVAL_ConsolidateInventoryItems( entity player, array<Consumabl
 		LootData data = SURVIVAL_Loot_GetLootDataByIndex( invItem1.type )
 		int slotCount = SURVIVAL_GetInventorySlotCountForPlayer( player, data )
 
-		if ( slotCount == invItem1.count || invItem1.count == 0 )
+		if ( slotCount <= invItem1.count || invItem1.count == 0 )
 			continue
 
 		for ( int j = i + 1; j < inventory.len(); j++ )
@@ -1790,6 +1809,25 @@ void function SURVIVAL_ConsolidateInventoryItems( entity player, array<Consumabl
 		{
 			inventory.remove( i )
 		}
+	}
+}
+
+void function SURVIVAL_ClearExcessInventoryItems( entity player, array<ConsumableInventoryItem> inventory )
+{
+	int INVENTORY_EMPTY = SURVIVAL_Loot_GetLootDataTable().len()
+
+	for ( int i = 0; i < inventory.len(); i++ )
+	{
+		ConsumableInventoryItem item = inventory[i]
+
+		if ( item.type == INVENTORY_EMPTY )
+			continue
+
+		LootData data = SURVIVAL_Loot_GetLootDataByIndex( item.type )
+		int slotCount = SURVIVAL_GetInventorySlotCountForPlayer( player, data )
+
+		if( item.count > slotCount )
+			item.count = slotCount
 	}
 }
 
@@ -2309,7 +2347,7 @@ bool function SURVIVAL_CanAddModToWeapon( entity player, entity weapon, string i
 	LootData data     = SURVIVAL_GetLootDataFromWeapon( weapon )
 	string weaponName = data.ref
 
-	if ( SURVIVAL_Weapon_IsAttachmentLocked( weaponName ) )
+	if ( SURVIVAL_IsAttachmentPointLocked( weaponName, GetAttachPointForAttachmentOnWeapon( weaponName, item ) ) )
 		return false
 
 	if ( weapon.IsDiscarding() )
@@ -3152,6 +3190,8 @@ LootActionStruct function SURVIVAL_BuildStringForAction( entity player, int cont
 
 				entity weapon = player.GetNormalWeapon( weaponSlot )
 				string attachmentPoint = GetAttachPointForAttachmentOnWeapon( GetWeaponClassNameWithLockedSet( weapon ), actionLoot.ref )
+				if ( attachmentPoint == "" )
+					break
 
 				string currentAttachmentForIntendedSlot = GetInstalledWeaponAttachmentForPoint( weapon, attachmentPoint )
 				if ( currentAttachmentForIntendedSlot == "" )
@@ -3242,7 +3282,7 @@ void function SURVIVAL_UpdateStringForEquipmentAction( entity player, string equ
 
 		LootData weaponData = SURVIVAL_GetLootDataFromWeapon( fromWeapon )
 
-		if ( SURVIVAL_Weapon_IsAttachmentLocked( weaponData.ref ) )
+		if ( SURVIVAL_IsAttachmentPointLocked( weaponData.ref, actionLoot.attachmentStyle ) )
 		{
 			as.action = eLootAction.NONE
 			as.displayString = ""
@@ -3262,16 +3302,13 @@ void function SURVIVAL_UpdateStringForEquipmentAction( entity player, string equ
 				entity attachWeapon       = player.GetNormalWeapon( ns.weaponSlot )
 				LootData attachWeaponData = SURVIVAL_GetLootDataFromWeapon( attachWeapon )
 
-				bool couldHaveAttached = (IsValid( attachWeapon ) &&
-				SURVIVAL_Loot_IsRefValid( attachWeaponData.ref ) &&
-				CanAttachToWeapon( actionLoot.ref, attachWeaponData.baseWeapon )
-				)
-
-				bool canAttach = !SURVIVAL_Weapon_IsAttachmentLocked( attachWeaponData.ref ) && couldHaveAttached
+				bool canAttach = (IsValid( attachWeapon ) &&
+									SURVIVAL_Loot_IsRefValid( attachWeaponData.ref ) &&
+									CanAttachToWeapon( actionLoot.ref, attachWeaponData.baseWeapon ) )
 
 				if ( !canAttach )
 				{
-					if ( couldHaveAttached && SURVIVAL_Weapon_IsAttachmentLocked( attachWeaponData.ref ) )
+					if ( SURVIVAL_IsAttachmentPointLocked( attachWeaponData.ref, actionLoot.ref ) )
 						as.displayString = Localize( "#REASON_CANNOT_TRANSFER_FULLY_KITTED" )
 					else if ( attachWeaponData.pickupString != "" )
 						as.displayString = Localize( "#REASON_CANNOT_TRANSFER", Localize( attachWeaponData.pickupString ) )
@@ -5160,6 +5197,11 @@ LootData function SURVIVAL_GetLootDataFromWeapon( entity weapon )
 
 bool function SURVIVAL_Weapon_IsAttachmentLocked( string weaponName )
 {
+                        
+                     
+              
+       
+
 	if ( !SURVIVAL_Loot_IsRefValid( weaponName ) )
 		return false
 	array<string> baseMods = SURVIVAL_Loot_GetLootDataByRef( weaponName ).baseMods
@@ -5172,6 +5214,20 @@ bool function SURVIVAL_Weapon_IsAttachmentLocked( string weaponName )
 	if ( baseMods.contains( WEAPON_LOCKEDSET_MOD_BLUESET ) )
 		return true
 	if ( baseMods.contains( WEAPON_LOCKEDSET_MOD_PURPLESET ) )
+		return true
+
+	return false
+}
+
+
+bool function SURVIVAL_IsAttachmentPointLocked( string weaponName, string attachmentPoint )
+{
+                        
+                     
+              
+       
+
+	if ( SURVIVAL_Weapon_IsAttachmentLocked( weaponName ) && attachmentPoint != "sight" )
 		return true
 
 	return false
@@ -5466,6 +5522,16 @@ bool function IsValidAndUsableDeathBoxEnt( entity deathBox )
 		return true //
 
 	return false
+}
+#endif
+
+#if(CLIENT)
+bool function IsPlayerCloseEnoughToDeathBoxToLoot( entity player, entity deathBox )
+{
+	if ( !IsValidAndUsableDeathBoxEnt( deathBox ) )
+		return false
+
+	return DistanceSqr( player.GetOrigin(), deathBox.GetOrigin() ) <= ( DEATH_BOX_MAX_DIST * DEATH_BOX_MAX_DIST )
 }
 #endif
 

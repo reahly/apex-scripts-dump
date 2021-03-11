@@ -29,7 +29,6 @@ void function OnWeaponActivate_ability_phase_walk( entity weapon )
 
 #endif
 
-                   
 	if ( !weapon.HasMod( "ult_active" ) )
 	{
 		#if(false)
@@ -46,7 +45,6 @@ void function OnWeaponActivate_ability_phase_walk( entity weapon )
 		float amount = GetCurrentPlaylistVarFloat( "wraith_phase_walk_slow_amount", 0.2 )
 		StatusEffect_AddTimed( player, eStatusEffect.move_slow, amount, deploy_time, deploy_time )
 	}
-      
 }
 
 var function OnWeaponPrimaryAttack_ability_phase_walk( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -104,7 +102,6 @@ bool function OnWeaponChargeBegin_ability_phase_walk( entity weapon )
 	entity player = weapon.GetWeaponOwner()
 	float chargeTime = weapon.GetWeaponSettingFloat( eWeaponVar.charge_time )
 
-                   
 	//
 	{
 		bool doStatus = true
@@ -124,7 +121,6 @@ bool function OnWeaponChargeBegin_ability_phase_walk( entity weapon )
 #endif
 		}
 	}
-      
 
 	#if(false)
 

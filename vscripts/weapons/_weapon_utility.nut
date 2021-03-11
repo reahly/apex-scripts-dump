@@ -52,6 +52,7 @@ global function PlayDelayedShellEject
 global function IsABaseGrenade
 global function HandleDisappearingParent
 global function SolveBallisticArc
+global function AreAbilitiesSilenced
 
 #if(false)
 
@@ -74,6 +75,8 @@ global function SolveBallisticArc
 
 
 #endif
+
+global function Weapon_AddSingleCharge
 
 #if(CLIENT)
 global function ServerCallback_SetWeaponPreviewState
@@ -143,6 +146,42 @@ global function CodeCallback_OnPlayerAddedWeaponMod
 global function CodeCallback_OnPlayerRemovedWeaponMod
 
 global function EnergyChoke_OnWeaponModCommandCheckMods
+
+#if(CLIENT)
+global function DisplayCenterDotRui
+#endif
+
+                       
+  
+                                    
+ 
+                    
+                       
+                       
+                           
+                                
+                    
+
+                              
+ 
+                                                                 
+                                                                         
+                                                                           
+                                                                                             
+                                                                                     
+                                                                                                       
+                                                                                                         
+                                                                                                                      
+                                                                                               
+                                                                                          
+                                       
+                                         
+                                           
+                                                    
+                                     
+                                          
+                                         
+      
 
 global const bool PROJECTILE_PREDICTED = true
 global const bool PROJECTILE_NOT_PREDICTED = false
@@ -309,6 +348,9 @@ void function WeaponUtility_Init()
 	RegisterSignal( "WeaponSignal_EnemyKilled" )
                       
 	RegisterSignal( "GoldMagPerkEnd" )
+       
+                        
+                                                       
        
 
 	PrecacheParticleSystem( EMP_GRENADE_BEAM_EFFECT )
@@ -3103,8 +3145,6 @@ entity function GetMeleeWeapon( entity player )
 
 
 
-
-
 //
 
 //
@@ -4458,4 +4498,227 @@ ArcSolution function SolveBallisticArc( vector launchOrigin, float launchSpeed, 
 	as.duration = groundDist / groundSpeed
 
 	return as;
-}
+}
+
+void function Weapon_AddSingleCharge( entity weapon )
+{
+	int ammoReq = weapon.GetAmmoPerShot()
+	int maxClip = weapon.GetWeaponPrimaryClipCountMax()
+	int fullAdd = weapon.GetWeaponPrimaryClipCount() + ammoReq
+	int newClip = minint( maxClip, fullAdd )
+	weapon.SetWeaponPrimaryClipCount( newClip )
+
+	if ( fullAdd > maxClip )
+	{
+		int diff = fullAdd - maxClip
+		int maxAmmo = weapon.GetWeaponPrimaryAmmoCountMax( AMMOSOURCE_STOCKPILE )
+		int fullAmmoAdd = weapon.GetWeaponPrimaryAmmoCount( AMMOSOURCE_STOCKPILE ) + diff
+		int newAmmo = minint( maxAmmo, fullAmmoAdd )
+		weapon.SetWeaponPrimaryAmmoCount( AMMOSOURCE_STOCKPILE, newAmmo )
+	}
+}
+
+#if(CLIENT)
+bool function AreAbilitiesSilenced( entity player )
+{
+	if ( !IsValid( player ) )
+		return true
+
+	if ( StatusEffect_GetSeverity( player, eStatusEffect.silenced ) )
+		return true
+	if ( StatusEffect_GetSeverity( player, eStatusEffect.is_boxing ) )
+		return true
+
+	return false
+}
+#endif
+
+
+#if(CLIENT)
+void function DisplayCenterDotRui( entity weapon, string abortSignal, float appearDelay, float duration )
+{
+	AssertIsNewThread()
+	if ( !IsValid( weapon ) )
+		return
+	entity player = weapon.GetWeaponOwner()
+	if ( !IsValid( player ) )
+		return
+
+	player.EndSignal( "OnDeath" )
+	weapon.EndSignal( "OnDestroy" )
+	weapon.EndSignal( abortSignal )
+
+	var rui = CreateCockpitPostFXRui( $"ui/crosshair_single_dot_helper.rpak" )
+	RuiSetBool( rui, "isActive", false )
+
+	OnThreadEnd(
+		function() : ( rui, weapon, player )
+		{
+			RuiDestroy( rui )
+		}
+	)
+
+	wait appearDelay
+
+	if ( !IsValid( weapon ) )
+		return
+
+	float endTime = Time() + duration
+
+	RuiSetBool( rui, "isActive", true )
+	RuiSetFloat( rui, "birthTime", Time() )
+	RuiSetFloat( rui, "deathTime", endTime )
+
+	while ( Time() < endTime )
+	{
+		WaitFrame()
+	}
+
+	RuiSetBool( rui, "isActive", false )
+}
+#endif
+
+//
+//
+//
+//
+//
+//
+//
+//
+                       
+                                                                                       
+ 
+            
+                        
+                                              
+       
+
+                                             
+  
+                                                
+              
+  
+
+            
+ 
+
+                                                                                         
+ 
+                    
+                                
+
+            
+                        
+         
+       
+
+           
+
+
+
+
+      
+
+               
+
+                                            
+ 
+
+                                                                                           
+ 
+                                                      
+ 
+
+                                                                                                                                                
+ 
+            
+                        
+         
+       
+
+                                                                               
+  
+                               
+
+                                  
+   
+                                                        
+                                     
+                    
+                                            
+                                                                                                                     
+       
+                                                    
+                                                                                
+   
+  
+ 
+
+                                                                                                      
+ 
+                    
+                                
+                                                    
+                                                         
+
+              
+                                              
+ 
+
+                                                                                                            
+ 
+            
+                        
+         
+       
+
+                                                
+                                                      
+                                                   
+  
+                                                                                                                       
+                                                       
+   
+                                                                                  
+                                       
+                                                
+                                               
+
+                                                      
+                                                
+
+                          
+                                                                             
+   
+      
+   
+                                                
+   
+  
+ 
+
+                                                                                         
+ 
+            
+                        
+         
+       
+
+                          
+                                               
+                                                
+ 
+
+                                                                                          
+ 
+            
+                        
+         
+       
+
+                              
+                                               
+                                                
+ 
+      

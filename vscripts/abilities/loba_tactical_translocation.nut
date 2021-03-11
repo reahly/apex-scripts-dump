@@ -31,6 +31,11 @@ const asset TRANSLOCATION_DROP_TO_GROUND_ACTIVATE_FX = $"P_warp_proj_drop"
 const asset TRANSLOCATION_DROP_TO_GROUND_DESTINATION_FX = $"P_warp_proj_drop_grnd"
 
 const bool TRANSLOCATION_DEBUG = false
+
+#if(DEV)
+const bool TRANSLOCATION_BACKFACE_DEBUG = false
+#endif
+
 const float TRANSLOCATION_MIN_SAMPLE_DISTANCE_SQR = 2000
 const float TRANSLOCATION_MAX_SAMPLE_DISTANCE_SQR = 10000
 const float TRANSLOCATION_TRACK_BACK_DIST = 100
@@ -319,10 +324,6 @@ var function OnWeaponToss_ability_translocation( entity weapon, WeaponPrimaryAtt
 {
 	entity owner = weapon.GetWeaponOwner()
 
-	#if(false)
-
-#endif
-
 	return weapon.GetAmmoPerShot()
 }
 #endif
@@ -341,6 +342,10 @@ var function OnWeaponTossReleaseAnimEvent_ability_translocation( entity weapon, 
 	#endif
 
 	weapon.EmitWeaponSound_1p3p( GetGrenadeThrowSound_1p( weapon ), GetGrenadeThrowSound_3p( weapon ) )
+
+	#if(false)
+
+#endif
 
 	entity projectile = ThrowDeployable( weapon, attackParams, 1, OnProjectilePlanted, OnProjectileBounce, null )
 	if ( IsValid( projectile ) )
@@ -377,7 +382,7 @@ var function OnWeaponTossReleaseAnimEvent_ability_translocation( entity weapon, 
 		thread TranslocationTossedThread( owner, weapon )
 	}
 
-	return weapon.GetAmmoPerShot()
+	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot ) //
 }
 #endif
 
@@ -522,8 +527,8 @@ void function TranslocationTossedThread( entity owner, entity weapon )
 
 
 #elseif(CLIENT)
-			if ( IsValid( weapon ) && weapon.GetWeaponOwner() == owner )
-				weapon.SetWeaponPrimaryClipCount( 0 )
+			//
+			//
 
 			CleanupFXArray( fxIds, true, false )
 
@@ -589,7 +594,7 @@ void function TranslocationTossedThread( entity owner, entity weapon )
 		if ( !IsPlayerTranslocationPermitted( owner ) )
 			break
 
-		weapon.SetWeaponPrimaryClipCount( 0 )
+		//
 
 		WaitFrame()
 	}
@@ -654,6 +659,10 @@ void function OnProjectileBounce( entity projectile, DeployableCollisionParams c
 
 
 //
+
+
+
+
 
 
 
@@ -977,7 +986,9 @@ void function ServerToClient_Translocation_TeleportFailed( entity weapon )
 //
 
 
+
 //
+
 
 
 

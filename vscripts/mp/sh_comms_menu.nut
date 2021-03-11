@@ -161,10 +161,10 @@ bool function PingSecondPageIsEnabled()
 }
 
                    
-                                                
- 
-                                                                             
- 
+bool function WeaponInspectFromChatPageEnabled()
+{
+	return GetCurrentPlaylistVarBool( "weapon_inspect_from_page_enabled", true )
+}
       
 
 
@@ -415,7 +415,7 @@ enum eOptionType
 	CRAFT,
       
                    
-                
+	WEAPON_INSPECT,
       
 	_count
 }
@@ -455,12 +455,12 @@ CommsMenuOptionData function MakeOption_CommsAction( int commsAction )
 
 //
                    
-                                                       
- 
-                       
-                                           
-          
- 
+CommsMenuOptionData function MakeOption_WeaponInspect()
+{
+	CommsMenuOptionData op
+	op.optionType = eOptionType.WEAPON_INSPECT
+	return op
+}
       
 
 CommsMenuOptionData function MakeOption_Quip( ItemFlavor quip, int index )
@@ -537,10 +537,10 @@ array<CommsMenuOptionData> function BuildMenuOptions( int chatPage )
 			results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_CELEBRATE ) )
 
                       
-                                  
-    
-                                                
-    
+			if ( IsControllerModeActive() )
+			{
+				results.append( MakeOption_WeaponInspect() )
+			}
          
 
 			if ( !LoadoutSlot_IsReady( playerEHI, Loadout_Character() ) )
@@ -755,29 +755,29 @@ string[2] function GetPromptsForMenuOption( int index )
 		}
 
                      
-                                  
-   
-                                                                            
-                                                 
-                                                                 
+		case eOptionType.WEAPON_INSPECT:
+		{
+			entity weapon 		= player.GetActiveWeapon( eActiveInventorySlot.mainHand )
+			string wpnText 		= Localize("#INSPECT_WEAPON")
+			LootData weaponData = SURVIVAL_GetLootDataFromWeapon( weapon )
 
-                           
-    
-                                        
-                                                                                                    
-     
-       
-                             
-     
-        
-     
-                             
-                                             
-     
+			if ( IsValid( weapon ) )
+			{
+				int wpnType = weapon.GetWeaponType()
+				if ( ( weapon.GetWeaponClassName() == "mp_weapon_melee_survival" ) || ( wpnType == WT_GADGET ) )
+				{
+					//
+					promptTexts[0] = wpnText
+				}
+				else
+				{
+					promptTexts[0] = wpnText
+					promptTexts[1] = weaponData.pickupString
+				}
 
-    
-        
-   
+			}
+			break
+		}
         
 
                   
@@ -865,10 +865,10 @@ var function GetRuiForMenuOption( var mainRui, int index )
 			return RuiCreateNested( mainRui, "iconHandle" + index, craftingAsset )
         
                      
-                                  
-     
-                                                                
-                                                                       
+		case eOptionType.WEAPON_INSPECT:
+			//
+			asset weaponAsset = $"ui/comms_menu_icon_weapon_inspect.rpak"
+			return RuiCreateNested( mainRui, "iconHandle" + index, weaponAsset )
         
 	}
 
@@ -937,10 +937,10 @@ asset function GetIconForMenuOption( int index )
 		}
 
                      
-                                  
-   
-                                               
-   
+		case eOptionType.WEAPON_INSPECT:
+		{
+			return $"rui/weapon_icons/r5/weapon_inspect"
+		}
         
 	}
 
@@ -1745,11 +1745,11 @@ bool function MakeCommMenuSelection( int choice, int wheelInputType )
 		}
 
                      
-                                  
-   
-                                 
-              
-   
+		case eOptionType.WEAPON_INSPECT:
+		{
+			HandleWeaponInspectSelection()
+			return true
+		}
         
 
 		case eOptionType.QUIP:
@@ -1926,26 +1926,26 @@ void function HandleOrdnanceSelection( int ordnanceIndex )
 }
 
                    
-                                             
- 
-                                          
-  
-                                        
-   
-                     
-   
+void function HandleWeaponInspectSelection( )
+{
+	if ( WeaponInspectFromChatPageEnabled() )
+	{
+		array<int> pagesAllowedToGoToInspect =
+		[
+			eChatPage.DEFAULT,
+		]
 
-                                                                 
-   
-                                       
-                          
-    
-                              
-                                            
-    
-   
-  
- 
+		if ( pagesAllowedToGoToInspect.contains( s_currentChatPage )  )
+		{
+			entity player = GetLocalViewPlayer()
+			if( IsValid( player ) )
+			{
+				CommsMenu_Shutdown( true )
+				player.ClientCommand( "weapon_inspect" )
+			}
+		}
+	}
+}
       
 
 
@@ -2083,8 +2083,13 @@ bool function CommsMenu_CanUseMenu( entity player, int menuType = eChatPage.DEFA
 			return false
        
 
-	if ( GetGameState() >= eGameState.Epilogue )
-		return false
+               
+                                             
+               
+      
+		if ( GetGameState() >= eGameState.Epilogue )
+			return false
+       
 
 	if ( IsPlayerInCryptoDroneCameraView( player ) )
 		return false

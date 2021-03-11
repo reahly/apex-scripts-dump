@@ -18,6 +18,7 @@ global const int ANNOUNCEMENT_STYLE_CIRCLE_WARNING = 8
 global const int ANNOUNCEMENT_STYLE_ELITE = 9
 global const int ANNOUNCEMENT_STYLE_KILL_LEADER = 10
 global const int ANNOUNCEMENT_STYLE_GOT_TREASURE_PACK = 11
+global const int ANNOUNCEMENT_STYLE_GENERIC_WARNING = 12
 
 const int ANNOUNCEMENT_STYLE_DEFAULT = ANNOUNCEMENT_STYLE_BIG
 
@@ -533,6 +534,9 @@ void function AnnouncementMessage_DisplayOnHud( AnnouncementData announcement )
 
 			if ( announcement.soundAlias != "" )
 				EmitSoundOnEntity( player, announcement.soundAlias )
+
+			if ( announcement.icon != $"" )
+				RuiSetImage( rui, "iconImage", announcement.icon )
 			break
 
 		case ANNOUNCEMENT_STYLE_OBJECTIVE:
@@ -565,6 +569,9 @@ void function AnnouncementMessage_DisplayOnHud( AnnouncementData announcement )
 
 			RuiSetGameTime( rui, "displayEndTime", announcement.displayEndTime )
 
+			RuiSetInt( rui, "verticalOffset", announcement.verticalOffset )
+			RuiSetFloat3( rui, "titleColor", announcement.titleColor )
+
 			EmitSoundOnEntity( player, announcement.soundAlias )
 			break
 
@@ -582,6 +589,27 @@ void function AnnouncementMessage_DisplayOnHud( AnnouncementData announcement )
 			rui = RuiCreate( $"ui/got_treasurebox_noti.rpak", clGlobal.topoFullScreen, RUI_DRAW_POSTEFFECTS, 0 )
 			RuiSetString( rui, "messageText", optionalTextArgs[0] )
 			RuiSetString( rui, "messageSubText", optionalTextArgs[1] )
+			EmitSoundOnEntity( player, announcement.soundAlias )
+			break
+
+		case ANNOUNCEMENT_STYLE_GENERIC_WARNING:
+			customAnnouncement = true
+			rui = RuiCreate( $"ui/generic_warning.rpak", clGlobal.topoFullScreen, RUI_DRAW_POSTEFFECTS, 0 )
+
+			RuiSetGameTime( rui, "startTime", Time() )
+
+			RuiSetFloat( rui, "duration", announcement.duration )
+			RuiSetFloat( rui, "announceScale", 1.5 )
+
+			RuiSetString( rui, "messageText", Localize( announcement.messageText, Localize( optionalTextArgs[0] ), Localize( optionalTextArgs[1] ), Localize( optionalTextArgs[2] ), Localize( optionalTextArgs[3] ), Localize( optionalTextArgs[4] ) ) )
+			RuiSetString( rui, "messageSubText", Localize( announcement.subText, Localize( optionalSubTextArgs[0] ), Localize( optionalSubTextArgs[1] ), Localize( optionalSubTextArgs[2] ), Localize( optionalSubTextArgs[3] ), Localize( optionalSubTextArgs[4] ) ) )
+			RuiSetString( rui, "messageHeaderText", Localize( announcement.headerText ) )
+
+			RuiSetGameTime( rui, "displayEndTime", announcement.displayEndTime )
+
+			RuiSetInt( rui, "verticalOffset", announcement.verticalOffset )
+			RuiSetFloat3( rui, "titleColor", announcement.titleColor )
+
 			EmitSoundOnEntity( player, announcement.soundAlias )
 			break
 

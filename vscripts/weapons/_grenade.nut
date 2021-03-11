@@ -198,6 +198,10 @@ int function Grenade_OnWeaponToss( entity weapon, WeaponPrimaryAttackParams atta
 
 	#if(false)
 
+
+
+
+
 #endif
 
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )

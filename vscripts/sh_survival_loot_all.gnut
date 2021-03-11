@@ -130,7 +130,7 @@ global enum eLootType
 	LOCKBOX
 
                     
-        
+		GADGET
        
 
                     
@@ -436,7 +436,7 @@ void function SURVIVAL_Loot_All_InitShared()
 
 			case eLootType.ORDNANCE:
                       
-                         
+			case eLootType.GADGET:
          
 				RegisterWeaponForUse( data.baseWeapon )
 				data.pickupString = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "printName" )
@@ -641,8 +641,8 @@ int function SURVIVAL_Loot_GetLootTypeFromString( string lootTypeString )
       
 
                    
-                
-                          
+		case "gadget":
+			return eLootType.GADGET
       
 
 
@@ -775,6 +775,9 @@ vector function GetRarityColor( entity ent )
 vector function GetFXRarityColorForTier( int tier )
 {
 	#if(false)
+
+
+
 
 
 

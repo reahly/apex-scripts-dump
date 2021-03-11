@@ -113,7 +113,17 @@ void function JoinClubButton_OnActivate( var button )
 		thread ClearActiveLobbyPopup()
 	}
 
-	ClubJoin( file.joinClubHeader.clubID )
+	string playerDataCenter = GetDatacenterRealName()
+	printf( "ClubDatacenterDebug: Player Datacenter: %s (region: %s), Club Datacenter: %s", playerDataCenter, MyRegion(), file.joinClubHeader.dataCenter )
+	if ( file.joinClubHeader.dataCenter != playerDataCenter )
+	{
+		Clubs_OpenJoinRegionConfirmationDialog( file.joinClubHeader )
+		return
+	}
+	//
+
+	Clubs_JoinClub( file.joinClubHeader.clubID )
+	//
 }
 
 void function InitClubCreateDialog( var menu )

@@ -8,6 +8,8 @@ global function Sh_ArenaDeathField_Init
 
 
 
+
+
 #endif
 
 #if(false)
@@ -121,6 +123,9 @@ global enum ePathfinderNotifications
 const float START_WAIT_TIME = 5.0
 const float MARGIN_WAIT_TIME = 5.0
 const asset SURVEY_BEACON_MODEL = $"mdl/props/pathfinder_beacon_radar/pathfinder_beacon_radar_animated.rmdl"
+#if(DEV)
+const string DUMMY_ZONE_WP_NAME = "dev_dummy_circle"
+#endif
 
 global struct DeathFieldData
 {
@@ -192,6 +197,9 @@ struct
 
 
 
+
+
+
 #endif
 
 	table< entity, SurveyBeaconData > surveyBeaconData
@@ -244,6 +252,10 @@ void function Sh_ArenaDeathField_Init()
                                                                         
        
 
+               
+                                                                            
+       
+	
 	file.usePreciseRingFx = GetCurrentPlaylistVarBool( "deathfield_usePreciseRingFx", true )
 
 	PrecacheParticleSystem( $"P_ring_FP_hit_01" )
@@ -284,6 +296,10 @@ void function Sh_ArenaDeathField_Init()
 
 		AddCreatePilotCockpitCallback( TrackDeathfieldDistance )
 		AddLocalPlayerTookDamageTypeCallback( eDamageSourceId.deathField, Callback_OnPlayerTakeDeathFieldDamage )
+		#if(DEV)
+			Waypoints_RegisterCustomType( DUMMY_ZONE_WP_NAME, DEV_OnDummyCircleWpInstanced )
+		#endif
+
 	#endif
 }
 
@@ -762,81 +778,6 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -847,147 +788,6 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
 
 
 
@@ -1156,6 +956,42 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 
@@ -1183,8 +1019,8 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
-
-
+//
+//
 
 
 
@@ -1371,7 +1207,6 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
-//
 
 
 
@@ -1382,7 +1217,6 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
-//
 
 
 
@@ -1407,7 +1241,6 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
-//
 
 
 
@@ -1441,7 +1274,6 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
-//
 
 
 
@@ -1473,7 +1305,6 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
-//
 
 
 
@@ -1496,40 +1327,6 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-
-//
-
-
-
-
-
-
-
-//
 
 
 
@@ -1598,6 +1395,264 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//
+
+//
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 
 
@@ -1664,6 +1719,30 @@ bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
 
 
 //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2945,6 +3024,19 @@ var function SurveyBeacon_CreateHUDMarker( asset beaconImage, entity minimapObj 
 	RuiKeepSortKeyUpdated( rui, true, "pos" )
 	return rui
 }
+
+#if(DEV)
+void function DEV_OnDummyCircleWpInstanced( entity wp )
+{
+	float startTime = wp.GetWaypointFloat( 0 )
+	float endTime = wp.GetWaypointFloat( 1 )
+	float endRadius = float( wp.GetWaypointInt( 0 ) )
+
+                       
+                                                                     
+       
+}
+#endif //
 #endif //
 
 int function SURVIVAL_GetCurrentDeathFieldStage()
@@ -3299,19 +3391,31 @@ bool function ShouldShowDeathFieldEffects( entity player )
 	{
 		if ( DeathField_PointDistanceFromFrontier( player.EyePosition(), player.DeathFieldIndex() ) >= 0 )
 			shouldShow = false
+
+                                
+			//
+			if ( IsRingCollapseGameMode() && CL_RingCollapseMode_IsPositionInRingFissure( player.EyePosition() ) )
+				shouldShow = true
+        
 	}
 	else
 	{
 		if ( DeathField_PointDistanceFromFrontier( player.GetOrigin(), player.DeathFieldIndex() ) >= 0 )
 			shouldShow = false
+
+                                
+			//
+			if ( IsRingCollapseGameMode() && CL_RingCollapseMode_IsPositionInRingFissure( player.GetOrigin() ) )
+				shouldShow = true
+        
 	}
 
 	if ( IsViewingSquadSummary() || IsViewingDeathRecap() )
 		shouldShow = false
 
                       
-                                                                            
-                    
+	if ( StatusEffect_GetSeverity( player, eStatusEffect.ring_immunity ) >= 1 )
+		shouldShow = false
       
 
 	//
@@ -3437,6 +3541,16 @@ void function Bloodhound_PassiveChanged( entity player, int passive, bool didHav
   
  
 
+      
+
+              
+                                                                                            
+ 
+                         
+  
+                                                                                                                
+  
+ 
       
 
 void function RegisterSurveyBeaconData( entity player, int passive, bool nowHas, string calloutLine, string player1pAnim, string player3pAnim, string panelAnim )

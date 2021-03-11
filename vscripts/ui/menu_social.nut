@@ -1897,7 +1897,11 @@ void function PreviewFriendCosmetics( bool isForLocalPlayer, CommunityUserInfo o
 			}
 		}
 
+		//
 		Ranked_SetupMenuGladCardForUIPlayer()
+                         
+                                              
+        
 	}
 	else
 	{
@@ -1940,6 +1944,11 @@ void function PreviewFriendCosmetics( bool isForLocalPlayer, CommunityUserInfo o
 		introQuipSoundEventName = CharacterIntroQuip_GetVoiceSoundEvent( introQuip )
 
 		Ranked_SetupMenuGladCardFromCommunityUserInfo( userInfo )
+
+		//
+			//
+			//
+		//
 	}
 
 	OnThreadEnd( void function() : ( introQuipSoundEventName ) {
@@ -2253,6 +2262,9 @@ void function OnPlayerSendFriendRequest( var button )
 
 bool function CanSendEADPFriendRequest()
 {
+	if ( !IsFullyConnected() )
+		return false
+
 	if ( IsPlayerEADPFriend() )
 		return false
 
@@ -2270,6 +2282,9 @@ bool function CanSendEADPFriendRequest()
 			return false
 		}
 	}
+
+	if ( GetUIPlayer() == null )
+		return false
 
 	string eaid = GetUIPlayer().GetPINNucleusId()
 	if ( s_socialFile.actionFriend.eadpData != null )

@@ -71,6 +71,17 @@ global struct EHIScriptStruct
 	//
 	int rankScore = -1 //
 	int rankedLadderPosition = -1//
+
+                        
+    
+                               
+                                       
+       
+
+	//
+	string clubName = ""
+	string clubTag = ""
+	string clubLogo = ""
 }
 #endif
 

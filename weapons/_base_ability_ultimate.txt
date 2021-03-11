@@ -19,6 +19,13 @@ WeaponData
         {
             regen_ammo_refill_rate              0
         }
+
+                               
+                           
+   
+                                
+   
+              
     }
 }
 

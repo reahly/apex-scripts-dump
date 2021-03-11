@@ -27,6 +27,8 @@ global function CharacterSkin_GetCustomCharSelectIdleAnim
 global function CharacterSkin_GetCustomCharSelectReadyIntroAnim
 global function CharacterSkin_GetCustomCharSelectReadyIdleAnim
 global function CharacterSkin_HasCustomCharSelectAnims
+global function CharacterSkin_GetMenuCustomLightData
+global function CharacterSkin_HasMenuCustomLighting
 global function CharacterSkin_GetCharacterSelectLabelColorOverride
 global function CharacterSkin_HasStoryBlurb
 global function CharacterSkin_GetStoryBlurbBodyText
@@ -568,6 +570,27 @@ bool function CharacterSkin_HasCustomCharSelectAnims( ItemFlavor flavor )
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.character_skin )
 
 	return ( CharacterSkin_GetCustomCharSelectIntroAnim( flavor ) != $"" && CharacterSkin_GetCustomCharSelectIdleAnim( flavor ) != $"" && CharacterSkin_GetCustomCharSelectReadyIntroAnim( flavor ) != $"" && CharacterSkin_GetCustomCharSelectReadyIdleAnim( flavor ) != $"" )
+}
+
+
+CharacterMenuLightData function CharacterSkin_GetMenuCustomLightData( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.character_skin )
+	CharacterMenuLightData data
+	data.key_color = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "menuCustomLightColorKey" )
+	data.fill_color = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "menuCustomLightColorFill" )
+	data.rimL_color = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "menuCustomLightColorRimL" )
+	data.rimR_color = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "menuCustomLightColorRimR" )
+	data.animSeq = GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "menuCustomLightAnimSeq" )
+	return data
+}
+
+
+bool function CharacterSkin_HasMenuCustomLighting( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.character_skin )
+
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( flavor ), "hasCustomCharSelectLighting" )
 }
 
 

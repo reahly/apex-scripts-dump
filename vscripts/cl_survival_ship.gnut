@@ -26,6 +26,8 @@ void function ClSurvivalShip_Init()
 	AddEventNotificationCallback( eEventNotifications.SURVIVAL_NewJumpmaster, SURVIVAL_NewJumpmaster )
 	AddEventNotificationCallback( eEventNotifications.SURVIVAL_RejoinedSquad, SURVIVAL_RejoinedSquad )
 
+	AddCallback_OnViewPlayerChanged( OnLocalViewPlayerChanged )
+
 	AddTargetNameCreateCallback( "planeEnt", PlaneCreated )
 }
 
@@ -71,9 +73,19 @@ void function PlayerPlaneStatusChanged( entity statusChangePlayer, bool oldValue
 	if ( !actuallyChanged )
 		return
 
-	if ( !IsValid( statusChangePlayer ) )
+	__PlayerPlaneStatusChanged( statusChangePlayer )
+}
+
+void function OnLocalViewPlayerChanged( entity player )
+{
+	if ( !IsValid( player ) )
 		return
 
+	__PlayerPlaneStatusChanged( player )
+}
+
+void function __PlayerPlaneStatusChanged( entity statusChangePlayer )
+{
 	entity player = GetLocalClientPlayer()
 	var gamestateRui = ClGameState_GetRui()
 	Assert( gamestateRui != null )

@@ -17,6 +17,9 @@ global function StatCard_SetStatToolTip
 global function StatsScreen_SetPanelRui
 global function StatsCard_OnSeasonRegistered
 global function StatsCard_OnRankedPeriodRegistered
+                       
+                                                         
+      
 #endif //
 
 global function StatCard_GetAvailableSeasons
@@ -1152,7 +1155,12 @@ array< ItemFlavor > function StatCard_GetAvailableSeasonsAndRankedPeriods()
 			seasons.removebyvalue( season )
 	}
 
-	array< ItemFlavor > rankedPeriods = GetAllRankedPeriodFlavors()
+	array< ItemFlavor > rankedPeriods = GetAllRankedPeriodFlavorsByType( eItemType.calevent_rankedperiod )
+                        
+    
+    
+       
+
 	foreach( ItemFlavor period in rankedPeriods )
 	{
 		if ( !CalEvent_IsRevealed( period, GetUnixTimestamp() ) )
@@ -1432,6 +1440,14 @@ void function StatsCard_OnRankedPeriodRegistered( ItemFlavor rp )
 	string seasonGUIDString = ItemFlavor_GetGUIDString( rp )
 	file.GUIDToSeasonNumber[ seasonGUIDString ] <- 0
 }
+
+                       
+                                                                                         
+ 
+                                                                           
+                                                 
+ 
+      
 
 void function StatsCard_OnSeasonRegistered( ItemFlavor rp ) //
 {

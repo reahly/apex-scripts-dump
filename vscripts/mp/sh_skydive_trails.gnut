@@ -381,17 +381,17 @@ void function UpdatePlayerSkydiveTrailFriendlyEnemyFX( entity player )
 
 	CleanupFriendlyEnemySkydiveTrailFXForPlayer( player )
 
-	if ( !player.Player_IsSkydiving()  )
-		return
-
-	if ( player.Player_IsSkydiveAnticipating() )
-		return
-
-	 StartFriendlyEnemySkydiveTrailFXForPlayer( player )
+	StartFriendlyEnemySkydiveTrailFXForPlayer( player )
 }
 
 void function StartFriendlyEnemySkydiveTrailFXForPlayer( entity skyDivingPlayer )
 {
+	if ( !skyDivingPlayer.Player_IsSkydiving()  )
+		return
+
+	if ( skyDivingPlayer.Player_IsSkydiveAnticipating() )
+		return
+
 	thread StartFriendlyEnemySkydiveTrailFXForPlayer_threaded (skyDivingPlayer )
 }
 

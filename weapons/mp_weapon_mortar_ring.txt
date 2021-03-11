@@ -1,4 +1,3 @@
-
 #base "_base_ability_ultimate.txt"
 
 WeaponData

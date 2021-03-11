@@ -32,7 +32,7 @@ void function OpenAboutGameModePage( var button )
 
 	if ( GetPlaylistVarBool( Lobby_GetSelectedPlaylist(), "ltm_about_button_shows_event_page", false ) )
 	{
-		ItemFlavor ornull buffetEvent = GetActiveBuffetEvent( GetUnixTimestamp() )
+		ItemFlavor ornull buffetEvent = GetActiveBuffetEventForIndex( GetUnixTimestamp(), 0 )
 		if ( buffetEvent != null )
 		{
 			expect ItemFlavor( buffetEvent )

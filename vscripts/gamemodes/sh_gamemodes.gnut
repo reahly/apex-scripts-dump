@@ -107,12 +107,24 @@ global enum eGameModes
 	TEAM_DEATHMATCH_ID =				1,
 	//
 	GAMEMODE_FREELANCE_ID = 3,
+                       
+                  
+      
+                        
+                   
+      
 	_count,
 }
 
 const table<string, int> gameModesStringToIdMap = {
 	[ TEAM_DEATHMATCH ] 					= eGameModes.TEAM_DEATHMATCH_ID,
 	[ SURVIVAL ]							= eGameModes.SURVIVAL_ID,
+                       
+                                                 
+      
+                        
+                                                  
+      
 	[ GAMEMODE_FREELANCE ]					= eGameModes.GAMEMODE_FREELANCE_ID
 }
 
@@ -148,6 +160,32 @@ void function GameModes_Init()
 	GameMode_SetDefaultTimeLimits( gameMode, 30, 0.0 )
 	GameMode_AddScoreboardColumnData( gameMode, "#SCOREBOARD_PILOT_KILLS", PGS_PILOT_KILLS, 2 )
 	GameMode_SetColor( gameMode, [147, 204, 57, 255] )
+
+                       
+                           
+                            
+                                                 
+                                                             
+                                                      
+                                                                            
+                                                  
+                                                   
+                                                                                            
+                                                   
+      
+
+                        
+                            
+                            
+                                                  
+                                                             
+                                                       
+                                                                            
+                                                  
+                                                   
+                                                                                            
+                                                   
+      
 
 	gameMode = GAMEMODE_FREELANCE
 	GameMode_Create( gameMode )

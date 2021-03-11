@@ -80,7 +80,7 @@ void function OnPostGameRankedMenu_Show()
 	var rui = Hud_GetRui( Hud_GetChild( file.menu, "SummaryBox" ) )
 	RuiSetString( rui, "titleText", "#RANKED_TITLE" )
 
-	ItemFlavor ornull rankedPeriod = GetActiveRankedPeriod( GetUnixTimestamp() )
+	ItemFlavor ornull rankedPeriod = GetActiveRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_rankedperiod )
 	if ( rankedPeriod != null )
 	{
 		expect ItemFlavor( rankedPeriod )
@@ -108,12 +108,7 @@ void function OnPostGameRankedMenu_Show()
 	UI_SetPresentationType( ePresentationType.WEAPON_CATEGORY )
 
 	var matchRankRui = Hud_GetRui( Hud_GetChild( file.menu, "MatchRank" ) )
-
-	RuiSetInt( matchRankRui, "squadRank", GetPersistentVarAsInt( "lastGameRank" ) )
-	RuiSetInt( matchRankRui, "totalPlayers", GetPersistentVarAsInt( "lastGameSquads" ) )
-	int elapsedTime = GetUnixTimestamp() - GetPersistentVarAsInt( "lastGameTime" )
-
-	RuiSetString( matchRankRui, "lastPlayedText", Localize( "#EOG_LAST_PLAYED", GetFormattedIntByType( elapsedTime, eNumericDisplayType.TIME_MINUTES_LONG ) ) )
+	PopulateMatchRank( matchRankRui )
 
 	thread AnimateXPBar( file.isFirstTime )
 }
@@ -132,7 +127,7 @@ void function AnimateXPBar( bool isFirstTime )
 	int previousScore               = expect int( GetRankedPersistenceData( player, "previousRankedScore" ) )
 	RankedDivisionData previousRank = GetCurrentRankedDivisionFromScore( previousScore ) //
 
-	bool previousGameWasAbandonded = expect bool( GetRankedPersistenceData( player, "lastGameRankedAbandon" ) )
+	bool previousGameWasAbandonded = expect bool( GetPersistentVar( "lastGameRankedAbandon" ) )
 
 	bool wasNetDecreaseInRankedScore = previousScore >= score
 	bool quick                       = !isFirstTime
@@ -181,7 +176,7 @@ void function AnimateXPBar( bool isFirstTime )
 	RuiSetColorAlpha( rui, "line3Color", <1,1,1>, 1 )
 
 	int numLines = 3
-	bool rankForgiveness = expect bool( GetRankedPersistenceData( player, "lastGameRankedForgiveness" ) ) || expect bool( GetRankedPersistenceData( player, "lastGameAbandonForgiveness" ) )
+	bool rankForgiveness = expect bool( GetPersistentVar( "lastGameRankedForgiveness" ) ) || expect bool( GetPersistentVar( "lastGameAbandonForgiveness" ) )
 	Assert( !( previousGameWasAbandonded &&  rankForgiveness )  ) //
 
 	int lastGameLossProtectionAdjustment = expect int ( GetRankedPersistenceData( player, "lastGameLossProtectionAdjustment" ) )

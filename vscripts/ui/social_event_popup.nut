@@ -604,7 +604,8 @@ bool function EventFriendRequest_HandleInput( int inputID )
 				break
 
 			case eSocialEventType.CLUB:
-				ClubJoin( event.eventID )
+				Clubs_JoinClub( event.eventID )
+				//
 				break
 		}
 

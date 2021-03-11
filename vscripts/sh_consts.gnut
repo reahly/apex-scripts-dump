@@ -103,6 +103,12 @@ global const SPECTATOR_SETTINGS = $"settings/player/mp/spectator.rpak"
 
 global const TEAM_DEATHMATCH = "tdm"
 global const SURVIVAL = "survival"
+                       
+                                       
+      
+                        
+                                         
+      
 global const GAMEMODE_FREELANCE = "freelance"
 
 global const bool R2_SCOREBOARD = false
@@ -332,7 +338,7 @@ global enum eRespawnStyle
 		CUSTOM_RESPAWN,
        
                            
-                  
+		SKYDIVE_RESPAWN,
        
 	_COUNT,
 }
@@ -1334,7 +1340,7 @@ global enum eCommsAction
 	//
 	//
                     
-                        
+		WEAPON_INSPECT_DEFAULT
        
 	INVENTORY_NEED_AMMO_BULLET,
 	INVENTORY_NEED_AMMO_SPECIAL,
@@ -1348,6 +1354,14 @@ global enum eCommsAction
        
                    
                              
+       
+                          
+                           
+                            
+                            
+                            
+                           
+                           
        
 	INVENTORY_NEED_FIRST_WEAPON,
 	INVENTORY_NEED_ANOTHER_WEAPON,
@@ -1617,11 +1631,11 @@ global enum eCommsAction
                      
        
                        
-                         
-                          
+		PING_OFFHAND_VOID_RING,
+		PING_DEPLOYED_VOID_RING,
        
                     
-                        
+		INVENTORY_NEED_GADGET,
        
 	PING_BANNER_ENEMYCOUNT_0,
 	PING_BANNER_ENEMYCOUNT_1,
@@ -1633,7 +1647,7 @@ global enum eCommsAction
 
 	QUIP,
                                
-                 
+		PING_RINGFLARE,
        
 
                                 
@@ -1648,8 +1662,8 @@ global enum eCommsAction
        
 
                              
-                        
-                        
+		PING_MY_LAST_DEATHBOX,
+		MARK_MY_LAST_DEATHBOX,
        
 
 
@@ -1672,7 +1686,7 @@ global const string GEYSER_PING_SCRIPT_NAME = "ping_geyser"
 global const string LAVA_FLOW_SURFACE_NAME = "lava_flow"
 
                       
-                                                           
+global const string VOID_RING_DOME_SCRIPTNAME = "void_ring"
       
 
 global enum eToolTipFlag
@@ -1702,6 +1716,7 @@ global enum eTooltipStyle
                     
       
 	CLUB_MEMBER,
+	GLADIATOR_CARD_BADGE,
 }
 
 global struct LootTooltipData
@@ -1742,6 +1757,8 @@ global struct ToolTipData
 	int tooltipFlags
 	int tooltipStyle = eTooltipStyle.DEFAULT
 
+	int rarity
+
 	LootTooltipData & lootPromptData
 
 	ClubMemberTooltipData & clubMemberData
@@ -1756,6 +1773,7 @@ global const MINIMAP_FRAME_RUI = $"ui/minimap_square_frame.rpak"
 global const MINIMAP_YOU_RUI = $"ui/minimap_square_you.rpak"                        //
 global const MINIMAP_JAMMER_LAYER_RUI = $"ui/minimap_square_jammer_layer.rpak"            //
 global const MINIMAP_OBJECT_RUI = $"ui/minimap_square_object.rpak"                    //
+global const MINIMAP_OBJECT_DYNAMIC_RUI = $"ui/minimap_square_object_dynamic.rpak"                    //
 global const MINIMAP_PLAYER_RUI = $"ui/minimap_square_player.rpak"                    //
 global const MINIMAP_RING_PULSE_RUI = $"ui/minimap_square_ring_pulse.rpak"                //
 global const MINIMAP_SQUARE_SIMPLE_RUI = $"ui/minimap_square_simple.rpak"                    //
@@ -1967,7 +1985,7 @@ global const DirFBLRUD DIR_FBLRUD_DOWN = 5
                                
  
            
-                
+   
                  
               
             

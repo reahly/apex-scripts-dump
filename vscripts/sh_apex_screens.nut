@@ -8,6 +8,10 @@ global function ShApexScreens_Init
 
 
 
+
+
+
+
 #endif
 
 #if(false)
@@ -29,6 +33,12 @@ global function ClApexScreens_OnStaticPropRuiVisibilityChange
 global function ClApexScreens_AddScreenOverride
 global function ClApexScreens_GetCustomBannerScreen
 global function ClApexScreens_PosInStaticBanner
+
+global function ClApexScreens_SetCustomApexScreenBGAsset
+global function ClApexScreens_SetCustomLogoTint
+global function ClApexScreens_SetCustomLogoImage
+global function ClApexScreens_SetCustomLogoSize
+global function ClApexScreens_SetAnimatedLogoAsset
 #endif
 
 global function GetCurrentPlaylistVarAsset
@@ -87,6 +97,7 @@ global enum eApexScreenMode
 	ZONE_NAME = 11,
 	ZONE_LOOT = 12,
 	CAMERA_VIEW = 13,
+	BG_NO_LOGO = 14,
 
 	_COUNT,
 	INVALID = -1,
@@ -106,6 +117,14 @@ global enum eApexScreenMods
 	RED = (1 << 0),
 }
 
+global enum eApexScreenDisplayGroup
+{
+	DISPLAY_PLAYER,
+	DISPLAY_PLAYER_SQUAD,
+	DISPLAY_LOGOS,
+	DISPLAY_CENTER_LOGO_ONLY,
+	DISPLAY_RANDOM_PLAYERS
+}
 
 #if(CLIENT)
 global struct ScreenOverrideInfo
@@ -135,6 +154,9 @@ table<string, ScreenOverrideInfo> s_screenOverrides
 global struct ApexScreenState
 {
 	var    rui
+
+	var 	nestedRui
+
 	int    magicId
 	string mockup
 	asset  ruiToCreate
@@ -194,11 +216,27 @@ struct ApexScreenPositionMasterState
 
 
 
+
+
+
+
+
+
+
+
+
+
 #endif
 
 
 struct {
 	#if(false)
+
+#endif
+
+	#if(false)
+
+
 
 #endif
 
@@ -219,6 +257,12 @@ struct {
 		table<string, ApexScreenState> customBannerList
 
 		bool DEV_activeScreenDebug = false
+
+		asset bannerBGAssert = $"rui/rui_screens/banner_c"
+		vector logoOverlayTint = < 1.0 , 1.0, 1.0 >
+		vector logoSize = <562,407,0>
+		asset logoImage = $"rui/rui_screens/apex_logo"
+		asset animatedLogoAsset = $""
 	#endif
 } file
 
@@ -237,6 +281,61 @@ void function ShApexScreens_Init()
 
 	if ( !GetCurrentPlaylistVarBool( "enable_apex_screens", true ) )
 		return
+
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 	Remote_RegisterClientFunction( "ServerToClient_ApexScreenKillDataChanged", "int", 0, 512, "float", 0.0, 10000.0, 32, "int", 0, 32, "entity" )
 	Remote_RegisterClientFunction( "ServerToClient_ApexScreenRefreshAll" )
@@ -565,103 +664,113 @@ ApexScreenState function ClApexScreens_GetCustomBannerScreen( string teaseScreen
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
 
 
 
@@ -1065,6 +1174,12 @@ void function UpdateScreensContent( array<ApexScreenState> screenList )
 
 			CleanupNestedGladiatorCard( screen.nestedGladiatorCard0Handle )
 
+			if ( screen.nestedRui != null )
+			{
+				RuiDestroyNestedIfAlive( screen.rui, "animatedLogoHandle" )
+				screen.nestedRui = null
+			}
+
 			RuiDestroyIfAlive( screen.rui )
 			screen.rui = null
 		}
@@ -1422,18 +1537,21 @@ var function CreateApexScreenRUIElement( ApexScreenState screen )
 	RuiSetFloat3( rui, "tintColor", screen.tint )
 	RuiSetFloat( rui, "tintIntensity", 1.0 )
 	RuiSetInt( rui, "unixTimeStamp", GetUnixTimestamp() )
+	RuiSetImage( rui, "overlayImg", file.bannerBGAssert )
+	RuiSetImage( rui, "logoImage", file.logoImage )
+	RuiSetFloat3( rui, "logoTint", file.logoOverlayTint )
+	RuiSetFloat2( rui, "logoSize", file.logoSize )
+
+	if ( file.animatedLogoAsset != $"" )
+	{
+		var nestedRui = RuiCreateNested( rui, "animatedLogoHandle", file.animatedLogoAsset )
+		screen.nestedRui = nestedRui
+	}
+
 	if ( screen.sharesPropWithEnvironmentalRUI )
 		RuiSetBool( rui, "sharesPropWithEnvironmentalRUI", true )
 
 	RuiTrackInt( rui, "cameraNearbyEnemySquads", GetLocalViewPlayer(), RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( "cameraNearbyEnemySquads" ) )
-
-                                                
-		if ( IsFallLTM() || IsShadowRoyaleMode() )
-		{
-			RuiSetImage( rui, "overlayImg", $"rui/rui_screens/banner_c_shadowfall" )
-			RuiSetFloat3( rui, "logoTint", <1.0, 1.0, 1.0> )
-		}
-       
 
 	if ( screen.overrideInfoIsValid )
 	{
@@ -1467,6 +1585,30 @@ var function CreateApexScreenRUIElement( ApexScreenState screen )
 	}
 
 	return rui
+}
+
+void function ClApexScreens_SetCustomApexScreenBGAsset( asset bg )
+{
+	file.bannerBGAssert = bg
+}
+
+void function ClApexScreens_SetCustomLogoTint( vector tint )
+{
+	file.logoOverlayTint = tint
+}
+
+void function ClApexScreens_SetCustomLogoImage( asset logo )
+{
+	file.logoImage = logo
+}
+
+void function ClApexScreens_SetCustomLogoSize( vector l_size )
+{
+	file.logoSize = l_size
+}
+void function ClApexScreens_SetAnimatedLogoAsset( asset ruiAsset )
+{
+	file.animatedLogoAsset = ruiAsset
 }
 #endif
 
@@ -1595,4 +1737,24 @@ void function ServerToClient_ApexScreenRefreshAll()
 //
 //
 
-
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif

@@ -211,7 +211,7 @@ void function GamemodeSurvivalShared_Init()
 		Remote_RegisterServerFunction( "ClientCallback_Sur_DropEquipment", "string" )
 		Remote_RegisterServerFunction( "ClientCallback_Sur_EquipOrdnance", "string" )
                      
-                                                                              
+			Remote_RegisterServerFunction( "ClientCallback_Sur_EquipGadget", "string" )
         
 		Remote_RegisterServerFunction( "ClientCallback_Sur_EquipAttachment", "string", "int", -1, INT_MAX )
 		Remote_RegisterServerFunction( "ClientCallback_Sur_UnequipAttachment", "string", "int", -1, INT_MAX, "bool" )
@@ -230,6 +230,11 @@ void function GamemodeSurvivalShared_Init()
 
 
 
+
+
+
+//
+
 #elseif(CLIENT)
 		AddCreateCallback( "prop_dynamic", OnPropDynamicCreated )
 	#endif
@@ -241,11 +246,21 @@ void function GamemodeSurvivalShared_Init()
 		ObjectiveSystem_Init()
 		EncounterSystem_Init()
 
-		#if(false)
+#if(false)
 
 
 #endif //
 	}
+                       
+                                       
+   
+                       
+                    
+             
+
+      
+   
+       
 }
 #endif
 
@@ -644,6 +659,17 @@ bool function VaultPanel_CanUseFunction( entity playerUser, entity controlPanel 
 
 
 
+
+
+
+
+
+
+
+
+
+
+//
 #endif
 
 TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPickup itemData )

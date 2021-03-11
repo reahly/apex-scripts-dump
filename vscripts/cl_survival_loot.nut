@@ -21,7 +21,7 @@ global function ServerToClient_OnStartedUsingHealthPack
 
 global function GetLootPromptStyle
 global function GetDeathBoxOwnerEHI
-
+global function GetDeathboxPlayerIsLookingAt
 global function DeathBoxGetExtendedUseSettings
 global function CreateDeathBoxRui
 
@@ -1017,15 +1017,21 @@ void function UpdateLootRuiWithData( entity player, var rui, LootData data, int 
 		}
 	}
 
+                    
+		RuiSetBool( rui, "isSurvivalGadget", false )
+       
+
 	if ( (data.lootType == eLootType.HEALTH || data.lootType == eLootType.AMMO) && lootRef.count > 1 )
 	{
 		RuiSetString( rui, "titleText", Localize( "#SURVIVAL_PICKUP_STACK_COUNT", Localize( data.pickupString ).toupper(), lootRef.count ) )
 	}
                     
-                                                                      
-  
-                                                                                                                                      
-  
+	else if ( data.lootType == eLootType.GADGET )
+	{
+		RuiSetBool( rui, "isSurvivalGadget", true )
+		RuiSetInt( rui, "propertyValue", lootRef.count )
+		RuiSetInt( rui, "extraPropertyValue", lootRef.lootData.inventorySlotCount )
+	}
        
 	else if ( data.lootType == eLootType.ARMOR )
 	{
@@ -1128,10 +1134,9 @@ void function UpdateLootRuiWithData( entity player, var rui, LootData data, int 
 				RuiSetImage( rui, "attachImage" + attachmentCount, attachmentData.hudIcon )
 				RuiSetInt( rui, "attachTier" + attachmentCount, attachmentData.tier )
 
-				bool lootIsGoldAttach = SURVIVAL_Weapon_IsAttachmentLocked( data.ref )
-				if ( lootIsGoldAttach )
+				if ( SURVIVAL_IsAttachmentPointLocked( data.ref, attachmentPoint ) )
 					RuiSetInt( rui, "attachTier" + attachmentCount, data.tier )
-				else
+				else if ( !SURVIVAL_Weapon_IsAttachmentLocked( data.ref ) )
 					numSwaps++
 			}
 			else
@@ -1696,8 +1701,12 @@ void function TrackLootToPing( entity player )
 	e.farRui <- null
 
 	OnThreadEnd(
-		function() : ( e )
+		function() : ( e, player )
 		{
+              
+                                                                     
+                                               
+         
 			if ( e.farRui != null )
 				RuiDestroy( e.farRui )
 			file.crosshairEntity = null
@@ -1708,14 +1717,34 @@ void function TrackLootToPing( entity player )
 
 	while ( IsValid( player ) )
 	{
-		bool shouldLookForLoot = (GetAimAssistCurrentTarget() == null &&
-		player.GetTargetInCrosshairRange() == null &&
-		!player.IsPhaseShifted()
-		)
-
+		bool shouldLookForLoot = ( GetAimAssistCurrentTarget() == null &&
+									player.GetTargetInCrosshairRange() == null &&
+									!player.IsPhaseShifted() )
 		array<entity> loot
 		if ( shouldLookForLoot )
 		{
+              
+                                                
+    
+                                                       
+                                                      
+     
+                          
+      
+                                            
+                   
+      
+
+                
+             
+     
+                                                                                     
+     
+                                                 
+     
+    
+         
+
 			if ( player.ContextAction_IsInVehicle() )
 				loot = GetSurvivalLootNearbyPos( player.EyePosition(), LOOT_PING_DISTANCE * GetFovScalar( player ), false, false, false, player )
 			else
@@ -1853,6 +1882,58 @@ entity function GetEntityPlayerIsLookingAt( entity player, array<entity> ents, f
 	return theEnt
 }
 
+entity function GetDeathboxPlayerIsLookingAt( entity player, float degrees = 8.0, float maxDistSqr = 1000000.0 )
+{
+	array<entity> deathboxArray = GetAllDeathBoxes()
+
+	entity theEnt
+	float largestDot = -1.0
+
+	float minDot = deg_cos( degrees )
+	float dot
+
+	array<PlayerLookAtItem> finalLootEnts
+
+	vector playerEyePos = player.EyePosition()
+
+	foreach ( ent in deathboxArray )
+	{
+		if ( ent.GetTargetName() != DEATH_BOX_TARGETNAME )
+			continue
+
+		dot = DotProduct( Normalize( ent.GetWorldSpaceCenter() - playerEyePos ), player.GetViewVector() )
+		if ( dot < minDot )
+			continue
+
+		float distanceSqr = DistanceSqr( ent.GetOrigin(), player.GetOrigin() )
+		if ( distanceSqr > maxDistSqr )
+			continue
+
+		PlayerLookAtItem lootItem
+		lootItem.ent = ent
+		lootItem.playerViewDot = dot
+		finalLootEnts.append( lootItem )
+
+		#if(DEV)
+			//
+			//
+		#endif
+	}
+
+	finalLootEnts.sort( PlayerLookSort )
+
+	foreach ( item in finalLootEnts )
+	{
+		TraceResults result = TraceLineHighDetail( playerEyePos, item.ent.GetWorldSpaceCenter(), [player, item.ent], TRACE_MASK_SOLID_BRUSHONLY, TRACE_COLLISION_GROUP_PLAYER )
+		if ( result.fraction == 1.0 )
+		{
+			theEnt = item.ent
+			break
+		}
+	}
+
+	return theEnt
+}
 
 entity function GetPropSurvivalUseEntity( entity player )
 {

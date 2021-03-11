@@ -1582,6 +1582,12 @@ void function ShowRewardBasedOnItemType( int itemType, ItemFlavor item, vector a
 			thread ShowRewards_SkydiveEmote( item, attachOrigin, attachAngles, rarity, displayIndex )
 			break
 
+                
+                                 
+                                                                                                          
+        
+        
+
 		case eItemType.voucher:
 			thread ShowRewards_Voucher( item, attachOrigin, attachAngles, rarity, quantity, displayIndex, attachment )
 			break
@@ -1876,9 +1882,17 @@ void function ShowRewards_Execution( ItemFlavor item, vector origin, vector angl
 const float WEAPON_SKIN_Z_OFFSET = 28.0
 const vector WEAPON_SKIN_LOCAL_ANGLES = <10, -90, 0>
 
-const float HOLOSPRAY_Z_OFFSET = 16.0
+
+
 
 #if(CLIENT)
+
+#if(NX_PROG)
+const float HOLOSPRAY_Z_OFFSET = 21.0
+#else
+const float HOLOSPRAY_Z_OFFSET = 16.0
+#endif
+
 void function ShowRewards_EmoteIcon( ItemFlavor item, vector origin, vector angles, int rarity, int displayIndex, string attachment )
 {
 	EndSignal( level, "EndSetPresentationType" )
@@ -2574,6 +2588,58 @@ void function ShowRewards_SkydiveEmote( ItemFlavor item, vector origin, vector a
 }
 #endif
 
+              
+           
+                                                                                                                                          
+ 
+                                             
+                                                       
+                                                               
+
+   
+                                          
+
+                                                                  
+
+                    
+                                                                           
+
+                          
+
+                                                                                               
+
+                                                                                                   
+                                                                                                   
+                                            
+                                         
+                                
+                                  
+
+                                                               
+
+   
+                                                     
+
+   
+                                                          
+                                                                           
+
+             
+                                                    
+   
+                           
+                  
+                                                    
+   
+  
+
+                                             
+                                                                                            
+     
+                                                                                                       
+ 
+      
+      
 
 #if(CLIENT)
 const float VOUCHER_Z_OFFSET = 31.0
@@ -3480,6 +3546,22 @@ void function PopulateInspectMenuDetails_CharacterSkin( ItemFlavor item, int rar
 }
 #endif
 
+              
+           
+                                                                                                    
+ 
+                                                                  
+
+                    
+                                               
+     
+  
+                           
+                                                                                       
+  
+ 
+      
+      
 
 #if(CLIENT)
 void function PopulateInspectMenuDetails( ItemFlavor item, int rarity, int quantity, string miscString = "", string descString = "" )
@@ -3554,6 +3636,9 @@ void function PopulateInspectMenuDetails( ItemFlavor item, int rarity, int quant
 		eItemType.account_currency_bundle,
 		eItemType.voucher,
 		eItemType.emote_icon,
+                
+                             
+        
 	]
 
 	if ( hideItemList.contains(itemType) )
@@ -3724,6 +3809,12 @@ void function InspectMenuFunctionality_Model( ItemFlavor item, int displayIndex,
 				{
 					PopulateInspectMenuDetails( item, rarity, quantity, "", ItemFlavor_GetLongDescription( item ) )
 				}
+                  
+                                                      
+      
+                                                                  
+      
+          
 				else
 				{
 					PopulateInspectMenuDetails( item, rarity, 1 )
@@ -4754,6 +4845,12 @@ void function ClientToUI_UpdateStoreButtonVisibility()
 
 	Hud_SetVisible( fileForever.storeButton, visible )
 	Hud_SetEnabled( fileForever.storeButton, visible )
+	
+	entity player = GetLocalClientPlayer()
+	if ( GRX_IsOfferRestricted( player ) && !fileLevel.heirloomShards )
+	{
+		Hud_SetEnabled( fileForever.storeButton, false )
+	}
 }
 #endif
 
@@ -5400,21 +5497,21 @@ void function UpdateSpecialItemPresentationPurchaseButton()
 
 	bool showPurchase = false
 	bool showEquip    = false
+	bool isOwned      = false
 
 	if ( GRX_IsInventoryReady() )
 	{
+		if ( fileLevel.specialItemOverrideOwned != null )
+			isOwned = expect bool(fileLevel.specialItemOverrideOwned)
+		else if ( ItemFlavor_GetGRXMode( itemFlav ) == eItemFlavorGRXMode.REGULAR )
+			isOwned = GRX_IsItemOwnedByPlayer( itemFlav, null )
+
+		//
+		if ( itemFlav == GetItemFlavorByAsset( $"settings/itemflav/gcard_badge/account/season02_bplevel.rpak" ) )
+			isOwned = GladiatorCardBadge_DoesStatSatisfyValue( itemFlav, 110 )
+
 		if ( TEMP_IsItemFlavorEquippable( itemFlav ) )
 		{
-			bool isOwned = false
-			if ( fileLevel.specialItemOverrideOwned != null )
-				isOwned = expect bool(fileLevel.specialItemOverrideOwned)
-			else if ( ItemFlavor_GetGRXMode( itemFlav ) == eItemFlavorGRXMode.REGULAR )
-				isOwned = GRX_IsItemOwnedByPlayer( itemFlav, null )
-
-			//
-			if ( itemFlav == GetItemFlavorByAsset( $"settings/itemflav/gcard_badge/account/season02_bplevel.rpak" ) )
-				isOwned = GladiatorCardBadge_DoesStatSatisfyValue( itemFlav, 110 )
-
 			if ( !fileLevel.specialItemHidePurchaseButton )
 				showPurchase = !isOwned
 
@@ -5450,15 +5547,30 @@ void function UpdateSpecialItemPresentationPurchaseButton()
 		HudElem_SetRuiArg( fileForever.inspectMenu, "packName", expect string(fileLevel.specialItemPackName) )
 		HudElem_SetRuiArg( fileForever.inspectMenu, "packImg", expect asset(fileLevel.specialItemPackImg), eRuiArgType.IMAGE )
 	}
-
-	if ( ItemFlavor_GetType( itemFlav ) == eItemType.weapon_charm && showEquip )
+	else
 	{
+		HudElem_SetRuiArg( fileForever.inspectMenu, "showPackDetails", false )
+	}
+
+	bool showUnlockedWithoutEquip = isOwned && ( ItemFlavor_GetType( itemFlav ) == eItemType.weapon_charm ||
+	                                             ItemFlavor_GetType( itemFlav ) == eItemType.skydive_emote )
+	if ( showUnlockedWithoutEquip )
+	{
+		Hud_SetVisible( fileForever.equipButton, true )
 		Hud_SetEnabled( fileForever.equipButton, false )
 		Hud_SetLocked( fileForever.equipButton, true )
 
 		HudElem_SetRuiArg( fileForever.equipButton, "buttonText", "#UNLOCKED" )
-		HudElem_SetRuiArg( fileForever.equipButton, "descText", "#CHARM_EQUIP_INSTRUCTIONS" )
-		HudElem_SetRuiArg( fileForever.equipButton, "descTextRarity", eRarityTier.COMMON )
+
+		if ( ItemFlavor_GetType( itemFlav ) == eItemType.weapon_charm )
+		{
+			HudElem_SetRuiArg( fileForever.equipButton, "descText", "#CHARM_EQUIP_INSTRUCTIONS" )
+			HudElem_SetRuiArg( fileForever.equipButton, "descTextRarity", eRarityTier.COMMON )
+		}
+		else
+		{
+			HudElem_SetRuiArg( fileForever.equipButton, "descText", "" )
+		}
 	}
 }
 #endif

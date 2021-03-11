@@ -105,6 +105,10 @@ void function ShGameModeShadowRoyale_Init()
 #endif //
 
 	#if(CLIENT)
+		SetCustomScreenFadeAsset( $"ui/screen_fade_shadow_fall.rpak" )
+		ClApexScreens_SetCustomApexScreenBGAsset( $"rui/rui_screens/banner_c_shadowfall" )
+		ClApexScreens_SetCustomLogoTint( <1.0, 1.0, 1.0> )
+
 		Survival_SetVictorySoundPackageFunction( GetVictorySoundPackage )
 		AddCallback_GameStateEnter( eGameState.Playing, ShadowRoyale_OnPlaying )
 		AddCallback_OnVictoryCharacterModelSpawned( OnVictoryCharacterModelSpawned )

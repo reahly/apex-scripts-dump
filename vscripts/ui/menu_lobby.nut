@@ -6,6 +6,10 @@ global function SetActiveLobbyPopup
 global function ClearActiveLobbyPopup
 global function HasActiveLobbyPopup
 
+                 
+global function Lobby_SetMinimapCoordsName
+      
+
 global struct LobbyPopup
 {
 	bool functionref( int inputID ) checkBlocksInput
@@ -28,6 +32,12 @@ struct
 	var datacenterButton
 	var tempSeasonExtensionButton
 	var socialEventPopup
+                     
+	var storyEventButton0
+	#if(NX_PROG)
+	var storyEventButtonNX
+	#endif
+          
 
 	string previousRotationGroup
 
@@ -36,6 +46,15 @@ struct
 	LobbyPopup ornull  activeLobbyPopup = null
 	table< int, bool > isInputBlocked
 } file
+
+                 
+void function Lobby_SetMinimapCoordsName( string name )
+{
+	var minimapCoords = Hud_GetChild( file.menu, "MinimapCoords" )
+	var minimapCoordsRui = Hud_GetRui( minimapCoords )
+	RuiSetString( minimapCoordsRui, "name", name )
+}
+      
 
 void function InitLobbyMenu( var newMenuArg )
 //
@@ -121,7 +140,32 @@ void function InitLobbyMenu( var newMenuArg )
 	var socialEventPopup = Hud_GetChild( menu, "SocialPopupPanel" )
 	file.socialEventPopup = socialEventPopup
 
+                 
+	if ( IsTakeHomeBuild() )
+	{
+		var minimapCoords = Hud_GetChild( menu, "MinimapCoords" )
+		Hud_SetVisible( minimapCoords, true )
+		Hud_SetEnabled( minimapCoords, true )
+
+		var minimapCoordsRui = Hud_GetRui( minimapCoords )
+		InitializeMinimapCoords( minimapCoordsRui, true )
+	}
+      
+
 	InitSocialEventPopup( socialEventPopup )
+
+                     
+	file.storyEventButton0 = Hud_GetChild( menu, "StoryEventButton0" )
+	Hud_AddEventHandler( file.storyEventButton0, UIE_CLICK, StoryModeButton_OnActivate )
+	Hud_AddEventHandler( file.storyEventButton0, UIE_GET_FOCUS, StoryModeButton_OnGetFocus )
+	Hud_AddEventHandler( file.storyEventButton0, UIE_LOSE_FOCUS, StoryModeButton_OnLoseFocus )
+
+	#if(NX_PROG)
+	file.storyEventButtonNX = Hud_GetChild( menu, "StoryEventButtonNX" )
+	Hud_AddEventHandler( file.storyEventButtonNX, UIE_CLICK, StoryModeButton_OnActivate )
+	HudElem_SetRuiArg( file.storyEventButtonNX, "icon", $"rui/rui_screens/arenas_logo" )
+	#endif
+          
 
 	PerfInitLabel( 1, "1" )
 	PerfInitLabel( 2, "2" )
@@ -190,7 +234,6 @@ void function OnLobbyMenu_Show()
 	thread LobbyMenuUpdate()
 	SocialEventUpdate()
 	RegisterInputs()
-
 	Chroma_Lobby()
 }
 
@@ -249,7 +292,11 @@ void function OnGRXStateChanged()
 	HudElem_SetRuiArg( seasonTabDef.button, "titleTextColor", Season_GetTitleTextColor( season ), eRuiArgType.COLOR )
 	HudElem_SetRuiArg( seasonTabDef.button, "headerTextColor", Season_GetHeaderTextColor( season ), eRuiArgType.COLOR )
 	HudElem_SetRuiArg( seasonTabDef.button, "timeRemainingTextColor", Season_GetTimeRemainingTextColor( season ), eRuiArgType.COLOR )
-
+	
+	#if(NX_PROG)
+		HudElem_SetRuiArg( seasonTabDef.button, "tabsNXOffset", 1.0, eRuiArgType.FLOAT )
+	#endif
+	
 	seasonTabDef.useCustomColors = true
 	seasonTabDef.customDefaultBGCol = Season_GetTabBGDefaultCol( season )
 	seasonTabDef.customDefaultBarCol = Season_GetTabBarDefaultCol( season )
@@ -294,6 +341,30 @@ void function OnGRXStateChanged()
 				//
 			}
 		}
+
+                      
+		if ( GetPersistentVar( "s08StoryEvent.hasStep4Completed" ) && !GetPersistentVar( "s08StoryEvent.hasSeenBadgeCelebration" ) )
+		{
+			array<BattlePassReward> rewards
+			BattlePassReward info
+			info.level = -1
+			info.flav = GetItemFlavorByHumanReadableRef("gcard_badge_account_s08e04_reward")
+			info.quantity = 1
+			rewards.append( info )
+
+			ShowRewardCeremonyDialog(
+				"",
+				"#GENERIC_REWARD_RECEIVED",
+				"#gcard_badge_account_s08e04_reward_NAME",
+				rewards,
+				false,
+				true,
+				true,
+				true
+			)
+			Remote_ServerCallFunction( "ClientCallback_MarkStoryEventFinaleRewardSeen" )
+		}
+        
 	}
 }
 
@@ -449,6 +520,16 @@ void function UpdateCornerButtons()
 
 	Hud_SetEnabled( file.gameMenuButton, !IsDialog( GetActiveMenu() ) )
 
+                     
+	bool storyButtonEnabled = isPlayPanelActive && (GetPersistentVar("s08StoryEvent.hasStep1Completed") == true) && (GetPersistentVar("s08StoryEvent.hasStep4Completed") == false)
+	#if(NX_PROG)
+		Hud_SetVisible( file.storyEventButton0 , storyButtonEnabled && !IsNxHandheldMode() )
+		Hud_SetVisible( file.storyEventButtonNX, storyButtonEnabled && IsNxHandheldMode() )
+	#else
+		Hud_SetVisible( file.storyEventButton0 , storyButtonEnabled )
+	#endif
+          
+
 	int count = GetOnlineFriendCount( false )
 	if ( count > 0 )
 	{
@@ -546,6 +627,82 @@ void function SeasonTab_OnActivate( var button )
 	JumpToSeasonTab()
 }
 
+                    
+void function StoryModeButton_OnActivate( var button )
+{
+	if ( Hud_IsLocked( button ) )
+		return
+
+	thread function() : ( button )
+	{
+		EndSignal( uiGlobal.signalDummy, "CleanupInGameMenus" )
+		Hud_SetEnabled( button, false )
+
+		OnThreadEnd(
+			function() : ( button )
+			{
+				Hud_SetEnabled( button, true )
+			}
+		)
+
+
+		ItemFlavor ornull storyChallengeEventOrNull = GetStoryChallengeEventIfActive( GetUnixTimestamp(), "calevent_s08e04_story_challenges" )
+		if ( storyChallengeEventOrNull == null )
+		{
+			Hud_SetEnabled( button, true )
+			return
+		}
+
+		ItemFlavor storyChallengeEvent = expect ItemFlavor( storyChallengeEventOrNull )
+
+		entity player = GetUIPlayer()
+
+		//
+		StoryEventDialogueData dialogueData = StoryChallengeEvent_GetNonAutoplayDialogueDataForPlayer( storyChallengeEvent, player )
+		if ( dialogueData.audioAliases.len() == 0 )
+		{
+			Hud_SetEnabled( button, true )
+			return
+		}
+
+
+		array <StoryEventDialogueData> dialogueDatas
+		dialogueDatas.append( dialogueData )
+
+		waitthread Lobby_ShowDialoguePopupFromData(dialogueDatas )
+
+		//
+		thread function() : ()
+		{
+			EndSignal( uiGlobal.signalDummy, "ActiveMenuChanged" ) //
+			EndSignal( uiGlobal.signalDummy, "Lobby_ShowCallToActionPopup" ) //
+
+			WaitSignal( uiGlobal.signalDummy, "UINotification_AssignedChallengesDidChange" )
+			thread function() : () //
+			{
+				Lobby_ShowCallToActionPopup( true )
+			}()
+		}()
+		
+		RunClientScript("Lobby_TurnOffIdleHighlightOnKeyCard")
+
+		Remote_ServerCallFunction( "ClientCallback_RefereshEventChallenges" )
+	}()
+}
+
+void function StoryModeButton_OnGetFocus( var button )
+{
+	//
+	RunClientScript("Lobby_ToggleHighlightOnKeyCard", true)
+}
+
+
+void function StoryModeButton_OnLoseFocus( var button )
+{
+	//
+	RunClientScript("Lobby_ToggleHighlightOnKeyCard", false)
+}
+         
 
 void function NewsButton_OnActivate( var button )
 {
@@ -684,7 +841,7 @@ void function OnLobbyMenu_PostGameOrChat( var button )
 void function PostGameFlow()
 {
                         
-                                                                                           
+                                                                                        
        
 	bool showRankedSummary = GetPersistentVarAsInt( "showRankedSummary" ) != 0
 	bool isFirstTime       = GetPersistentVarAsInt( "showGameSummary" ) != 0
@@ -702,9 +859,10 @@ void function PostGameFlow()
 	}
 
                         
-                          
+                                
    
-                                   
+                                                                                                                                                                      
+                                  
    
        
 }

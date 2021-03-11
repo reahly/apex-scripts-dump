@@ -16,6 +16,8 @@ const bool SCRIPT_ANIM_DEBUG = false
 
 void function ClAnim_Init()
 {
+	//
+	//
 	AddGlobalAnimEventTokenize( "enable_fx_group", ClGlobalAnimEvent_EnableFxGroup )
 	AddGlobalAnimEventTokenize( "disable_fx_group", ClGlobalAnimEvent_DisableFxGroup )
 	AddGlobalAnimEventTokenize( "playImpactFXTable", ClGlobalAnimEvent_playImpactFXTable )
@@ -233,6 +235,26 @@ void function ClGlobalAnimEvent_DisableFxGroup( entity model, array<string> toke
 	Assert( tokens.len() == 2 )
 	string fxGroup = tokens[1]
 	ModelFX_DisableGroup( model, fxGroup )
+}
+
+void function ClGlobalAnimEvent_bodyfall_human( entity model )
+{
+	array<string> tokens
+	tokens.append( "bodyfall_human" )
+	tokens.append( "pilot_bodyslam" )
+	tokens.append( "CHESTFOCUS" )
+
+	ClGlobalAnimEvent_playImpactFXTable( model, tokens )
+}
+
+void function ClGlobalAnimEvent_bodyfall_human_small( entity model )
+{
+	array<string> tokens
+	tokens.append( "bodyfall_human_small" )
+	tokens.append( "pilot_bodyslam_small" )
+	tokens.append( "CHESTFOCUS" )
+
+	ClGlobalAnimEvent_playImpactFXTable( model, tokens )
 }
 
 //

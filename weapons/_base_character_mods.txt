@@ -53,7 +53,6 @@ WeaponData
 			"uses_ammo_pool" 					"0"
 			"reload_enabled"                    "1"
 			"ammo_min_to_fire"                  "1"
-			"reload_no_auto_if_ads_pressed"     "1"
 
 		    "ammo_default_total"							"500"
 		    "ammo_stockpile_max"                            "420"

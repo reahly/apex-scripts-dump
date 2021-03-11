@@ -100,6 +100,7 @@ global struct ClientEntityStruct
 	int    clientEntMinimapCustomState
 	int    clientEntMinimapFlags
 	float  clientEntMinimapScale = 1.0
+	int    clientEntMinimapZOrder
 
                            
 		int deathBoxMenu_lastSeenClipCount
@@ -108,6 +109,10 @@ global struct ClientEntityStruct
 	EncodedEHandle ornull gladCardPropOwnerPlayerEEH = null
 	ItemFlavor ornull     animWindowCosmeticItemFlavor = null
 	ItemFlavor ornull     animWindowSkinItemFlavor = null
+
+                     
+		int arenasTeaseHolosprayID = -1
+       
 }
 
 
@@ -233,7 +238,7 @@ global struct ClientWeaponStruct
        
 
              
-                                               
+                                                             
                                              
        
 }

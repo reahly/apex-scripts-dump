@@ -152,123 +152,15 @@ void function ShUtilityAll_Init()
 	RegisterSignal( "Timeout" )
 	RegisterSignal( "CancelTimeout" )
 
-	//
-	#if(!UI)
-		PrecacheModel( $"mdl/fx/ar_hazard_ring_z.rmdl" )
-		PrecacheModel( $"mdl/fx/fire_cylinder_sm1.rmdl" )
-		PrecacheModel( $"mdl/fx/r301_leg07_fire_horns.rmdl" )
-		PrecacheModel( $"mdl/fx/r301_leg07_fire_body.rmdl" )
-
-		PrecacheModel( $"mdl/weapons_r5/snipe_sentinel_sr/sentinel_charge_base.rmdl" )
-		PrecacheModel( $"mdl/weapons_r5/snipe_sentinel_sr/sentinel_charge_speed.rmdl" )
-
-		PrecacheModel( $"mdl/fx/peacekeeper_legendary_ice_stock.rmdl" )
-		PrecacheModel( $"mdl/fx/peacekeeper_legendary_ice_lvl2_add.rmdl" )
-		PrecacheModel( $"mdl/fx/peacekeeper_legendary_ice_lvl2_add_b.rmdl" )
-		PrecacheModel( $"mdl/fx/peacekeeper_legendary_ice_lvl3_add.rmdl" )
-		PrecacheModel( $"mdl/fx/peacekeeper_legendary_ice_lvl3_add_b.rmdl" )
-
-		PrecacheModel( $"mdl/fx/flatline_s4_glow_hex.rmdl" )
-		PrecacheModel( $"mdl/fx/flatline_s4_glow_hex_fast.rmdl" )
+	#if(!UI)//
 
 		//
-		PrecacheModel( $"mdl/weapons_r5/misc_octane_heirloom/octane_knife_slash.rmdl" )
-		PrecacheModel( $"mdl/weapons_r5/misc_octane_heirloom/octane_knife_blur.rmdl" )
-		PrecacheParticleSystem( $"P_octane_knife_swipe_geo_FP" )
-		PrecacheParticleSystem( $"P_octane_knife_needle_spurt" )
-		PrecacheParticleSystem( $"P_octane_knife_needle_liquid" )
-		PrecacheParticleSystem( $"P_octane_knife_blur_geo_FP" )
-
-		//
-		PrecacheParticleSystem( $"P_skydive_contrail_sm_thin_long" )
-		PrecacheParticleSystem( $"P_skydive_bang_can_trail" )
-		PrecacheParticleSystem( $"P_drone_enemy_exhaust_l" )
-		PrecacheParticleSystem( $"P_drone_enemy_exhaust_r" )
-		PrecacheParticleSystem( $"P_drone_enemy_exhaust_t" )
-		PrecacheParticleSystem( $"P_drone_enemy_exhaust_b" )
-		PrecacheParticleSystem( $"P_drone_disable_elec" )
-		PrecacheParticleSystem( $"P_skydive_bang_can_launch" )
-		PrecacheParticleSystem( $"P_skydive_lp_launch" )
-		PrecacheParticleSystem( $"P_skydive_lp_trail" )
-		PrecacheParticleSystem( $"P_loba_staff_blur_MDL" )
-		PrecacheParticleSystem( $"P_crypto_drone_freefall_swordstreak" )
-		PrecacheParticleSystem( $"P_crypto_drone_freefall_swordstreak_L" )
-
-		//
-		PrecacheParticleSystem( $"P_prop_Blowtorch" )
-		PrecacheParticleSystem( $"P_prop_lobby_Blowtorch" )
-		PrecacheParticleSystem( $"P_bubblegum_pop" )
-		PrecacheParticleSystem( $"P_lobby_weld_sparks" )
-
-		PrecacheParticleSystem( $"P_rampart_freefall" )
-		PrecacheParticleSystem( $"P_Bshadow_execution" )
-		PrecacheParticleSystem( $"P_dive_shadow_body_burst" )
-
-		PrecacheModel( $"mdl/fx/wing_s5_gear_01.rmdl" )
-		PrecacheModel( $"mdl/fx/wing_s5_gear_flat01.rmdl" )
-
-		//
-		PrecacheParticleSystem( $"P_robot_eyes" )
-		PrecacheParticleSystem( $"P_robot_eyes_flicker" )
-
-		PrecacheModel( $"mdl/fx/spark_blast.rmdl" )
-
-            
-    
-                                                         
-      
-
-		//
-		PrecacheParticleSystem( $"P_replipod_engine_mdl" )
-
-		//
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_vent_l_1P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_vent_r_1P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_turbine_1P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_intake_1P" )
-
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_vent_l_3P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_vent_r_3P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_turbine_3P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_intake_3P" )
-
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_Kill_intake_1P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_Kill_turbine_1P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_Kill_vent_l_1P" )
-		PrecacheParticleSystem( $"P_dmr_s8_lvl3_Kill_vent_r_1P" )
-
-		//
-		PrecacheParticleSystem( $"P_g7_s6_lvl3_center" )
-		PrecacheParticleSystem( $"P_g7_s6_lvl2_rear" )
-		PrecacheParticleSystem( $"P_g7_s6_lvl3_rear" )
-		PrecacheParticleSystem( $"P_g7_s6_lvl3_rear_RT" )
-		PrecacheParticleSystem( $"P_g7_s6_lvl3_side" )
-		PrecacheParticleSystem( $"P_g7_s6_lvl3_side_RT" )
-		PrecacheParticleSystem( $"P_g7_s6_kill_rear_3P" )
-		PrecacheParticleSystem( $"P_g7_s6_kill_center0_FP" )
-
-		//
-		PrecacheParticleSystem( $"P_r99_s7_lvl1_inner" )
-		PrecacheParticleSystem( $"P_r99_s7_lvl1_outer" )
-		PrecacheParticleSystem( $"P_r99_s7_lvl2_inner" )
-		PrecacheParticleSystem( $"P_r99_s7_lvl2_outer" )
-		PrecacheParticleSystem( $"P_r99_s7_lvl3_outer" )
-		PrecacheParticleSystem( $"P_r99_s7_lvl3_outer_kill" )
-		PrecacheParticleSystem( $"P_r99_s7_lvl3_rear_kill" )
-
-		//
-		PrecacheModel( $"mdl/robotics_r5/spectre/spectre_v2_corporate_l_leg_gib.rmdl" )
-    	PrecacheModel( $"mdl/robotics_r5/spectre/spectre_v2_corporate_r_leg_gib.rmdl" )
-    	PrecacheModel( $"mdl/robotics_r5/spectre/spectre_v2_corporate_l_arm_gib.rmdl" )
-    	PrecacheModel( $"mdl/robotics_r5/spectre/spectre_v2_corporate_r_arm_gib.rmdl" )
-    	PrecacheModel( $"mdl/robotics_r5/spectre/spectre_v2_corporate_head_gib.rmdl" )
-
-    	//
-    	PrecacheParticleSystem( $"P_wpn_grenade_frag_trail_bright" )
-
-              
-		PrecacheParticleSystem( $"lobby_f_CH_blinking_emissive" ) //
-        
+		PrecacheParticleSystem( $"P_wpn_ghurka_swipe_FP" )
+		PrecacheParticleSystem( $"P_wpn_ghurka_swipe_3P" )
+		PrecacheParticleSystem( $"P_ghurka_amb_plasma_FP" )
+		PrecacheParticleSystem( $"P_ghurka_amb_plasma_3P" )
+		PrecacheParticleSystem( $"P_ghurka_plasma_mdl" )
+		PrecacheParticleSystem( $"P_ghurka_plasma_mdl_3P" )
 
 	#endif
 }
@@ -822,6 +714,11 @@ bool function IsACETakeOverGameMode()
 	return GetCurrentPlaylistVarBool( "is_ace_takeover", false )
 }
 
+bool function IsAprilFools_S8_Mode()
+{
+	return GetCurrentPlaylistVarBool( "is_april_fools_s8", false )
+}
+
 int function GetEnemyTeam( int team )
 {
 	if ( IsMultiTeamPvPGame() )
@@ -1213,6 +1110,24 @@ bool function GetWeaponInfoFileKeyField_GlobalBool( string ref, string variable 
 	return expect bool( val )
 }
 
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 #if(false)
 
@@ -2228,7 +2143,12 @@ bool function FreelanceSystemsAreEnabled()
 	const bool ENABLED_BY_DEFAULT = false
 	return GetCurrentPlaylistVarBool( "freelance_systems_enabled", ENABLED_BY_DEFAULT )
 }
-
+                      
+                                       
+ 
+                                                                    
+ 
+      
 
 float function LerpFloat( float startValue, float endValue, float time )
 {
@@ -3419,9 +3339,9 @@ bool function AreClubInvitesEnabled()
 
 
                    
-  
-                               
- 
-                                                            
- 
+//
+bool function IsMadMaggieHost()
+{
+	return GetCurrentPlaylistVarBool( "is_maggie_host", false )
+}
          

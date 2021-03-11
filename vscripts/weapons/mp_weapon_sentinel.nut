@@ -30,6 +30,10 @@ const bool DEBUG_FLAGS = false
 
 const string SENTINEL_CLASS_NAME = "mp_weapon_sentinel"
 
+const string SENTINEL_DEACTIVATE_SIGNAL = "SentinelDeactivate"
+
+const float SENTINEL_RECHAMBER_READY_TO_FIRE_FRAC = 50.0 / 63.0	//
+
 const string ENERGIZED_MOD = "energized"
 const string WATCH_ENERGIZE_ABORT_SIGNAL = "SentinelWatchEnergizeAbortSignal"
 
@@ -91,10 +95,16 @@ const int BASE_CONSUMABLES_REQUIRED = 2
 
 struct
 {
+	bool fileStructInitialized = false
+
 	ConsumableData& consumableData
 	float energizedDuration
 	float energizedTimeConsumedPerShot
 	float energizeActivityTime
+
+                        
+                                              
+       
 } file
 
 //
@@ -105,6 +115,8 @@ struct
 void function MpWeaponSentinel_Init()
 {
 	PrecacheWeapon( SENTINEL_CLASS_NAME )
+
+	RegisterSignal( SENTINEL_DEACTIVATE_SIGNAL )
 
 	RegisterSignal( WATCH_ENERGIZE_ABORT_SIGNAL )
 	RegisterSignal( ENERGIZE_DISPLAY_ABORT_SIGNAL )
@@ -139,13 +151,39 @@ void function MpWeaponSentinel_Init()
 
 void function OnWeaponActivate_weapon_sentinel( entity weapon )
 {
-	if ( !GetCurrentPlaylistVarBool( SENTINEL_USE_ENERGIZE_PLAYLIST_VAR, true ) )
-		return
 
 	//
-	file.energizedDuration = GetWeaponInfoFileKeyField_GlobalFloat( "mp_weapon_sentinel", "energized_duration" )
-	file.energizedTimeConsumedPerShot = GetWeaponInfoFileKeyField_GlobalFloat( "mp_weapon_sentinel", "energized_time_consumed_per_shot" )
-	file.energizeActivityTime = GetWeaponInfoFileKeyField_GlobalFloat( "mp_weapon_sentinel", "energize_activity_time" )
+	if ( !file.fileStructInitialized )
+	{
+		file.fileStructInitialized = true
+
+		file.energizedDuration = GetWeaponInfoFileKeyField_GlobalFloat( "mp_weapon_sentinel", "energized_duration" )
+		file.energizedTimeConsumedPerShot = GetWeaponInfoFileKeyField_GlobalFloat( "mp_weapon_sentinel", "energized_time_consumed_per_shot" )
+		file.energizeActivityTime = GetWeaponInfoFileKeyField_GlobalFloat( "mp_weapon_sentinel", "energize_activity_time" )
+
+                         
+                                 
+                                                                                                                                         
+                                                                                                                                       
+                                                                                                                                                 
+                                                                                                                                           
+                                                                                                                                                      
+                                                                                                                                            
+                                                                 
+                                               
+
+            
+
+      
+        
+	}
+
+                        
+                                                                       
+       
+
+	if ( !GetCurrentPlaylistVarBool( SENTINEL_USE_ENERGIZE_PLAYLIST_VAR, true ) )
+		return
 
 	entity player = weapon.GetWeaponOwner()
 	#if(false)
@@ -179,6 +217,8 @@ void function OnWeaponDeactivate_weapon_sentinel( entity weapon )
 	if ( !GetCurrentPlaylistVarBool( SENTINEL_USE_ENERGIZE_PLAYLIST_VAR, true ) )
 		return
 
+	weapon.Signal( SENTINEL_DEACTIVATE_SIGNAL )
+
 	#if(false)
 
 #endif
@@ -198,6 +238,10 @@ void function OnWeaponDeactivate_weapon_sentinel( entity weapon )
 		weapon.Signal( SCRIPT_CHARGE_FRAC_THINK_ABORT_SIGNAL )
 		weapon.SetWeaponChargeFraction( 0.0 )
 	}
+
+                        
+                                                                
+       
 }
 
 var function OnWeaponPrimaryAttack_weapon_sentinel( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -228,6 +272,13 @@ var function OnWeaponPrimaryAttack_weapon_sentinel( entity weapon, WeaponPrimary
 		}
 	#endif
 
+                        
+                                                                                      
+                                                                                
+                                                                                                              
+                                                                       
+                                                                                                      
+       
 
 	return ammoPerShot
 }
@@ -348,19 +399,12 @@ void function DisplayRechamberRui( entity weapon )
 	entity player = weapon.GetWeaponOwner()
 	if ( !IsValid( player ) )
 		return
-
 	player.EndSignal( "OnDeath" )
 	weapon.EndSignal( "OnDestroy" )
 	weapon.EndSignal( RECHAMBER_RUI_ABORT_SIGNAL )
-
-	var rui = CreateCockpitPostFXRui( $"ui/crosshair_single_dot_sentinel.rpak" )
-	RuiSetBool( rui, "isActive", false )
-
 	OnThreadEnd(
-		function() : ( rui, weapon, player )
+		function() : ( weapon )
 		{
-			RuiDestroy( rui )
-
 			if ( IsValid( weapon ) && weapon.w.sentinelEnergizeHintRui != null )
 				RuiSetBool( weapon.w.sentinelEnergizeHintRui, "isRechambering", false)
 		}
@@ -374,23 +418,15 @@ void function DisplayRechamberRui( entity weapon )
 	if ( !IsValid( weapon ) )
 		return
 
-	float duration = weapon.GetSequenceDuration( RECHAMBER_RUI_END_EVENT_ANIM )
-	float frac = weapon.GetScriptedAnimEventCycleFrac( RECHAMBER_RUI_END_EVENT_ANIM, RECHAMBER_RUI_END_EVENT )
-	float endTime = Time() + duration * frac
-
-	RuiSetBool( rui, "isActive", true )
-	RuiSetFloat( rui, "birthTime", Time() )
-	RuiSetFloat( rui, "deathTime", endTime )
-
 	if ( weapon.w.sentinelEnergizeHintRui != null )
 		RuiSetBool( weapon.w.sentinelEnergizeHintRui, "isRechambering", true)
 
-	while ( Time() < endTime )
-	{
-		WaitFrame()
-	}
+	//
+	//
+	float duration = weapon.GetSequenceDuration( RECHAMBER_RUI_END_EVENT_ANIM )
+	float frac = weapon.GetScriptedAnimEventCycleFrac( RECHAMBER_RUI_END_EVENT_ANIM, RECHAMBER_RUI_END_EVENT )
 
-	RuiSetBool( rui, "isActive", false )
+	waitthread DisplayCenterDotRui( weapon, RECHAMBER_RUI_ABORT_SIGNAL, 0.0, duration * frac )
 
 	if ( IsValid( weapon ) && weapon.w.sentinelEnergizeHintRui != null )
 		RuiSetBool( weapon.w.sentinelEnergizeHintRui, "isRechambering", false)
@@ -650,6 +686,9 @@ void function AttemptCancelEnergize( entity player )
 //
 //
 #if(false)
+
+
+
 
 
 

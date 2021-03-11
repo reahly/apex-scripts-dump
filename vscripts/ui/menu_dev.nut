@@ -299,7 +299,7 @@ void function SetupDefaultDevCommandsMP()
 		string itemsString = "ordnance ammo health custom_pickup"
 		//
                      
-                           
+			itemsString += " gadget"
         
 		//
                 

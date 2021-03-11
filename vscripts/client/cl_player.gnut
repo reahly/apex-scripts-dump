@@ -112,8 +112,12 @@ void function ClPlayer_Init()
 	level.spawnAsTitanSelected <- false
 
 	AddLocalPlayerFunc( Player_AddPlayer )
-}
 
+	if ( ObserverLiveLogs_IsSystemEnabled() )
+	{
+		ObserverLiveLogs_Init()
+	}
+}
 
 entity function FindEnemyRodeoParent( entity player )
 {
@@ -1100,8 +1104,9 @@ void function ServerCallback_OnEntityKilled( entity attacker, entity victim, int
 		obitFlags = obitFlags | OBIT_FLAG_HEADSHOT
 
 	Obituary( attacker, "", victim, scriptDamageType, damageSourceId, obitFlags )
-}
 
+	ObserverLiveLogs_OnPlayerKilled( attacker, victim, damageSourceId )
+}
 
 void function ServerCallback_OnEnemyDowned( entity attacker, entity victim, int scriptDamageType, int damageSourceId, int weaponSkinItemFlavorGUID )
 {
@@ -1139,6 +1144,8 @@ void function ServerCallback_OnEnemyDowned( entity attacker, entity victim, int 
 	}
 
 	Obituary( attacker, "", victim, scriptDamageType, damageSourceId, OBIT_FLAG_DOWNED )
+
+	ObserverLiveLogs_OnPlayerDowned( attacker, victim, damageSourceId )
 }
 
 

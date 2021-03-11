@@ -272,6 +272,19 @@ WeaponData
         {
         }
 
+		hopup_april_fools
+		{
+		"damage_near_value"   							"19"
+        "damage_far_value"								"19"
+        "damage_very_far_value"							"19"
+        "damage_near_value_titanarmor"					"19"
+        "damage_far_value_titanarmor" 					"19"
+        "damage_very_far_value_titanarmor" 				"19"
+
+		"ammo_clip_size"   								"9"
+
+		}
+
         hopup_unshielded_dmg
         {
             "damage_unshielded_scale"   					"2.3"

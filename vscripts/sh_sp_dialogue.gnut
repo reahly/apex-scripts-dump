@@ -223,8 +223,7 @@ struct
 	#if(CLIENT)
 		var                                                   devTextDialogueRUI
 		int                                                   videoChannel = -1
-		array<EnvironmentSpeaker>                             environmentSpeakers
-		array< entity >[ NUM_CUSTOM_QUEUES ] 				  customSpeakersList
+		array< EnvironmentSpeaker >[ NUM_TOTAL_DIALOGUE_QUEUES ]		  allSpeakersList
 		table<string, CachedCharacterData>                    voiceToCachedCharDataMap
 		array<void functionref( string abortedDialogueLine )> abortDialogueCallbacks
 
@@ -440,27 +439,36 @@ void function EnvironmentSpeakerListInit()
 void function RegisterCustomDialogueQueueSpeakerEntities( int queueIdx, array<entity> customSpeakers )
 {
 	Assert( queueIdx < NUM_CUSTOM_QUEUES, "Tried to register entities for custom speaker with invalid queueIdx!" )
-	file.customSpeakersList[ queueIdx ] = customSpeakers
+	foreach ( entity speaker in customSpeakers )
+	{
+		RegisterSpeaker_Internal( speaker, queueIdx )
+	}
 }
 #endif
 
 #if(CLIENT)
 EnvironmentSpeaker function RegisterEnvironmentSpeaker( entity speakerEnt )
 {
+	return RegisterSpeaker_Internal( speakerEnt, QUEUE_MAIN )
+}
+#endif
+
+#if(CLIENT)
+EnvironmentSpeaker function RegisterSpeaker_Internal( entity speakerEnt, int queue )
+{
 	EnvironmentSpeaker speaker
 	speaker.origin = speakerEnt.GetOrigin()
 	speaker.speakerEnt = speakerEnt
 
-	file.environmentSpeakers.append( speaker )
+	file.allSpeakersList[ queue ].append( speaker )
 	return speaker
 }
 #endif
 
-
 #if(CLIENT)
 void function DeregisterEnvironmentSpeaker( EnvironmentSpeaker speaker )
 {
-	file.environmentSpeakers.fastremovebyvalue( speaker )
+	file.allSpeakersList[ QUEUE_MAIN ].fastremovebyvalue( speaker )
 }
 #endif
 
@@ -1295,7 +1303,7 @@ array<EnvironmentSpeaker> function SortEnvironmentSpeakersByClosest()
 
 	array<EnvironmentSpeaker> nearbySpeakers
 	const float maxDistSqr = 10000 * 10000
-	foreach ( EnvironmentSpeaker speaker in file.environmentSpeakers )
+	foreach ( EnvironmentSpeaker speaker in file.allSpeakersList[ QUEUE_MAIN ] )
 	{
 		float distanceSqr = Distance2DSqr( playerPos, speaker.origin )
 		if ( distanceSqr > maxDistSqr )
@@ -1333,7 +1341,11 @@ void function PlayDialogueOnCustomSpeakers( int aliasID, int dialogueFlags, int 
 void function PlayDialogueOnCustomSpeakers_Common( int aliasID, int dialogueFlags, int customQueueIdx )
 {
 	Assert( customQueueIdx < NUM_TOTAL_DIALOGUE_QUEUES, "Invalid index for custom speakers " + customQueueIdx )
-	array<entity> customSpeakers = file.customSpeakersList[ customQueueIdx ]
+	array<EnvironmentSpeaker> customSpeakers = file.allSpeakersList[ customQueueIdx ]
+	array<entity> customSpeakerEntities
+	foreach( EnvironmentSpeaker customSpeaker in customSpeakers )
+		customSpeakerEntities.append( customSpeaker.speakerEnt )
+
 	if ( customSpeakers.len() == 0 )
 	{
 		if ( Flag( "EntitiesDidLoad" ) )
@@ -1351,13 +1363,13 @@ void function PlayDialogueOnCustomSpeakers_Common( int aliasID, int dialogueFlag
 	vector playerPos        = player.GetOrigin()
 	bool playerNearSpeakers = false
 
-	int numSpeakers = customSpeakers.len()
+	int numSpeakers = customSpeakerEntities.len()
 	int closestSpeakerIdx = 0
 	float closestSpeakerDistSqr = FLT_MAX
 
 	for( int i; i < numSpeakers; i++ )
 	{
-		entity speaker = customSpeakers[ i ]
+		entity speaker = customSpeakerEntities[ i ]
 		if ( !IsValid( speaker ) )
 			continue
 
@@ -1381,12 +1393,12 @@ void function PlayDialogueOnCustomSpeakers_Common( int aliasID, int dialogueFlag
 		if ( closestSpeakerIdx != 0 )
 		{
 
-			entity closestSpeaker = customSpeakers[ closestSpeakerIdx ]
-			customSpeakers[ closestSpeakerIdx ] = customSpeakers[ 0 ]
-			customSpeakers[ 0 ] = closestSpeaker
+			entity closestSpeaker = customSpeakerEntities[ closestSpeakerIdx ]
+			customSpeakerEntities[ closestSpeakerIdx ] = customSpeakerEntities[ 0 ]
+			customSpeakerEntities[ 0 ] = closestSpeaker
 		}
 
-		thread PlayClientDialogueOnSpeakers( aliasID, dialogueFlags, customSpeakers, customQueueIdx )
+		thread PlayClientDialogueOnSpeakers( aliasID, dialogueFlags, customSpeakerEntities, customQueueIdx )
 	}
 }
 

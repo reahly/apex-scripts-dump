@@ -1,10 +1,12 @@
 #if CLIENT || UI 
 global function StoryChallengeEvents_Init
-global function GetActiveStoryChallengeEvent
+global function GetActiveStoryChallengeEvents
+global function GetStoryChallengeEventIfActive
 global function StoryChallengeEvent_GetAppropriateChallengesForPlayer
 global function StoryChallengeEvent_HasChallengesPopupBeenSeen
 global function StoryChallengeEvent_GetHasChallengesPopupBeenSeenVarNameOrNull
-global function StoryChallengeEvent_GetAppropriateDialogueDatasForPlayer
+global function StoryChallengeEvent_GetAutoplayDialogueDataForPlayer
+global function StoryChallengeEvent_GetNonAutoplayDialogueDataForPlayer
 #endif
 
 
@@ -20,6 +22,7 @@ global struct StoryEventGroupChallengeData
 {
 	array<ItemFlavor> challengeFlavors
 	string ornull     persistenceVarNameToUnlockOrNull
+	int           	  persistenceVarCountToUnlock
 	string ornull     persistenceVarNameHasSeenOrNull
 	int               requiredStartDateUnixTime = -1
 }
@@ -38,6 +41,7 @@ global struct StoryEventDialogueData
 	string ornull persistenceVarNameHasSeenOrNull
 	string ornull persistenceVarNameToHideOrNull
 	array<string> audioAliases
+	bool		  autoPlay = true
 }
 #endif
 
@@ -89,6 +93,7 @@ void function StoryChallengeEvents_Init()
 			string persistenceVarNameToUnlock = GetSettingsBlockString( challengeGroupBlock, "requiredChallengesPersistentVarName" )
 			string persistenceVarNameHasSeen  = GetSettingsBlockString( challengeGroupBlock, "hasSeenChallengesPersistentVarName" )
 			string requiredStartDate          = GetSettingsBlockString( challengeGroupBlock, "requiredStartTime" )
+			data.persistenceVarCountToUnlock = GetSettingsBlockInt( challengeGroupBlock, "requiredChallengesPersistentVarNameCount" )
 
 			//
 			if ( persistenceVarNameToUnlock != "" )
@@ -167,6 +172,7 @@ void function StoryChallengeEvents_Init()
 			data.persistenceVarCountToUnlock = GetSettingsBlockInt( dialogueBlock, "dialoguePersistentVarNameToUnlockCount" )
 			string persistenceVarNameHasSeen = GetSettingsBlockString( dialogueBlock, "dialoguePersistentVarNameHasSeen" )
 			string persistenceVarNameToHide  = GetSettingsBlockString( dialogueBlock, "dialoguePersistentVarNameToHide" )
+			data.autoPlay = GetSettingsBlockBool( dialogueBlock, "dialogueAutoPlay" )
 
 			//
 			if ( persistenceVarNameToUnlock != "" )
@@ -237,19 +243,35 @@ void function StoryChallengeEvents_Init()
 //
 
 #if CLIENT || UI 
-ItemFlavor ornull function GetActiveStoryChallengeEvent( int t )
+array<ItemFlavor> function GetActiveStoryChallengeEvents( int t )
 {
 	Assert( IsItemFlavorRegistrationFinished() )
-	ItemFlavor ornull event = null
+	array<ItemFlavor> events
 	foreach ( ItemFlavor ev in GetAllItemFlavorsOfType( eItemType.calevent_story_challenges ) )
 	{
 		if ( !CalEvent_IsActive( ev, t ) )
 			continue
 
-		Assert( event == null, format( "Multiple story challenge events are active!! (%s, %s)", ItemFlavor_GetHumanReadableRef( expect ItemFlavor(event) ), ItemFlavor_GetHumanReadableRef( ev ) ) )
-		event = ev
+		events.push( ev )
 	}
-	return event
+	return events
+}
+
+ItemFlavor ornull function GetStoryChallengeEventIfActive( int t, string challenge_name )
+{
+	Assert( IsItemFlavorRegistrationFinished() )
+	foreach ( ItemFlavor ev in GetAllItemFlavorsOfType( eItemType.calevent_story_challenges ) )
+	{
+		if ( ItemFlavor_GetHumanReadableRef( ev ) == challenge_name )
+		{
+			if ( CalEvent_IsActive( ev, t ) )
+			{
+				return ev
+			}
+			return null
+		}
+	}
+	return null
 }
 #endif
 
@@ -263,7 +285,7 @@ array<ItemFlavor> function StoryChallengeEvent_GetAppropriateChallengesForPlayer
 
 	foreach ( StoryEventGroupChallengeData groupData in fileLevel.eventChallengesDataMap[ event ] )
 	{
-		bool challengesGroupIsUnlockedFromPersistence = groupData.persistenceVarNameToUnlockOrNull == null || player.GetPersistentVarAsInt( expect string( groupData.persistenceVarNameToUnlockOrNull ) ) > 0
+		bool challengesGroupIsUnlockedFromPersistence = groupData.persistenceVarNameToUnlockOrNull == null || player.GetPersistentVarAsInt( expect string( groupData.persistenceVarNameToUnlockOrNull ) ) >= groupData.persistenceVarCountToUnlock
 
 		if ( !challengesGroupIsUnlockedFromPersistence )
 			continue
@@ -309,7 +331,8 @@ string ornull function StoryChallengeEvent_GetHasChallengesPopupBeenSeenVarNameO
 
 
 #if CLIENT || UI 
-array<StoryEventDialogueData> function StoryChallengeEvent_GetAppropriateDialogueDatasForPlayer( ItemFlavor event, entity player )
+//
+array<StoryEventDialogueData> function StoryChallengeEvent_GetAutoplayDialogueDataForPlayer( ItemFlavor event, entity player, bool isInAutoplayCooldown )
 {
 	Assert( ItemFlavor_GetType( event ) == eItemType.calevent_story_challenges )
 
@@ -317,6 +340,9 @@ array<StoryEventDialogueData> function StoryChallengeEvent_GetAppropriateDialogu
 
 	foreach ( StoryEventDialogueData data in fileLevel.eventDialogueDataMap[ event ] )
 	{
+		if ( !data.autoPlay )
+			continue
+
 		bool isUnlocked = data.persistenceVarNameToUnlockOrNull == null || player.GetPersistentVarAsInt( expect string( data.persistenceVarNameToUnlockOrNull ) ) >= data.persistenceVarCountToUnlock
 
 		bool shouldHide = data.persistenceVarNameToHideOrNull != null && player.GetPersistentVarAsInt( expect string( data.persistenceVarNameToHideOrNull ) ) > 0
@@ -328,5 +354,33 @@ array<StoryEventDialogueData> function StoryChallengeEvent_GetAppropriateDialogu
 	}
 
 	return appropriateDialogueDatas
+}
+#endif //
+
+
+#if CLIENT || UI 
+//
+StoryEventDialogueData function StoryChallengeEvent_GetNonAutoplayDialogueDataForPlayer( ItemFlavor event, entity player )
+{
+	Assert( ItemFlavor_GetType( event ) == eItemType.calevent_story_challenges )
+
+	foreach ( StoryEventDialogueData data in fileLevel.eventDialogueDataMap[ event ] )
+	{
+		if ( data.autoPlay )
+			continue
+
+		bool isUnlocked = data.persistenceVarNameToUnlockOrNull == null || player.GetPersistentVarAsInt( expect string( data.persistenceVarNameToUnlockOrNull ) ) >= data.persistenceVarCountToUnlock
+
+		bool shouldHide = data.persistenceVarNameToHideOrNull != null && player.GetPersistentVarAsInt( expect string( data.persistenceVarNameToHideOrNull ) ) > 0
+
+		if ( !isUnlocked || shouldHide )
+			continue
+
+		return data
+	}
+
+
+	StoryEventDialogueData emptyStoryEventDialogueData
+	return emptyStoryEventDialogueData
 }
 #endif //

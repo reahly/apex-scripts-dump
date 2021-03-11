@@ -729,7 +729,7 @@ void function StopSearchForPartyServer( string details, string prompt )
 	Signal( uiGlobal.signalDummy, "EndSearchForPartyServerTimeout" )
 
 	MatchmakingCancel()
-	ClientCommand( "party_leave" )
+	Party_LeaveParty()
 	SetLaunchState( eLaunchState.WAIT_TO_CONTINUE, details, prompt )
 	file.searching = false
 

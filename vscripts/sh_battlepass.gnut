@@ -123,8 +123,6 @@ struct FileStruct_LifetimeLevel
 	array<ItemFlavor> battlePassList
 
 	table<ItemFlavor, BattlePassData> battlePassMap
-
-	table<int, array<ItemFlavor> > S7_BP_BACKUP_WEEKLIES
 }
 FileStruct_LifetimeLevel& fileLevel
 
@@ -135,131 +133,7 @@ global const asset BATTLEPASS_MODEL_APEX_COINS = $"mdl/menu/coin.rmdl"
 global const asset BATTLEPASS_MODEL_CRAFTING_METALS = $"mdl/currency/crafting/currency_crafting_epic.rmdl"
 global const float BATTLEPASS_XP_BOOST_AMOUNT = 0.1
 
-global const asset S7_BP = $"settings/itemflav/battlepass/season07.rpak"
-
-const table<int, array<asset> > S7_BP_BACKUP_WEEKLIES =
-{
-	[ 1 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week01_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week01_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week01_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week01_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week01_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week01_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week01_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week01_08.rpak",
-	],
-	[ 2 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week02_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week02_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week02_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week02_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week02_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week02_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week02_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week02_08.rpak",
-	],
-	[ 3 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week03_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week03_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week03_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week03_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week03_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week03_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week03_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week03_08.rpak",
-	],
-	[ 4 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week04_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week04_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week04_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week04_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week04_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week04_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week04_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week04_08.rpak",
-	],
-	[ 5 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week05_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week05_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week05_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week05_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week05_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week05_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week05_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week05_08.rpak",
-	],
-	[ 6 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week06_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week06_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week06_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week06_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week06_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week06_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week06_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week06_08.rpak",
-	],
-	[ 7 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week07_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week07_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week07_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week07_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week07_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week07_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week07_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week07_08.rpak",
-	],
-	[ 8 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week08_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week08_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week08_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week08_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week08_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week08_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week08_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week08_08.rpak",
-	],
-	[ 9 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week09_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week09_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week09_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week09_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week09_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week09_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week09_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week09_08.rpak",
-	],
-	[ 10 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week10_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week10_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week10_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week10_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week10_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week10_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week10_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week10_08.rpak",
-	],
-	[ 11 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week11_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week11_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week11_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week11_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week11_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week11_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week11_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week11_08.rpak",
-	],
-	[ 12 ] = [
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week12_01.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week12_02.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week12_03.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week12_04.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week12_05.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week12_06.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week12_07.rpak",
-		$"settings/itemflav/challenge/s07/v2/weekly_season07_week12_08.rpak",
-	],
-}
+global const asset S8_BP = $"settings/itemflav/battlepass/season08.rpak"
 
 //
 //
@@ -490,24 +364,6 @@ void function ShBattlePass_LevelInit()
 			printt( zone + " - " + count )
 		}
 #endif
-
-		if ( ItemFlavor_GetAsset(pass) == S7_BP )
-		{
-			foreach ( week, challenges in S7_BP_BACKUP_WEEKLIES )
-			{
-				fileLevel.S7_BP_BACKUP_WEEKLIES[ week ] <- []
-
-				foreach ( chAsset in challenges )
-				{
-					ItemFlavor ornull challenge = RegisterChallengeFromAsset( chAsset )
-					if ( challenge != null )
-					{
-						expect ItemFlavor( challenge )
-						fileLevel.S7_BP_BACKUP_WEEKLIES[ week ].append( challenge )
-					}
-				}
-			}
-		}
 
 		dupeCheck.clear()
 
@@ -1747,14 +1603,6 @@ int function GetNumBattlePassChallengesWeeks( ItemFlavor pass )
 
 array<ItemFlavor> function GetBattlePassChallenges( ItemFlavor pass, int challengeKind, int groupIndex, int forWeek = -1 )
 {
-	if ( ItemFlavor_GetAsset( pass ) == S7_BP && challengeKind == eChallengeTimeSpanKind.SEASON_WEEKLY )
-	{
-		if ( forWeek >= GetCurrentPlaylistVarInt( "battlepass_s7_backup_weeklies_start", 3 ) )
-		{
-			return fileLevel.S7_BP_BACKUP_WEEKLIES[ groupIndex ]
-		}
-	}
-
 	return fileLevel.battlePassMap[ pass ].challenges[ challengeKind ][ groupIndex ]
 }
 
@@ -1770,14 +1618,6 @@ ItemFlavor ornull function GetBattlePassRecurringGrindlordChallenge( ItemFlavor 
 
 bool function BattlePassHasWeeklyChallenge( ItemFlavor pass, ItemFlavor challenge, int week )
 {
-	if ( ItemFlavor_GetAsset( pass ) == S7_BP )
-	{
-		if ( fileLevel.S7_BP_BACKUP_WEEKLIES[ week ].contains( challenge ) )
-		{
-			return true
-		}
-	}
-
 	return fileLevel.battlePassMap[ pass ].challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY ][ week ].contains( challenge )
 }
 #endif

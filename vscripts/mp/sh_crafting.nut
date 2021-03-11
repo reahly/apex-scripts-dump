@@ -289,6 +289,11 @@ void function Crafting_Init()
 		AddCreateCallback( "info_target", OnLimitedStockParentCreated )
 	#endif
 
+	RegisterSignal( "CraftingPlayerAttaching" )
+	RegisterSignal( "CraftingComplete" )
+	RegisterSignal( "CraftingPlayerDetached" )
+	RegisterSignal( "OnPinged_Crafting" )
+
 	if ( !GetCurrentPlaylistVarBool( "crafting_enabled", true ) )
 		return
 
@@ -296,9 +301,6 @@ void function Crafting_Init()
 	file.isEnabled = true
 
 	#if(false)
-
-
-
 
 
 
@@ -1174,10 +1176,8 @@ void function MapPackage_Crafting_WorkbenchLimited( entity ent, var rui )
 
 void function TryCloseCraftingMenuFromDamage( float damage, vector damageOrigin, int damageType, int damageSourceId, entity attacker )
 {
-	if ( damageSourceId == eDamageSourceId.deathField )
-		return
-
-	TryCloseCraftingMenu()
+	if ( GetConVarBool( "player_setting_damage_closes_deathbox_menu" ) )
+		TryCloseCraftingMenu()
 }
 #endif
 
@@ -1758,49 +1758,6 @@ bool function Crafting_IsPlayerAtWorkbench( entity player )
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //
@@ -1823,70 +1780,6 @@ bool function Crafting_IsPlayerAtWorkbench( entity player )
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
 
 
 
@@ -1954,6 +1847,122 @@ bool function Crafting_IsPlayerAtWorkbench( entity player )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
 //
 
 
@@ -2082,9 +2091,6 @@ bool function Crafting_IsPlayerAtWorkbench( entity player )
 
 
 
-//
-
-
 
 
 //
@@ -2092,6 +2098,7 @@ bool function Crafting_IsPlayerAtWorkbench( entity player )
 
 
 
+//
 
 
 
@@ -2105,6 +2112,21 @@ bool function Crafting_IsPlayerAtWorkbench( entity player )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 
@@ -2333,6 +2355,7 @@ ExtendedUseSettings function WorkbenchExtendedUseSettings( entity ent, entity pl
 }
 
 #if(false)
+
 
 
 
@@ -3498,6 +3521,7 @@ vector function GetCraftingColor()
 void function Crafting_Workbench_OpenCraftingMenu( entity workbench )
 {
 	CommsMenu_Shutdown( false )
+	HideScoreboard()
 
 	if ( !CommsMenu_CanUseMenu( GetLocalClientPlayer(), eChatPage.CRAFTING ) )
 		return

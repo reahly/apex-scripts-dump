@@ -276,9 +276,15 @@
 	"viewmodel_ads_rui_bottomleft_attachment"	"RUI_BL_CROSSHAIR_SENTINEL"
 	"viewmodel_ads_centerpoint_attachment"      "ADS_CENTER_SIGHT_SENTINEL"
 
-
-
-
+                        
+                          
+                                                
+                                                      
+                                                      
+                                                                                                                                                                                     
+                                                                                                                                                                                         
+                                                                         
+       
 
 	"Mods"
 	{
@@ -294,6 +300,19 @@
 		hopup_marksmans_tempo
         {
         }
+
+                         
+                              
+         
+                                              
+                            
+         
+
+                               
+         
+                            
+         
+              
 
 		energized
 		{
@@ -539,6 +558,10 @@
 			"Args"
 			{
 				"isFiring"  "weapon_is_firing"
+                           
+                                                     
+                                                               
+                      
 			}
 		}
 	}

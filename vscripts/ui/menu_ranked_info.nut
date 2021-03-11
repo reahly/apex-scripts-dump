@@ -87,7 +87,7 @@ void function OnRankedInfoMenu_Open()
 		RuiSetInt( mainRui, "entryFee" + i, d.entryCost )
 	}
 
-	ItemFlavor latestRankedPeriod = GetLatestRankedPeriod( GetUnixTimestamp() )
+	ItemFlavor latestRankedPeriod = GetLatestRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_rankedperiod )
 	string rankedPeriodGUIDString = ItemFlavor_GetGUIDString( latestRankedPeriod  )
 	if( Ranked_PeriodHasLadderOnlyDivision( rankedPeriodGUIDString) )
 	{
@@ -189,7 +189,7 @@ void function InitRankedInfoPanel( var panel, array<RankedTierData> tiers )
 	array<RankedTierData> infoTiers = clone tiers
 	int scriptID = int( Hud_GetScriptID( panel ) )
 
-	ItemFlavor currentRankedPeriod = GetLatestRankedPeriod( GetUnixTimestamp()  )
+	ItemFlavor currentRankedPeriod = GetLatestRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_rankedperiod )
 	string rankedGUIDString = ItemFlavor_GetGUIDString( currentRankedPeriod )
 	if ( Ranked_PeriodHasLadderOnlyDivision( rankedGUIDString )  )
 	{

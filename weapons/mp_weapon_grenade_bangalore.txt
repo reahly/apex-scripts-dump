@@ -89,56 +89,24 @@ WeaponData
 	"damage_flags"									"DF_RAGDOLL | DF_EXPLOSION"
 
 
+	"ammo_clip_size"   								"200"
+	"ammo_default_total"							"200"
+	"ammo_display"									"bar"
+	"ammo_min_to_fire"								"100"
+	"ammo_per_shot"									"100"
+	"ammo_stockpile_max"							"200"
+	"regen_ammo_refill_rate"						"3"
+	"regen_ammo_refill_start_delay"					"0.0"
 
-	MP_BASE
-	{
-		"ammo_clip_size"   								"200"
-		"ammo_default_total"							"200"
-		"ammo_display"									"bar"
-		"ammo_min_to_fire"								"100"
-		"ammo_per_shot"									"100"
-		"ammo_stockpile_max"							"200"
-		"regen_ammo_refill_rate"						"3"
-		"regen_ammo_refill_start_delay"					"0.0"
+	"grenade_arc_indicator_bounce_count"			"1"
+	"grenade_arc_indicator_effect"					"P_arc_red"
 
-		"enable_highlight_networking_on_creation"		"<KEEP_DEFAULT>"
-
-	//Mods
-		"grenade_arc_indicator_bounce_count"			"1"
-		"grenade_arc_indicator_effect"					"P_arc_red"
-
-		"explosion_damage"								"20"
-		"explosion_damage_heavy_armor"					"20"
-		"npc_explosion_damage"							"20"
-		"npc_explosion_damage_heavy_armor"				"20"
-		"explosion_inner_radius"  						"256"
-		"explosionradius" 								"256"
-	}
-
-	SP_BASE
-	{
-		"ammo_clip_size"   								"4"
-		"ammo_default_total"							"1"
-		"ammo_display"									"count"
-		"ammo_min_to_fire"								"1"
-		"ammo_per_shot"									"1"
-		"ammo_stockpile_max"							"6"
-		"regen_ammo_refill_rate"						"0"
-		"regen_ammo_refill_start_delay"					"0.0"
-
-		"enable_highlight_networking_on_creation"		"1"
-
-	//Mods
-		"grenade_arc_indicator_bounce_count"			"1"
-		"grenade_arc_indicator_effect"					"P_arc_red"
-
-		"explosion_damage"								"150"
-		"explosion_damage_heavy_armor"					"500"
-		"npc_explosion_damage"							"150"
-		"npc_explosion_damage_heavy_armor"				"500"
-		"explosion_inner_radius"  						"50"
-		"explosionradius" 								"210"
-	}
+	"explosion_damage"								"20"
+	"explosion_damage_heavy_armor"					"20"
+	"npc_explosion_damage"							"20"
+	"npc_explosion_damage_heavy_armor"				"20"
+	"explosion_inner_radius"  						"256"
+	"explosionradius" 								"256"
 
 	// Behavior
 	"cooldown_type"									"ammo_instant"
@@ -266,6 +234,13 @@ WeaponData
                                          
                                        
                                           
+         
+
+                               
+         
+                                                               
+                                                               
+                                                               
          
            
 

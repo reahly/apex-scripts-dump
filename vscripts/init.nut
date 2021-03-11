@@ -537,6 +537,13 @@ global struct WeaponFireMissileParams
 	int projectileIndex
 }
 
+global struct WeaponMissileMultipleTargetData
+{
+	vector pos
+	vector normal
+	float delay
+}
+
 global struct ModInventoryItem
 {
 	int slot
@@ -741,7 +748,7 @@ global struct EadpPrivacySetting
 	string	xboxTagDiscoverable
 	string	displayNameDiscoverable
 	string	steamNameDiscoverable
-	string	nxNameDiscoverable
+	string	nintendoNameDiscoverable
 }
 
 global enum eFriendStatus
@@ -773,6 +780,14 @@ global struct FriendsData
 	array<Friend> friends
 	bool          isValid
 }
+
+global struct CodeRedemptionGrant
+{
+	string alias
+	int qty
+	int type
+}
+
 #endif //
 //
 //

@@ -101,6 +101,7 @@ void function CardBadgesPanel_Update( var panel )
 ToolTipData function CreateBadgeToolTip( ItemFlavor badge, ItemFlavor ornull character )
 {
 	ToolTipData toolTipData
+	toolTipData.tooltipStyle = eTooltipStyle.GLADIATOR_CARD_BADGE
 	toolTipData.titleText = Localize( ItemFlavor_GetLongName( badge ) )
 
 	array<GladCardBadgeTierData> tierDataList = GladiatorCardBadge_GetTierDataList( badge )
@@ -109,8 +110,22 @@ ToolTipData function CreateBadgeToolTip( ItemFlavor badge, ItemFlavor ornull cha
 	if ( tierDataList.len() > 1 )
 	{
 		int currTierIdx = GetPlayerBadgeDataInteger( LocalClientEHI(), badge, 0, character )
+		int nextOrMaxTierIdx = minint( currTierIdx + 1, tierDataList.len() - 1 )
+		int progressCount = 0
+		string unlockStatRef = GladiatorCardBadge_GetUnlockStatRef( badge, character )
 
+		if ( IsValidStatEntryRef( unlockStatRef ) )
+		{
+			StatEntry stat = GetStatEntryByRef( unlockStatRef )
+			entity player = FromEHI( LocalClientEHI() )
+			progressCount = GetStat_Int( player, stat, eStatGetWhen.CURRENT )
+		}
+
+		bool shouldShowProgress = ( progressCount > 0 )
 		string goalStr = ""
+		if ( !shouldShowProgress )
+			nextOrMaxTierIdx = 0
+
 		foreach ( int tierIdx, GladCardBadgeTierData tierData in tierDataList )
 		{
 			if ( tierIdx > 0 )
@@ -118,13 +133,17 @@ ToolTipData function CreateBadgeToolTip( ItemFlavor badge, ItemFlavor ornull cha
 
 			if ( currTierIdx == tierIdx )
 				goalStr += "`3"
+
 			goalStr += string(tierData.unlocksAt)
+
 			if ( currTierIdx == tierIdx )
 				goalStr += "`2"
 		}
-		toolTipData.actionHint1 = Localize( "#BADGE_TIER", currTierIdx + 1, tierDataList.len() ) + "`2 - " + goalStr
 
-		toolTipData.actionHint2 = badgeHint
+		if ( shouldShowProgress )
+			toolTipData.actionHint1 = Localize( "#BADGE_TIER_PROGRESS", progressCount, tierDataList[nextOrMaxTierIdx].unlocksAt )
+		toolTipData.actionHint2 = Localize( "#BADGE_TIER", currTierIdx + 1, tierDataList.len() ) + "`2 - " + goalStr
+		toolTipData.actionHint3 = badgeHint
 
 		int displayTierIdx      = maxint( 0, currTierIdx )
 		float unlockRequirement = tierDataList[displayTierIdx].unlocksAt

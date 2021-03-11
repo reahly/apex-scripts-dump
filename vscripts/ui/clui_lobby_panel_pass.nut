@@ -604,13 +604,27 @@ void function BattlePass_SetTallButtonSettings( ItemFlavor flav, var btnRui, var
 			asset icon = GetCharacterIconToDisplay( flav )
 			RuiSetBool( btnRui, "showCharacterIcon", icon != $"" )
 			RuiSetImage( btnRui, "characterIcon", icon )
+			RuiSetFloat2( btnRui, "characterIconSize", <35, 35, 0> )
 
 			if ( ItemFlavor_GetType( flav ) == eItemType.weapon_skin )
 			{
 				if ( icon != $"" && icon != rewardImage )
 				{
-					RuiSetBool( btnRui, "showCharacterIcon", false )
+					asset weaponIcon = WeaponItemFlavor_GetHudIcon( WeaponSkin_GetWeaponFlavor( flav ) )
+					RuiSetBool( btnRui, "showCharacterIcon", weaponIcon != $"" )
+					RuiSetImage( btnRui, "characterIcon", weaponIcon )
+
 					RuiSetBool( btnRui, "forceFullIcon", true )
+					RuiSetFloat2( btnRui, "characterIconSize", <60, 30, 0> )
+
+					if ( !canUseTallButton )
+					{
+						//
+						//
+						RuiSetImage( btnRui, "buttonImage", $"white" )
+						RuiSetImage( btnRui, "buttonImageSecondLayer", rewardImage )
+						RuiSetFloat2( btnRui, "buttonImageSecondLayerOffset", <0.0, 0.16, 0.0> )
+					}
 				}
 			}
 		}
@@ -665,6 +679,10 @@ bool function ShouldDisplayTallButton( ItemFlavor flav )
 	switch ( itemType )
 	{
 		case eItemType.character_skin:
+			//
+			//
+			return ItemFlavor_GetIcon( flav ) != $""
+
 		case eItemType.character_execution:
 		case eItemType.gladiator_card_frame:
 		case eItemType.gladiator_card_stance:
@@ -675,7 +693,9 @@ bool function ShouldDisplayTallButton( ItemFlavor flav )
 			return true
 
 		case eItemType.weapon_skin:
-			return ItemFlavor_GetQuality( flav ) >= eRarityTier.EPIC
+			//
+			//
+			return ItemFlavor_GetQuality( flav ) >= eRarityTier.EPIC && ItemFlavor_GetIcon( flav ) != $""
 	}
 
 	return false
@@ -3058,37 +3078,10 @@ void function ShowBattlePassItem_EmoteIcon( ItemFlavor item, float scale, bool s
    
    
 
-                                          
+                                                      
 
                         
                                  
- 
-
-                                                                         
- 
-                               
-                               
-                                                    
-                                                        
-                                                       
-
-                      
-                      
-
-                  
-
-                        
-                                                        
-     
-  
-                            
-
-             
-   
-                                                    
-                 
-   
-  
  
       
 

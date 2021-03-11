@@ -14,9 +14,9 @@ WeaponData
 
 	"weapon_type_flags"								"WPT_CONSUMABLE"
                                   
-                              
+	"weaponType"									"gadget"
      
-	"weaponType"									"anti_titan"
+                                  
       
 	"fire_mode"   									"automatic"
     "is_semi_auto"									"1"
@@ -73,9 +73,9 @@ WeaponData
 	"lower_time"  									"0.25"
 	"raise_time"  									"0.2"
                                   
-                                                                                       
+	"allow_empty_fire"								"1" //Allowed for Gadget Slot to bypass Inventory Ammo Check
      
-	"allow_empty_fire"								"0" //Original MRB setting
+                                                     
       
 	"reload_enabled"								"0"
 	"empty_reload_only"   							"0"

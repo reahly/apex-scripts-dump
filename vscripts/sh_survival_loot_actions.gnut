@@ -275,9 +275,9 @@ bool function TryPickupItem( int action, entity pickup, entity player, int picku
       
 
                    
-                        
-                                                                                          
-        
+		case eLootType.GADGET:
+			shouldDestroy = PickupGadgetItem( pickup, player, pickupFlags, deathBox, desiredCount )
+			break
       
 
 		default:
@@ -635,47 +635,48 @@ bool function PickupDataknifeItem( entity pickup, entity player, int pickupFlags
          
 
                    
-                                                                                                                         
- 
-                                                                              
-                                                         
-                                                                               
-                                                                                             
+bool function PickupGadgetItem( entity pickup, entity player, int pickupFlags, entity deathBox, int ornull desiredCount )
+{
+	LootData data   = SURVIVAL_Loot_GetLootDataByIndex( pickup.GetSurvivalInt() )
+	LootTypeData lt       = GetLootTypeData( data.lootType )
+	EquipmentSlot es      = Survival_GetEquipmentSlotDataByRef( lt.equipmentSlot )
+	LootData equippedData = EquipmentSlot_GetEquippedLootDataForSlot( player, lt.equipmentSlot )
 
-                                                                             
-                               
-              
+	entity gadgetWeapon = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_GADGET )
+	if( !IsValid( gadgetWeapon ) )
+		return false
 
-                                        
-                              
-                
-                                                    
-                                                          
+	int pickupCount = pickup.GetClipCount()
+	int numToPickup = pickupCount
+	int ammoGet = 0
+	int ammo = gadgetWeapon.GetWeaponPrimaryClipCount()
+	int maxAmmo = gadgetWeapon.GetWeaponPrimaryClipCountMax()
 
-                            
-                                                               
+	if ( desiredCount != null )
+		numToPickup = minint( numToPickup, expect int(desiredCount) )
 
-                         
+	ammoGet = maxAmmo - ammo
 
-                                                 
+	int	numPickedUp = minint( ammoGet, numToPickup )
 
-                                                                 
+	gadgetWeapon.SetWeaponPrimaryClipCount( ammo + numPickedUp ) 	//
 
-                        
-              
+	if ( numPickedUp == 0 )
+		return false
 
-           
-  
-  
+	#if(false)
+//
+//
+//
 
 
 
-      
+#endif
 
 
-                                     
-                                  
- 
+	Assert( numPickedUp <= pickupCount )
+	return numPickedUp == pickupCount
+}
       
 
 
@@ -816,6 +817,10 @@ bool function EquipEquipment( entity pickup, entity player, string equipSlot, en
 
 
 
+
+
+
+//
 
 
 

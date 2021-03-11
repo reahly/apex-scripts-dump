@@ -162,11 +162,16 @@ void function QueueMessageThink()
 
 		messageData.startTime = Time()
 
+		asset ruiAsset = $""
 		var rui
-		if ( messageData.messageScale > 1.0 )
-			rui = CreateCockpitPostFXRui( $"ui/centerevent_info.rpak" )
+		if ( GetScoreMessageRuiAssetForMode() != $"" )
+			ruiAsset = GetScoreMessageRuiAssetForMode()
+		else if ( messageData.messageScale > 1.0 )
+			ruiAsset = $"ui/centerevent_info.rpak"
 		else
-			rui = CreateCockpitPostFXRui( $"ui/pickup_info.rpak" )
+			ruiAsset = $"ui/pickup_info.rpak"
+
+		rui = CreateCockpitPostFXRui( ruiAsset )
 
 		RuiSetGameTime( rui, "startTime", messageData.startTime )
 		RuiSetFloat( rui, "duration", messageData.duration )
@@ -215,6 +220,17 @@ void function MessageThink( MessageData messageData )
 		RuiSetFloat( messageRui, "messageOffsetScale", totalMessageScale )
 		totalMessageScale += file.activeEventQueue[index].messageScale
 	}
+}
+
+
+asset function GetScoreMessageRuiAssetForMode()
+{
+                         
+                                                   
+                                      
+       
+
+	return $""
 }
 
 

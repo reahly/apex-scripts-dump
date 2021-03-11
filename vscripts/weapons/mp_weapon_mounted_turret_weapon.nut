@@ -11,6 +11,7 @@ global function OnWeaponZoomFOVToggle_weapon_mounted_turret_weapon
 #if(false)
 
 
+
 #endif
 
 #if(CLIENT)
@@ -54,6 +55,7 @@ struct
 	int turret1pDamageFxIndex = -1
 
 	#if(false)
+
 
 
 #endif
@@ -130,6 +132,10 @@ void function OnWeaponDeactivate_weapon_mounted_turret_weapon( entity weapon )
 	StopSoundOnEntity( weapon, TURRET_WINDDOWN_1P )
 	StopSoundOnEntity( weapon, TURRET_RELOAD_3P )
 	StopSoundOnEntity( weapon, TURRET_RELOAD_RAMPART_3P )
+
+#if(false)
+
+#endif //
 
 	entity weaponOwner = weapon.GetOwner()
 
@@ -367,6 +373,17 @@ void function OnWeaponZoomFOVToggle_weapon_mounted_turret_weapon( entity weapon,
 }
 
 #if(false)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

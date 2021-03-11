@@ -614,11 +614,7 @@ void function UpdateSummaryBackground( ItemFlavor battlePass )
 void function UpdateMatchRankDisplay()
 {
 	var matchRankRui = Hud_GetRui( file.matchRank )
-	RuiSetInt( matchRankRui, "squadRank", GetPersistentVarAsInt( "lastGameRank" ) )
-	RuiSetInt( matchRankRui, "totalPlayers", GetPersistentVarAsInt( "lastGameSquads" ) )
-
-	int elapsedTime = GetUnixTimestamp() - GetPersistentVarAsInt( "lastGameTime" )
-	RuiSetString( matchRankRui, "lastPlayedText", Localize( "#EOG_LAST_PLAYED", GetFormattedIntByType( elapsedTime, eNumericDisplayType.TIME_MINUTES_LONG ) ) )
+	PopulateMatchRank( matchRankRui )
 }
 
 

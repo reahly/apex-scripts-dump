@@ -3,6 +3,10 @@ global function InitSystemPanelMain
 global function InitSystemPanel
 global function UpdateSystemPanel
 
+                    
+global function EnableCharacterChangeInFiringRange
+      
+
 global function OpenSystemMenu
 
 global function ShouldDisplayOptInOptions
@@ -31,6 +35,7 @@ struct
 	table<var, ButtonData > friendlyFireButtonData
 	table<var, ButtonData > suicideButtonData
 
+	bool enableChangeCharacterButton = true
 	InputDef& qaFooter
 } file
 
@@ -55,14 +60,15 @@ void function InitSystemPanelMain( var panel )
 	#endif
 	file.qaFooter = AddPanelFooterOption( panel, LEFT, BUTTON_X, true, "#X_BUTTON_QA", "QA", ToggleOptIn, ShouldDisplayOptInOptions )
 
-	#if(CONSOLE_PROG)
-		AddPanelFooterOption( panel, RIGHT, BUTTON_BACK, false, "#BUTTON_RETURN_TO_MAIN", "", ReturnToMain_OnActivate )
-	#endif
 	#if(NX_PROG)
-	AddPanelFooterOption( panel, LEFT, BUTTON_STICK_RIGHT, true, "#BUTTON_VIEW_CINEMATIC", "#VIEW_CINEMATIC", ViewCinematic, IsLobby )
+		AddPanelFooterOption( panel, LEFT, BUTTON_STICK_RIGHT, true, "#BUTTON_VIEW_CINEMATIC", "#VIEW_CINEMATIC", ViewCinematic, IsLobby )
 	#else
-	AddPanelFooterOption( panel, RIGHT, BUTTON_STICK_RIGHT, true, "#BUTTON_VIEW_CINEMATIC", "#VIEW_CINEMATIC", ViewCinematic, IsLobby )
+		AddPanelFooterOption( panel, RIGHT, BUTTON_STICK_RIGHT, true, "#BUTTON_VIEW_CINEMATIC", "", ViewCinematic, IsLobby )
+		AddPanelFooterOption( panel, RIGHT, KEY_V, true, "", "#BUTTON_VIEW_CINEMATIC", ViewCinematic, IsLobby )
 	#endif
+
+	AddPanelFooterOption( panel, RIGHT, BUTTON_BACK, true, "#BUTTON_RETURN_TO_MAIN", "", ReturnToMain_OnActivate, IsLobby )
+	AddPanelFooterOption( panel, RIGHT, KEY_R, true, "", "#BUTTON_RETURN_TO_MAIN", ReturnToMain_OnActivate, IsLobby )
 }
 
 void function ViewCinematic( var button )
@@ -73,6 +79,9 @@ void function ViewCinematic( var button )
 
 void function TryChangeCharacters()
 {
+	if ( !file.enableChangeCharacterButton )
+		return
+
 	RunClientScript( "UICallback_OpenCharacterSelectNewMenu" )
 }
 
@@ -143,6 +152,15 @@ void function InitSystemPanel( var panel )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, SystemPanelShow )
 }
 
+                    
+void function EnableCharacterChangeInFiringRange( bool enable )
+{
+	file.enableChangeCharacterButton = enable
+	var panel = Hud_GetChild( file.menu, "SystemPanel" )
+	UpdateSystemPanel( panel )
+}
+      
+
 void function SystemPanelShow( var panel )
 {
 	UpdateSystemPanel( panel )
@@ -180,7 +198,10 @@ void function UpdateSystemPanel( var panel )
 
 		if ( IsFiringRangeGameMode() )
 		{
-			SetButtonData( panel, buttonIndex++, file.changeCharacterButtonData[ panel ] )
+                       
+			if ( file.enableChangeCharacterButton )
+         
+				SetButtonData( panel, buttonIndex++, file.changeCharacterButtonData[ panel ] )
 
 			if ( (GetTeamSize( GetTeam() ) > 1) && FiringRangeHasFriendlyFire() )
 				SetButtonData( panel, buttonIndex++, file.friendlyFireButtonData[ panel ] )
@@ -271,7 +292,7 @@ void function OpenSettingsMenu()
 	AdvanceMenu( GetMenu( "MiscMenu" ) )
 }
 
-#if(CONSOLE_PROG)
+//
 void function ReturnToMain_OnActivate( var button )
 {
 	ConfirmDialogData data
@@ -293,7 +314,7 @@ void function OnReturnToMainMenu( int result )
 		ClientCommand( "disconnect" )
 	}
 }
-#endif
+//
 
 
 void function ToggleOptIn( var button )

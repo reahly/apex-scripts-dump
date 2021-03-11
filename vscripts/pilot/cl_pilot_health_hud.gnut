@@ -381,6 +381,10 @@ void function ShieldOverlayUpdate( entity player, float shieldFrac, float lastSh
 	}
 	else if ( shieldFrac < 1.0 && ( lastShieldFrac < shieldFrac ) )
 	{
+		//
+		if ( player.IsMostRecentShieldChangeFromSingleSource( SHIELD_CHANGE_SOURCE_REGEN, player.GetShieldHealth(), 0.5 ) )
+			return
+
 		particleSystemIdx = file.shieldChargingFX
 	}
 	else if ( shieldFrac < lastShieldFrac )

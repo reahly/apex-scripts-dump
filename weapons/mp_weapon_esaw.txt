@@ -42,7 +42,13 @@ WeaponData
 	"holster_type"									"rifle"
 	"thirdperson_fire_from_mount_point"				"1"
 
+                   
+                                                         
+                                                                                 
+     
 	"OnWeaponActivate"								"OnWeaponActivate_weapon_basic_bolt"
+                             
+
 	"OnClientAnimEvent"								"OnClientAnimEvent_weapon_basic_bolt"
 
 	"projectilemodel" 								"mdl/dev/empty_model.rmdl"

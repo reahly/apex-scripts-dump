@@ -19,6 +19,7 @@ global function Lobby_GetSelectedPlaylistExpectedSquadSize
 global function Lobby_OnGamemodeSelectV2Close
 global function Lobby_OnGamemodeSelectV3Close
 global function Lobby_UpdateLoadscreenFromPlaylist
+global function Lobby_ShowDialoguePopupFromData
 
                        
                                    
@@ -49,16 +50,17 @@ global function UpdateSeasonTab
 
 global function DialogFlow_DidCausePotentiallyInterruptingPopup
 
+global function Lobby_ShowCallToActionPopup
+
 #if(DEV)
 global function DEV_PrintPartyInfo
 global function DEV_PrintUserInfo
 global function Lobby_MovePopupMessage
-global function Lobby_ShowCallToActionPopup
 global function Lobby_ShowBattlePassPopup
 global function Lobby_ShowHeirloomShopPopup
 global function Lobby_ShowQuestPopup
 global function Lobby_ShowStoryEventChallengesPopup
-global function Lobby_ShowStoryEventDialoguePopup
+global function Lobby_ShowStoryEventAutoplayDialoguePopup
 #endif
 
 const string SOUND_BP_POPUP = "UI_Menu_BattlePass_PopUp"
@@ -174,6 +176,9 @@ struct
 	bool  rankedInitialized = false
 	float currentMaxMatchmakingDelayEndTime = -1
 	var   rankedRUIToUpdate = null
+                        
+                                      
+       
 
 	void functionref() onCallToActionFunc
 
@@ -195,7 +200,7 @@ struct
 	float nextAllowFriendsUpdateTime
 
 	bool noFillButtonWasFullSquad = false
-	bool noFillButtonWasPartyLeader = false
+	bool noFillButtonWasHidden = false
 } file
 
 void function InitPlayPanel( var panel )
@@ -255,7 +260,11 @@ void function InitPlayPanel( var panel )
 
 	file.selfButton = Hud_GetChild( panel, "SelfButton" )
 	Hud_AddEventHandler( file.selfButton, UIE_CLICK, FriendButton_OnActivate )
-
+	
+	#if(NX_PROG)
+		RuiSetFloat( Hud_GetRui( file.selfButton ), "lobbyNXOffset", 1.0 )
+	#endif
+	
 	file.friendButton0 = Hud_GetChild( panel, "FriendButton0" )
 	Hud_AddEventHandler( file.friendButton0, UIE_CLICK, FriendButton_OnActivate )
 	Hud_AddEventHandler( file.friendButton0, UIE_CLICKRIGHT, FriendButton_OnRightClick )
@@ -316,14 +325,17 @@ void function InitPlayPanel( var panel )
 
 	var rankedBadge = Hud_GetChild( file.panel, "RankedBadge" )
 	Hud_AddEventHandler( rankedBadge, UIE_CLICK, OpenRankedInfoPage )
+
+                        
+    
+                                                                         
+                                                                               
+       
+
+	//
 	AddUICallback_OnLevelInit( Ranked_OnLevelInit )
 	AddCallback_OnPartyMemberAdded( TryShowMatchmakingDelayDialog )
 	AddCallback_OnPartyMemberRemoved( UpdateCurrentMaxMatchmakingDelayEndTime )
-
-                        
-                                                                  
-                                                
-       
 }
 
 
@@ -532,28 +544,13 @@ void function PlayPanel_OnShow( var panel )
 	KeepUnixTimeDebugDisplayUpdated()
 
 	thread TryRunDialogFlowThread()
-	thread Lobby_ShowCallToActionPopup()
+	thread Lobby_ShowCallToActionPopup( false )
 
 	AddCallbackAndCallNow_UserInfoUpdated( Ranked_OnUserInfoUpdatedInPanelPlay )
 
 	Lobby_SetTempSeasonExtensionButtonVisible( true )
 
 	file.nextAllowFriendsUpdateTime = Time()
-
-	bool LTMisTakeover = GetPlaylistVarBool( Lobby_GetSelectedPlaylist(), "show_ltm_about_button_is_takeover", false )
-	var aboutButton         = Hud_GetChild( file.panel, "AboutButton" )
-	Hud_ClearToolTipData( aboutButton )
-	if ( LTMisTakeover )
-	{
-		string takeoverAbout = GetPlaylistVarString( Lobby_GetSelectedPlaylist(), "survival_takeover_about", "" )
-		if ( takeoverAbout != "" )
-		{
-			ToolTipData td
-			td.titleText = GetPlaylistVarString( Lobby_GetSelectedPlaylist(), "survival_takeover_title", "#PL_PLAY_APEX" )
-			td.descText = takeoverAbout
-			Hud_SetToolTipData( aboutButton, td )
-		}
-	}
 }
 
 
@@ -569,6 +566,7 @@ void function UpdateLobbyButtons()
 	UpdateFillButton()
 	UpdateReadyButton()
 	UpdateModeButton()
+	UpdateLTMButton()
 	UpdateFriendButtons()
 	UpdateLastPlayedButtons()
 	UpdateLowerLeftButtonPositions()
@@ -583,41 +581,28 @@ void function UpdateLobbyButtons()
 	#endif
 }
 
+void function UpdateLTMButton(){
+	bool LTMisTakeover = GetPlaylistVarBool( Lobby_GetSelectedPlaylist(), "show_ltm_about_button_is_takeover", false )
+	var aboutButton = Hud_GetChild( file.panel, "AboutButton" )
+	Hud_ClearToolTipData( aboutButton )
+	if ( LTMisTakeover )
+	{
+		string takeoverAbout = GetPlaylistVarString( Lobby_GetSelectedPlaylist(), "survival_takeover_about", "" )
+		if ( takeoverAbout != "" )
+		{
+			ToolTipData td
+			td.titleText = GetPlaylistVarString( Lobby_GetSelectedPlaylist(), "survival_takeover_title", "#PL_PLAY_APEX" )
+			td.descText = takeoverAbout
+			Hud_SetToolTipData( aboutButton, td )
+		}
+	}
+}
+
                        
                                 
  
                       
         
-
-                         
-
-                                                                                                                                                                   
-
-                                          
-  
-                                                                 
-                    
-   
-                                                                  
-                                                                                                
-                                                                 
-   
-      
-   
-                                                
-                                                         
-   
-
-                                   
-                            
-
-              
-                             
-                            
-       
-                           
-        
-  
  
       
 
@@ -895,8 +880,13 @@ void function UpdateFriendButton( var rui, PartyMember info, bool inMatch )
 
 	thread KeepMicIconUpdated( info, rui )
 
-	int rankScore      = 0 //
-	int ladderPosition = RANKED_INVALID_LADDER_POSITION
+	int rankScore       = 0 //
+	int ladderPosition  = RANKED_INVALID_LADDER_POSITION
+
+                        
+                                                  
+                                                                  
+       
 
 	CommunityUserInfo ornull userInfo = GetUserInfo( info.hardware, info.uid )
 	if ( userInfo == null )
@@ -916,7 +906,12 @@ void function UpdateFriendButton( var rui, PartyMember info, bool inMatch )
 		var nestedAccountBadge = CreateNestedAccountDisplayBadge( rui, "accountBadgeHandle", accountLevel )
 
 		if ( info.uid == GetPlayerUID() && IsPersistenceAvailable() )
+		{
 			rankScore = GetPlayerRankScore( GetUIPlayer() )
+                          
+                                                               
+         
+		}
 	}
 	else
 	{
@@ -934,16 +929,26 @@ void function UpdateFriendButton( var rui, PartyMember info, bool inMatch )
 		rankScore = userInfo.rankScore
 		ladderPosition = userInfo.rankedLadderPos
 
+                         
+     
+     
+
+     
+                            
+                                                              
+        
+
 		string platformString = CrossplayUserOptIn() ? PlatformIDToIconString( GetHardwareFromName( info.hardware ) ) : ""
 		RuiSetString( rui, "platformString", platformString )
 	}
 
+	RuiSetBool( rui, "showRanked", false )
 
 	bool isRanked = IsRankedPlaylist( Lobby_GetSelectedPlaylist() )
-	RuiSetBool( rui, "showRanked", isRanked )
-	PopulateRuiWithRankedBadgeDetails( rui, rankScore, ladderPosition )
 	if ( isRanked )
 	{
+		RuiSetBool( rui, "showRanked", isRanked )
+		PopulateRuiWithRankedBadgeDetails( rui, rankScore, ladderPosition )
 		float frac = 0.0
 
 		RankedDivisionData currentRank     = GetCurrentRankedDivisionFromScoreAndLadderPosition( rankScore, ladderPosition )
@@ -964,6 +969,36 @@ void function UpdateFriendButton( var rui, PartyMember info, bool inMatch )
 
 		RuiSetFloat( rui, "accountXPFrac", frac )
 	}
+
+                        
+                                                                             
+                       
+   
+                                                  
+                                                                                              
+
+                   
+
+                                                                                                                                               
+                                                                                               
+
+                          
+    
+              
+    
+       
+    
+                                         
+                                  
+     
+                                                                                                      
+     
+    
+
+                                            
+   
+       
+
 }
 
 
@@ -1117,20 +1152,28 @@ void function UpdateLowerLeftButtonPositions()
 	Hud_SetY( file.fillButton, 16 )
 
                         
-                           
-                                                   
-                                                 
+
+    
+                                                                                          
+                                                                         
+                                            
        
 
 	if ( v3PlaylistSelect )
 	{
 		Hud_SetPinSibling( rankedBadge, Hud_GetHudName( file.gamemodeSelectV3Button ) )
+                         
+                                                                                        
+        
 		Hud_SetPinSibling( aboutButton, Hud_GetHudName( file.gamemodeSelectV3Button ) )
 		Hud_SetPinSibling( file.fillButton, Hud_GetHudName( file.gamemodeSelectV3Button ) )
 
 		Hud_SetNavUp( file.gamemodeSelectV3Button, file.inviteFriendsButton0 )
 
 		Hud_SetNavDown( rankedBadge, file.gamemodeSelectV3Button )
+                         
+                                                                   
+         
 		Hud_SetNavDown( aboutButton, file.gamemodeSelectV3Button )
 		Hud_SetNavDown( file.fillButton, file.gamemodeSelectV3Button )
 	}
@@ -1230,6 +1273,63 @@ void function UpdateLowerLeftButtonPositions()
 		return
 	}
 
+                        
+                                    
+   
+     
+
+                                                                   
+
+                          
+    
+                                                                  
+    
+
+                                            
+
+                                                        
+
+                                               
+             
+
+                                                                       
+                                                                                 
+                                      
+
+                                                                                                              
+                                   
+                                  
+                                       
+                                                     
+                                                                        
+                                                    
+
+                                               
+    
+                                                       
+                                                                                       
+                                        
+    
+
+                      
+                                        
+
+                                                                                     
+
+                          
+    
+                                         
+                                                                                                                                   
+
+                                                   
+                                                                                                                
+    
+
+                                                   
+         
+   
+       
+
 	if ( showLTMAboutButton )
 	{
 		Hud_SetVisible( aboutButton, showLTMAboutButton )
@@ -1281,21 +1381,25 @@ void function UpdateLowerLeftButtonPositions()
 
 		return
 	}
-
-
-                        
-                                                                                                                                                                                  
-                 
-   
-                            
-    
-                                                  
-                                                      
-    
-   
-       
 }
+#if(NX_PROG)
+bool function NXCanInviteUser(var playerId )
+{
 
+	if( playerId == -1 )
+		return false
+	
+	string characterGUIDString = string( GetPersistentVar( "lastGameSquadStats[" + playerId + "].platformUid" ) )
+	
+	if( NX_IsSystemFriend(characterGUIDString) )
+		return true
+		
+	if ( CrossplayEnabled() && CrossplayUserOptIn() )
+		return true
+	
+	return false
+}
+#endif
 
 void function UpdateLastPlayedButtons()
 {
@@ -1319,6 +1423,14 @@ void function UpdateLastPlayedButtons()
 	isVisibleButton0 = isVisibleButton0 && CanInvite()
 	isVisibleButton1 = isVisibleButton1 && CanInvite()
 
+	bool canInviteUserOne = true
+	bool canInviteUserTwo = true
+			
+#if(NX_PROG)
+	canInviteUserOne = NXCanInviteUser(file.lastPlayedPlayerPersistenceIndex0)
+	canInviteUserTwo = NXCanInviteUser(file.lastPlayedPlayerPersistenceIndex1)
+#endif
+
 	if ( isVisibleButton0 )
 	{
 		if ( file.lastPlayedPlayerPersistenceIndex0 == -1 )
@@ -1337,8 +1449,16 @@ void function UpdateLastPlayedButtons()
 
 		if ( Time() - file.lastPlayedPlayerInviteSentTimestamp0 > INVITE_LAST_TIMEOUT )
 		{
-			HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame0, "unitframeFooterText", "#INVITE_PLAYER_UNITFRAME" )
-			Hud_SetLocked( file.inviteLastPlayedUnitFrame0, false )
+			if( canInviteUserOne )
+			{
+				HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame0, "unitframeFooterText", "#INVITE_PLAYER_UNITFRAME" )
+				Hud_SetLocked( file.inviteLastPlayedUnitFrame0, false )
+			}
+			else
+			{
+				HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame0, "unitframeFooterText", "" )
+				Hud_SetLocked( file.inviteLastPlayedUnitFrame0, true )
+			}
 		}
 
 		int hardwareID        = expect int( GetPersistentVar( "lastGameSquadStats[" + file.lastPlayedPlayerPersistenceIndex0 + "].hardwareID" ) )
@@ -1367,8 +1487,16 @@ void function UpdateLastPlayedButtons()
 
 		if ( Time() - file.lastPlayedPlayerInviteSentTimestamp1 > INVITE_LAST_TIMEOUT )
 		{
-			HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame1, "unitframeFooterText", "#INVITE_PLAYER_UNITFRAME" )
-			Hud_SetLocked( file.inviteLastPlayedUnitFrame1, false )
+			if( canInviteUserTwo )
+			{
+				HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame1, "unitframeFooterText", "#INVITE_PLAYER_UNITFRAME" )
+				Hud_SetLocked( file.inviteLastPlayedUnitFrame1, false )
+			}
+			else
+			{
+				HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame1, "unitframeFooterText", "" )
+				Hud_SetLocked( file.inviteLastPlayedUnitFrame1, true )
+			}
 		}
 
 		int hardwareID        = expect int( GetPersistentVar( "lastGameSquadStats[" + file.lastPlayedPlayerPersistenceIndex1 + "].hardwareID" ) )
@@ -1396,10 +1524,20 @@ void function UpdateLastPlayedButtons()
 	{
 		if ( Time() - file.lastPlayedPlayerInviteSentTimestamp0 > INVITE_LAST_TIMEOUT )
 		{
-			toolTipData0.actionHint1 = "#A_BUTTON_INVITE"
-			toolTipData0.actionHint2 = "#X_BUTTON_INSPECT"
-			if ( ClubIsValid() && ClubGetMyMemberRank() >= CLUB_RANK_CAPTAIN )
-				toolTipData0.actionHint3 = "#LAST_SQUAD_BUTTON_CLUB_INVITE"
+			if( canInviteUserOne )
+			{
+				toolTipData0.actionHint1 = "#A_BUTTON_INVITE"
+				toolTipData0.actionHint2 = "#X_BUTTON_INSPECT"
+				if ( ClubIsValid() && ClubGetMyMemberRank() >= CLUB_RANK_CAPTAIN )
+					toolTipData0.actionHint3 = "#LAST_SQUAD_BUTTON_CLUB_INVITE"
+			}
+			else
+			{
+				toolTipData0.actionHint1 = "#X_BUTTON_INSPECT"
+				if ( ClubIsValid() && ClubGetMyMemberRank() >= CLUB_RANK_CAPTAIN )
+					toolTipData0.actionHint2 = "#LAST_SQUAD_BUTTON_CLUB_INVITE"
+			}
+
 			Hud_SetToolTipData( file.inviteLastPlayedUnitFrame0, toolTipData0 )
 		}
 		else if ( Time() - file.lastPlayedPlayerInviteSentTimestamp0 <= INVITE_LAST_TIMEOUT )
@@ -1410,10 +1548,20 @@ void function UpdateLastPlayedButtons()
 
 		if ( Time() - file.lastPlayedPlayerInviteSentTimestamp1 > INVITE_LAST_TIMEOUT )
 		{
-			toolTipData1.actionHint1 = "#A_BUTTON_INVITE"
-			toolTipData1.actionHint2 = "#X_BUTTON_INSPECT"
-			if ( ClubIsValid() && ClubGetMyMemberRank() >= CLUB_RANK_CAPTAIN )
-				toolTipData0.actionHint3 = "#LAST_SQUAD_BUTTON_CLUB_INVITE"
+			if( canInviteUserTwo )
+			{
+				toolTipData1.actionHint1 = "#A_BUTTON_INVITE"
+				toolTipData1.actionHint2 = "#X_BUTTON_INSPECT"
+				if ( ClubIsValid() && ClubGetMyMemberRank() >= CLUB_RANK_CAPTAIN )
+					toolTipData1.actionHint3 = "#LAST_SQUAD_BUTTON_CLUB_INVITE"
+			}
+			else
+			{
+				toolTipData1.actionHint1 = "#X_BUTTON_INSPECT"
+				if ( ClubIsValid() && ClubGetMyMemberRank() >= CLUB_RANK_CAPTAIN )
+					toolTipData1.actionHint2 = "#LAST_SQUAD_BUTTON_CLUB_INVITE"
+			}
+			
 			Hud_SetToolTipData( file.inviteLastPlayedUnitFrame1, toolTipData1 )
 		}
 		else if ( Time() - file.lastPlayedPlayerInviteSentTimestamp1 <= INVITE_LAST_TIMEOUT )
@@ -1518,6 +1666,7 @@ int function Lobby_GetPlaylistState( string playlistName )
 	if ( GetPartySize() > GetMaxTeamSizeForPlaylist( playlistName ) )
 		return ePlaylistState.PARTY_SIZE_OVER
 
+	//
 	if ( IsRankedPlaylist( playlistName ) )
 	{
 		if ( !Ranked_PartyHasRankedLevelAccess() )
@@ -1538,6 +1687,11 @@ int function Lobby_GetPlaylistState( string playlistName )
                            
 		if ( playlistName == "private_match" && !IsTournamentMatchmaking() )
 			return ePlaylistState.LOCKED
+       
+
+                     
+	if ( GetPlaylistVarBool( playlistName, "preview_locked", false ) )
+		return ePlaylistState.LOCKED
        
 
 	return ePlaylistState.AVAILABLE
@@ -1828,9 +1982,9 @@ void function UpdateModeButton()
 void function ResetFillButton()
 {
 	Hud_SetSelected( file.fillButton, true )
-	SetConVarBool( "party_nofill_selected", true )
+	SetConVarBool( "party_nofill_selected", false )
 	file.noFillButtonWasFullSquad = false
-	file.noFillButtonWasPartyLeader = false
+	file.noFillButtonWasHidden = false
 }
 
 
@@ -1839,30 +1993,19 @@ void function UpdateFillButton()
 	Hud_ClearToolTipData( file.fillButton )
 
 	//
-	bool shouldShowFillButton = DoesPlaylistSupportNoFill( Lobby_GetSelectedPlaylist() )
+	bool shouldShowFillButton = DoesPlaylistSupportNoFill( Lobby_GetSelectedPlaylist() ) && IsPartyLeader()
 	bool shouldLockFillButton = false
 
 	if ( shouldShowFillButton )
 	{
 		string fillButtonToolTipText = "#MATCH_TEAM_FILL_DESC"
 
-		if ( IsPartyLeader() )
+		if ( file.noFillButtonWasHidden )
 		{
-			if ( !file.noFillButtonWasPartyLeader )
-				ResetFillButton()
-
-			file.noFillButtonWasPartyLeader = true
-		}
-		else
-		{
-			shouldLockFillButton = true
-			fillButtonToolTipText = "#MATCH_TEAM_FILL_NOT_LEADER"
-			Hud_SetSelected( file.fillButton, IsNoFillSelected() ) //
-			file.noFillButtonWasPartyLeader = false
+			ResetFillButton()
 		}
 
-
-		if ( AreWeMatchmaking() ) //
+		if ( AreWeMatchmaking() )
 		{
 			fillButtonToolTipText = "#MATCH_TEAM_FILL_MATCHMAKING"
 			shouldLockFillButton = true
@@ -1890,6 +2033,7 @@ void function UpdateFillButton()
 		shouldLockFillButton = true
 		Hud_SetSelected( file.fillButton, false )
 		SetConVarBool( "party_nofill_selected", false )
+		file.noFillButtonWasHidden = true
 	}
 
 	Hud_SetVisible( file.fillButton, shouldShowFillButton )
@@ -1900,13 +2044,11 @@ void function UpdateFillButton()
 
 void function FillButton_OnActivate( var button )
 {
-	//
-	//
-	bool isFillSquadActive = GetPartySize() > 1 ? IsNoFillSelected() : GetConVarBool( "party_nofill_selected" )
+	bool nofill_button_state = Hud_IsSelected( button )
 
-	Hud_SetSelected( button, !isFillSquadActive )
-	SetConVarBool( "party_nofill_selected", !isFillSquadActive )
-	printt( "SHOULD WE FILL THE SQUAD? " + !isFillSquadActive )
+	Hud_SetSelected( button, !nofill_button_state )
+	SetConVarBool( "party_nofill_selected", nofill_button_state )
+	printt( "SHOULD WE FILL THE SQUAD? " + !nofill_button_state )
 }
 
 
@@ -1964,10 +2106,28 @@ void function GameModeSelectV3Button_OnActivate( var button )
 	Hud_SetVisible( file.readyButton, false )
 
 	string currentLTM = Playlist_GetLTMSlotPlaylist()
+	bool resetMode = Lobby_IsPlaylistAvailable( currentLTM )
 	if ( (currentLTM != "") && (currentLTM != GetPersistentVar( "lastSeenLobbyLTM" )) && Lobby_IsPlaylistAvailable( currentLTM ) )
-		GamemodeSelectV3_SetFeaturedSlot( "ltm" )
+	{
+		GamemodeSelectV3_SetFeaturedSlot( "ltm", "#HEADER_NEW_MODE" )
+	}
+	else
+	{
+		array<ItemFlavor> currentEvents = GetActiveBuffetEventArray( GetUnixTimestamp() )
+		foreach ( event in currentEvents )
+		{
+			var sBlock         = ItemFlavor_GetSettingsBlock( event )
+			string highlight = GetSettingsBlockString( sBlock, "highlightGamemodeSelectorSlot" )
+			if ( highlight != "" && highlight != GetPersistentVar( "lastSeenLobbyLTM" ) )
+			{
+				GamemodeSelectV3_SetFeaturedSlot( highlight, "#HEADER_NEW_EVENT" )
+				resetMode = true
+				break
+			}
+		}
+	}
 
-	if ( Lobby_IsPlaylistAvailable( currentLTM ) )
+	if ( resetMode )
 		Remote_ServerCallFunction( "ClientCallback_ViewedModes" )
 
 	AdvanceMenu( GetMenu( "GamemodeSelectV3Dialog" ) )
@@ -3165,12 +3325,13 @@ bool function ShouldShowLastGameRankedAbandonForgivenessDialog()
 	if ( file.haveShownLastGameRankedAbandonForgivenessDialog )
 		return false
 
-	var lastGameAbandonForgiveness = GetRankedPersistenceData( GetUIPlayer(), "lastGameAbandonForgiveness" )
+	//
+	var lastGameAbandonForgiveness = GetPersistentVar( "lastGameAbandonForgiveness" )
 
 	if ( lastGameAbandonForgiveness == null )
 		return false
 
-	return expect bool ( lastGameAbandonForgiveness  )
+	return expect bool ( lastGameAbandonForgiveness )
 }
 
 
@@ -3182,7 +3343,7 @@ void function ShowLastGameRankedAbandonForgivenessDialog()
 		DialogFlow()
 	}
 
-	int numUsedForgivenessAbandons = expect int ( GetRankedPersistenceData( GetUIPlayer(), "numUsedForgivenessAbandons" ) )
+	int numUsedForgivenessAbandons = expect int ( GetPersistentVar( "numUsedForgivenessAbandons" ) )
 
 	if ( numUsedForgivenessAbandons == GetCurrentPlaylistVarInt( "ranked_num_abandon_forgiveness_games", RANKED_NUM_ABANDON_FORGIVENESS_GAMES ) )
 	{
@@ -3289,13 +3450,21 @@ void function Ranked_OnUserInfoUpdatedInPanelPlay( string hardware, string id )
 		{
 			PopulateRuiWithRankedBadgeDetails( file.rankedRUIToUpdate, cui.rankScore, cui.rankedLadderPos )
 		}
+                         
+                                                 
+    
+      
+                                                                                     
+   
+    
+        
 	}
 }
 
 
 array<int> POPUP_LEVEL_MARKERS = [ 25, 53, 77, 100 ]
 
-void function Lobby_ShowCallToActionPopup()
+void function Lobby_ShowCallToActionPopup( bool challengesOnly )
 {
 	Signal( uiGlobal.signalDummy, "Lobby_ShowCallToActionPopup" )
 	EndSignal( uiGlobal.signalDummy, "Lobby_ShowCallToActionPopup" )
@@ -3308,20 +3477,23 @@ void function Lobby_ShowCallToActionPopup()
 	while ( !GRX_IsInventoryReady() )
 		WaitFrame()
 
-	if ( Lobby_ShowBattlePassPopup() )
+	if ( Lobby_ShowStoryEventChallengesPopup() ) //
 		return
 
-	if ( Lobby_ShowHeirloomShopPopup() )
-		return
+	if ( !challengesOnly )
+	{
+		if ( Lobby_ShowStoryEventAutoplayDialoguePopup() )
+			return
 
-	if ( Lobby_ShowQuestPopup() )
-		return
+		if ( Lobby_ShowBattlePassPopup() )
+			return
 
-	if ( Lobby_ShowStoryEventDialoguePopup() )
-		return
+		if ( Lobby_ShowHeirloomShopPopup() )
+			return
 
-	if ( Lobby_ShowStoryEventChallengesPopup() )
-		return
+		if ( Lobby_ShowQuestPopup() )
+			return
+	}
 }
 
 
@@ -3568,156 +3740,176 @@ bool function Lobby_ShowQuestPopup( bool forceShow = false )
 }
 
 
-bool function Lobby_ShowStoryEventDialoguePopup( bool forceShow = false )
+bool function Lobby_ShowStoryEventAutoplayDialoguePopup( bool forceShow = false )
 {
-	ItemFlavor ornull storyChallengeEventOrNull = GetActiveStoryChallengeEvent( GetUnixTimestamp() )
-	if ( storyChallengeEventOrNull == null )
+	array<ItemFlavor> storyChallengeEvents  = GetActiveStoryChallengeEvents( GetUnixTimestamp() )
+	if ( storyChallengeEvents.len() <= 0 )
 		return false
-	ItemFlavor storyChallengeEvent = expect ItemFlavor( storyChallengeEventOrNull )
 
 	entity player = GetUIPlayer()
 
 	//
-	array<StoryEventDialogueData> dialogueDatas = StoryChallengeEvent_GetAppropriateDialogueDatasForPlayer( storyChallengeEvent, player )
-
-	if ( dialogueDatas.len() < 1 )
+	//
+	if( ( GetUnixTimestamp() - expect int( GetPersistentVar( "storyEventDialoguePopupLastSeen" ) ) < SECONDS_PER_DAY * 2 ) && !forceShow )
 		return false
 
-	//
-	bool hasSeenSomeDialogue = false
-	foreach ( StoryEventDialogueData data in dialogueDatas )
+	array<StoryEventDialogueData> dialogueDatas
+	foreach ( event in storyChallengeEvents )
 	{
-		if ( data.persistenceVarNameHasSeenOrNull != null && GetPersistentVarAsInt( expect string( data.persistenceVarNameHasSeenOrNull ) ) > 0 )
-		{
-			hasSeenSomeDialogue = true
-			break
-		}
-	}
-
-	if ( hasSeenSomeDialogue )
-	{
-		if ( GetUnixTimestamp() - expect int( GetPersistentVar( "storyEventDialoguePopupLastSeen" ) ) < SECONDS_PER_DAY * 2 && !forceShow )
-			return false
+		array<StoryEventDialogueData> temp =  StoryChallengeEvent_GetAutoplayDialogueDataForPlayer( event, player, false )
+		dialogueDatas.extend( temp )
 	}
 
 	//
-	thread function() : ( dialogueDatas )
+	if ( dialogueDatas.len() > 0 )
 	{
-		EndSignal( uiGlobal.signalDummy, "Lobby_ShowCallToActionPopup" )
+		Remote_ServerCallFunction ("ClientCallback_MarkStoryEventDialoguePopupAsAttempted")
+		thread Lobby_ShowDialoguePopupFromData( dialogueDatas )
+		return true
+	}
 
-		var popup = Hud_GetChild( file.panel, "StoryEventsMessage" )
-		var rui   = Hud_GetRui( popup )
-
-		foreach ( StoryEventDialogueData data in dialogueDatas )
-		{
-			RuiSetBool( rui, "shouldHideInMenu", false )
-			RuiSetString( rui, "displayText", data.bodyText )
-			RuiSetString( rui, "speakerName", data.speakerName )
-			RuiSetImage( rui, "portraitImage", data.speakerIcon )
-
-			wait 0.5
-
-			while ( GetActiveMenu() != GetMenu( "LobbyMenu" ) || !IsPanelActive( file.panel ) )
-				WaitFrame()
-
-			RuiSetFloat( rui, "soundDuration", data.duration )
-			RuiSetGameTime( rui, "startTimeOverride", Time() )
-
-			thread CallToActionDialoguePopupAudioThink( popup, data )
-			waitthread CallToActionDialoguePopupThink( popup, data )
-		}
-	}()
-
-	return true
+	return false
 }
 
-
-bool function Lobby_ShowStoryEventChallengesPopup( bool forceShow = false )
+void function Lobby_ShowDialoguePopupFromData( array<StoryEventDialogueData> dialogueDatas )
 {
-	ItemFlavor ornull storyChallengeEventOrNull = GetActiveStoryChallengeEvent( GetUnixTimestamp() )
-	if ( storyChallengeEventOrNull == null )
-		return false
-	ItemFlavor storyChallengeEvent = expect ItemFlavor( storyChallengeEventOrNull )
+	Signal( uiGlobal.signalDummy, "Lobby_ShowCallToActionPopup" ) //
+	EndSignal( uiGlobal.signalDummy, "Lobby_ShowCallToActionPopup" )
 
-	entity player = GetUIPlayer()
+	var popup = Hud_GetChild( file.panel, "StoryEventsMessage" )
+	var rui   = Hud_GetRui( popup )
 
-	array<ItemFlavor> appropriateSpecialEventChallenges = StoryChallengeEvent_GetAppropriateChallengesForPlayer( storyChallengeEvent, player )
-	bool hasSeenPopupForSomeChallenges                  = false
-	array<ItemFlavor> activeChallenges
-	array<string> hasSeenPersistenceVarNames
-
-	foreach ( ItemFlavor challenge in appropriateSpecialEventChallenges )
+	foreach ( StoryEventDialogueData data in dialogueDatas )
 	{
-		//
-		if ( Challenge_IsAssigned( player, challenge ) && !Challenge_IsComplete( player, challenge ) )
-		{
-			activeChallenges.append( challenge )
+		RuiSetBool( rui, "shouldHideInMenu", false )
+		RuiSetString( rui, "displayText", data.bodyText )
+		RuiSetString( rui, "speakerName", data.speakerName )
+		RuiSetImage( rui, "portraitImage", data.speakerIcon )
 
-			string ornull hasSeenPersistenceVarNameOrNull = StoryChallengeEvent_GetHasChallengesPopupBeenSeenVarNameOrNull( challenge, player )
-			if ( hasSeenPersistenceVarNameOrNull != null && !hasSeenPersistenceVarNames.contains( expect string ( hasSeenPersistenceVarNameOrNull ) ) )
-				hasSeenPersistenceVarNames.append( expect string ( hasSeenPersistenceVarNameOrNull ) )
-
-			if ( StoryChallengeEvent_HasChallengesPopupBeenSeen( challenge, player ) )
-				hasSeenPopupForSomeChallenges = true
-		}
-	}
-
-	if ( activeChallenges.len() == 0 )
-		return false
-
-	if ( hasSeenPersistenceVarNames.len() == 0 )
-		return false
-
-	//
-	if ( hasSeenPopupForSomeChallenges )
-	{
-		if ( GetUnixTimestamp() - expect int( GetPersistentVar( "storyEventChallengesPopupLastSeen" ) ) < SECONDS_PER_DAY * 2 && !forceShow )
-			return false
-	}
-
-	file.onCallToActionFunc = void function() : ()
-	{
-		JumpToSeasonTab( "ChallengesPanel" )
-		AllChallengesMenu_ForceClickSpecialEventButton()
-		Lobby_HideCallToActionPopup()
-	}
-
-	thread function() : ( hasSeenPersistenceVarNames )
-	{
-		EndSignal( uiGlobal.signalDummy, "Lobby_ShowCallToActionPopup" )
-
-		TabData lobbyTabData = GetTabDataForPanel( GetMenu( "LobbyMenu" ) )
-		var popup            = Hud_GetChild( file.panel, "PopupMessage" )
-
-		//
-		//
-		HudElem_SetRuiArg( popup, "detailText", "" )
-		HudElem_SetRuiArg( popup, "unlockedString", "" )
-		//
-		HudElem_SetRuiArg( popup, "forceFullIcon", false )
-		//
-
-		HudElem_SetRuiArg( popup, "altStyle1Color", <0.55, 0.55, 0.55> )
-		HudElem_SetRuiArg( popup, "altStyle2Color", <1.0, 1.0, 1.0> )
-		HudElem_SetRuiArg( popup, "altStyle3Color", SrgbToLinear( GetKeyColor( COLORID_MENU_TEXT_LOOT_TIER0, eRarityTier.HEIRLOOM ) / 255.0 ) )
-
-		Lobby_MovePopupMessage( 0, 0.288 )
-
-		wait 0.2
+		wait 0.5
 
 		while ( GetActiveMenu() != GetMenu( "LobbyMenu" ) || !IsPanelActive( file.panel ) )
 			WaitFrame()
 
-		RuiSetGameTime( Hud_GetRui( popup ), "animStartTime", Time() )
-		EmitUISound( SOUND_BP_POPUP )
+		RuiSetFloat( rui, "soundDuration", data.duration )
+		RuiSetGameTime( rui, "startTimeOverride", Time() )
 
-		foreach ( string varName in hasSeenPersistenceVarNames )
-			Remote_ServerCallFunction( "ClientCallback_MarkStoryEventChallengesPopupAsSeen", true, varName )
+		thread CallToActionDialoguePopupAudioThink( popup, data )
+		waitthread CallToActionDialoguePopupThink( popup, data )
+	}
+}
 
-		thread CallToActionPopupThink( popup, 10.0 )
-	}()
+bool function Lobby_ShowStoryEventChallengesPopup( bool forceShow = false )
+{
+	array< ItemFlavor > storyChallengeEvents = GetActiveStoryChallengeEvents( GetUnixTimestamp() )
+	if ( storyChallengeEvents.len() <= 0 )
+		return false
 
-	return true
+	entity player = GetUIPlayer()
+
+	foreach ( event in storyChallengeEvents )
+	{
+		array<ItemFlavor> appropriateSpecialEventChallenges = StoryChallengeEvent_GetAppropriateChallengesForPlayer( event, player )
+		bool hasSeenPopupForSomeChallenges                  = false
+		array<ItemFlavor> activeChallenges
+		array<string> hasSeenPersistenceVarNames
+
+		foreach ( ItemFlavor challenge in appropriateSpecialEventChallenges )
+		{
+			//
+			if ( Challenge_IsAssigned( player, challenge ) && !Challenge_IsComplete( player, challenge ) )
+			{
+				activeChallenges.append( challenge )
+
+				string ornull hasSeenPersistenceVarNameOrNull = StoryChallengeEvent_GetHasChallengesPopupBeenSeenVarNameOrNull( challenge, player )
+				if ( hasSeenPersistenceVarNameOrNull != null && !hasSeenPersistenceVarNames.contains( expect string ( hasSeenPersistenceVarNameOrNull ) ) )
+					hasSeenPersistenceVarNames.append( expect string ( hasSeenPersistenceVarNameOrNull ) )
+
+				if ( StoryChallengeEvent_HasChallengesPopupBeenSeen( challenge, player ) )
+					hasSeenPopupForSomeChallenges = true
+			}
+		}
+
+		if ( activeChallenges.len() == 0 )
+			continue
+
+		if ( hasSeenPersistenceVarNames.len() == 0 )
+			continue
+
+		//
+		if ( hasSeenPopupForSomeChallenges )
+		{
+			if ( GetUnixTimestamp() - expect int( GetPersistentVar( "storyEventChallengesPopupLastSeen" ) ) < SECONDS_PER_DAY * 2 && !forceShow )
+				continue
+		}
+
+		//
+		//
+		int kind = Challenge_GetTimeSpanKind( activeChallenges[0] )
+		if ( kind == eChallengeTimeSpanKind.EVENT_SPECIAL )
+		{
+			file.onCallToActionFunc = void function() : ()
+			{
+				JumpToSeasonTab( "ChallengesPanel" )
+				AllChallengesMenu_ForceClickSpecialEventButton( eChallengeTimeSpanKind.EVENT_SPECIAL )
+				Lobby_HideCallToActionPopup()
+			}
+		}
+		else if ( kind == eChallengeTimeSpanKind.EVENT_SPECIAL_2 )
+		{
+			file.onCallToActionFunc = void function() : ()
+			{
+				JumpToSeasonTab( "ChallengesPanel" )
+				AllChallengesMenu_ForceClickSpecialEventButton( eChallengeTimeSpanKind.EVENT_SPECIAL_2 )
+				Lobby_HideCallToActionPopup()
+			}
+		}
+		else
+		{
+			Assert( 0, "StoryChallengeEvent challenges only support all EVENT_SPECIAL or all EVENT_SPECIAL_2 kinds" )
+		}
+
+		string eventTitle = ItemFlavor_GetShortName( event )
+		string eventDesc = ItemFlavor_GetShortDescription( event )
+		thread function() : ( hasSeenPersistenceVarNames, eventTitle, eventDesc )
+		{
+			EndSignal( uiGlobal.signalDummy, "Lobby_ShowCallToActionPopup" )
+
+			TabData lobbyTabData = GetTabDataForPanel( GetMenu( "LobbyMenu" ) )
+			var popup            = Hud_GetChild( file.panel, "PopupMessage" )
+
+			HudElem_SetRuiArg( popup, "titleText", eventTitle )
+			HudElem_SetRuiArg( popup, "subText", "#S08E04_CHALLENGES_NOTIFICATION" )
+			HudElem_SetRuiArg( popup, "detailText", "" )
+			HudElem_SetRuiArg( popup, "unlockedString", "" )
+			HudElem_SetRuiArg( popup, "buttonImage", $"rui/rui_screens/arenas_logo", eRuiArgType.IMAGE ) //
+			HudElem_SetRuiArg( popup, "forceFullIcon", false )
+			//
+
+			HudElem_SetRuiArg( popup, "altStyle1Color", <0.55, 0.55, 0.55> )
+			HudElem_SetRuiArg( popup, "altStyle2Color", <1.0, 1.0, 1.0> )
+			HudElem_SetRuiArg( popup, "altStyle3Color", SrgbToLinear( GetKeyColor( COLORID_MENU_TEXT_LOOT_TIER0, eRarityTier.HEIRLOOM ) / 255.0 ) )
+
+			Lobby_MovePopupMessage( 0, 0.288 )
+
+			wait 0.2
+
+			while ( GetActiveMenu() != GetMenu( "LobbyMenu" ) || !IsPanelActive( file.panel ) )
+				WaitFrame()
+
+			RuiSetGameTime( Hud_GetRui( popup ), "animStartTime", Time() )
+			EmitUISound( SOUND_BP_POPUP )
+
+			foreach ( string varName in hasSeenPersistenceVarNames )
+				Remote_ServerCallFunction( "ClientCallback_MarkStoryEventChallengesPopupAsSeen", true, varName )
+
+			thread CallToActionPopupThink( popup, 10.0 )
+		}()
+
+		return true //
+	}
+
+	return false
 }
 
 

@@ -161,10 +161,13 @@ global enum eWaypoint
        
 
                        
-                         
-                        
+		VOID_RING_TROPHY_TIMER,
+		VOID_RING_TROPHY_LIFE,
        
                
+                    
+       
+            
                    
        
 	_count
@@ -809,7 +812,7 @@ void function CreateRUIsForObjectiveWP( entity wp )
 
 	//
 	var newRui = CreateWaypointRui( $"ui/waypoint_generic_pve_new.rpak", sortKey )
-
+	asset image = wp.GetWaypointAsset( 0 )
 
 	{	//
 		//
@@ -817,7 +820,7 @@ void function CreateRUIsForObjectiveWP( entity wp )
 		//
 		RuiSetImage( newRui, "innerIcon", $"rui/hud/ping/icon_ping_any_inner" )
 		RuiSetImage( newRui, "innerShadowIcon", $"rui/hud/ping/icon_ping_any_shadow" )
-		RuiSetImage( newRui, "outerIcon", $"rui/hud/ping/icon_ping_quest_outer" )
+		RuiSetImage( newRui, "outerIcon", image )
 		RuiSetImage( newRui, "shadowIcon", $"rui/hud/ping/icon_ping_quest_shadow" )
 		RuiSetImage( newRui, "animIcon", $"rui/hud/ping/icon_ping_quest_outline" )
 		RuiSetBool( newRui, "drawHeightLine", false )
@@ -849,7 +852,6 @@ void function CreateRUIsForObjectiveWP( entity wp )
 
 		if ( !noCreateForMinimap )
 		{
-			asset image = wp.GetWaypointAsset( 0 )
 			Assert( wp.wp.ruiMinimap == null )
 			wp.wp.ruiMinimap = AddLocationPingToMinimapNoClamp( targ0, image, MINIMAP_SIZE_BIG, iconScale )
 			HookUpWaypointRuiForObjectiveRelevanceIfPVE( wp, wp.wp.ruiMinimap )
@@ -870,7 +872,6 @@ void function CreateRUIsForObjectiveWP( entity wp )
 
 		if ( !noCreateForMinimap )
 		{
-			asset image = wp.GetWaypointAsset( 0 )
 			Assert( wp.wp.ruiMinimap == null )
 			wp.wp.ruiMinimap = AddWaypointPosToMiniMapNoClamp( wp, image, MINIMAP_SIZE_BIG, iconScale )
 			HookUpWaypointRuiForObjectiveRelevanceIfPVE( wp, wp.wp.ruiMinimap )
@@ -2015,17 +2016,17 @@ void function InstanceLocationPing( entity wp )
 			break
 
                             
-                                        
-                                                                
-                                                                                                
-                                       
-                                             
-                                              
-                                               
-                                       
-                                       
-                            
-        
+		case ePingType.MARK_MY_LAST_DEATH_BOX:
+			RuiSetString( rui, "topLabelText", Localize( "" ).toupper() )
+			RuiSetString( rui, "promptText", Localize( "#PROMPT_MARK_MY_LAST_DEATHBOX_SHORT").toupper() )
+			RuiSetFloat( rui, "iconSize", 56.0 )
+			RuiSetFloat( rui, "iconSizePinned", 72.0 )
+			RuiSetBool( rui, "completeADSFade", false )
+			RuiSetBool( rui, "useInactiveScalar", true )
+			RuiSetImage( rui, "animImage", $"" )
+			RuiSetBool( rui, "hideIcon", false )
+			iconScale = <0.5, 0.5, 0>
+			break
       
 
 		case ePingType.RESPAWN_BANNER:

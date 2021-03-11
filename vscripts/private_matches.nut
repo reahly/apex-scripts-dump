@@ -138,7 +138,7 @@ void function PrivateMatch_Init()
 
 
 
-//
+
 
 
 
@@ -196,7 +196,7 @@ void function PrivateMatch_RegisterNetworking()
 	Remote_RegisterClientFunction( "ServerCallback_GameStatus_PlayerButton_Update", "entity" )
 	Remote_RegisterClientFunction( "ServerCallback_PrivateMatch_ManageHighlights" )
 	Remote_RegisterClientFunction( "ServerCallback_PrivateMatch_PopulateGameStatusMenu" )
-	RegisterNetworkedVariable( NV_OBSERVER_EVENT_INDEX, SNDC_GLOBAL, SNVT_INT, 0 )
+	RegisterNetworkedVariable( NV_OBSERVER_EVENT_INDEX, SNDC_GLOBAL, SNVT_UNSIGNED_INT, 0 )
 	RegisterNetworkedVariable( NV_OBSERVER_HIGHLIGHT_ENABLED, SNDC_PLAYER_GLOBAL, SNVT_BOOL, false )
 
 	#if(CLIENT)
@@ -501,6 +501,15 @@ void function PrivateMatch_SetUpTeamRosters( string playlistName )
 //
 
 //
+
+
+
+
+
+
+
+
+
 
 
 

@@ -65,6 +65,8 @@ global function DeployableModelHighlight
 global function DeployableModelInvalidHighlight
 global function PingViewModelHighlight
 global function PingViewModelClearHighlight
+global function LobbyPropHighlight
+global function LobbyPropClearHighlight
 global function ClHighlight_YouRespawned
 global function ClHighlight_YouDied
 global function ClHighlight_HasHighlightContext
@@ -188,6 +190,11 @@ global const HIGHLIGHT_COLOR_BLACKHOLE = <0.1, 0.25, 0.9>
                                               
                                                              
                                               
+      
+
+                    
+const HIGHLIGHT_OUTLINE_LOBBY_PROP = 170
+const HIGHLIGHT_FILL_LOBBY_PROP = 171
       
 
 
@@ -2033,6 +2040,27 @@ void function PingViewModelClearHighlight( entity viewModelEntity )
 	viewModelEntity.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_NONE, true, HIGHLIGHT_OUTLINE_NONE, 1.0, highlightId, false )
 	viewModelEntity.Highlight_SetLifeTime( 0.0 )
 }
+
+void function LobbyPropHighlight( entity viewModelEntity, vector highlightColor = HIGHLIGHT_COLOR_FRIENDLY )
+{
+	viewModelEntity.Highlight_SetVisibilityType( HIGHLIGHT_VIS_ALWAYS )
+	viewModelEntity.Highlight_SetCurrentContext( HIGHLIGHT_CONTEXT_NEUTRAL )
+	int highlightId = viewModelEntity.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
+	viewModelEntity.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_LOBBY_PROP, true, HIGHLIGHT_OUTLINE_LOBBY_PROP, 3.0, highlightId, false )
+	viewModelEntity.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, highlightColor )
+	viewModelEntity.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1, <0, 0, 0> ) //
+	viewModelEntity.Highlight_SetFadeInTime( 0 )
+	viewModelEntity.Highlight_SetFadeOutTime( 0 )
+	viewModelEntity.Highlight_StartOn()
+}
+
+void function LobbyPropClearHighlight( entity viewModelEntity )
+{
+	int highlightId = viewModelEntity.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
+	viewModelEntity.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_NONE, true, HIGHLIGHT_OUTLINE_NONE, 1.0, highlightId, false )
+	viewModelEntity.Highlight_SetLifeTime( 0.0 )
+}
+
 
 void function ShowEntityHighlight( entity ent, float duration )
 {

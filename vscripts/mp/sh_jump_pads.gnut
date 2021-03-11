@@ -198,6 +198,8 @@ void function Sh_JumpPad_Init()
 
 
 
+//
+
 
 
 
@@ -278,6 +280,7 @@ void function Sh_JumpPad_Init()
 
 
 //
+
 
 
 
@@ -605,7 +608,7 @@ void function _DisplayJumpPadHint()
 
 	EndSignal( player, "OnDeath" )
 
-	AddPlayerHint( 3.0, 0.25, $"", "#JUMP_PAD_DOUBLE_JUMP_HINT" )
+	AddPlayerHint( 10.0, 0.25, $"", "#JUMP_PAD_DOUBLE_JUMP_HINT" )
 
 	OnThreadEnd(
 		function() : ()
@@ -614,7 +617,7 @@ void function _DisplayJumpPadHint()
 		}
 	)
 
-	while ( !player.IsOnGround() && !player.IsZiplining() )
+	while ( !player.IsOnGround() && !player.IsZiplining() && !player.IsDoubleJumping() )
 	{
 		WaitFrame()
 	}
@@ -630,7 +633,6 @@ void function JumpPad_GiveDoubleJump( entity player )
 		return
 
 	player.EndSignal( "OnDeath" )
-	player.Signal( "JumpPad_GiveDoubleJump" )
 	player.EndSignal( "JumpPad_GiveDoubleJump" )
 
 	wait 0.1
@@ -652,6 +654,7 @@ void function JumpPad_GiveDoubleJump( entity player )
 					TakePlayerSettingsMods( player, [ "enable_doublejump" ] )
 
 					#if(false)
+
 
 #endif
 				}

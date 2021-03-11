@@ -71,6 +71,10 @@ global function GetPlayerName
 global function GetKillerName
 global function GetPlayerRankScoreFromEHI
 global function GetPlayerLadderPosFromEHI
+                       
+                                               
+                                               
+      
 #endif
 #if(UI)
 global function ClientToUI_OnPlayerCreatedOrUpdated
@@ -408,6 +412,36 @@ int function EHI_GetRankedLadderPos( EHI ent )
 }
 #endif
 
+                       
+
+                 
+                                              
+ 
+           
+
+
+                     
+                           
+                                                  
+       
+ 
+      
+
+                 
+                                                    
+ 
+           
+
+
+                     
+                           
+                                                             
+       
+ 
+      
+
+         
+
 #if CLIENT || UI 
 array<EHI> function GetPlayerEHIArrayOfTeam( int team )
 {
@@ -563,7 +597,11 @@ void function ShEHI_OnPlayerCreated( entity ent )
 	ehiss.ehi = ehi
 	ehiss.isPlayer = true
 	ehiss.isConnected = true
-	ehiss.name = ent.GetPlayerName()
+	#if(false)
+
+#else
+		ehiss.name = ent.GetPlayerNameWithClanTag()
+	#endif
 	ehiss.team = ent.GetTeam()
 	ehiss.teamMemberIndex = ent.GetTeamMemberIndex()
 	ehiss.platformID = GetHardwareFromName( ent.GetHardware() )
@@ -756,11 +794,12 @@ string function GetObsfuscatedName( EHI playerEHI )
 #if(CLIENT)
 string function GetKillerName( EHI playerEHI )
 {
+	string clubTag = GetPlayerClubName( playerEHI )
 	string playerName = EHI_GetName( playerEHI )
 	if ( (ShouldPlayerNameBeAnonymized( playerEHI ) || !DisplayKillerName()) && playerEHI != LocalClientEHI() && EHI_GetTeam( playerEHI ) != EHI_GetTeam( LocalClientEHI() ) )
 		return GetObsfuscatedName( playerEHI )
 
-	return playerName
+	return clubTag + playerName
 }
 #endif
 
@@ -768,11 +807,36 @@ string function GetKillerName( EHI playerEHI )
 #if(CLIENT)
 string function GetPlayerName( EHI playerEHI )
 {
+	string clubTag = GetPlayerClubName( playerEHI )
+
 	string playerName = EHI_GetName( playerEHI )
 	if ( (ShouldPlayerNameBeAnonymized( playerEHI ) || !DisplayObituaryName()) && playerEHI != LocalClientEHI() && EHI_GetTeam( playerEHI ) != EHI_GetTeam( LocalClientEHI() ) )
 		return GetObsfuscatedName( playerEHI )
 
-	return playerName
+	return clubTag + playerName
+}
+#endif
+
+
+#if(CLIENT)
+string function GetPlayerClubName( EHI playerEHI )
+{
+	if ( Clubs_AreObituaryTagsEnabledByPlaylist() == false )
+	{
+		printf( "ClubDataDebug: No Club Tag (Disabled by Playlist)" )
+		return ""
+	}
+
+	string clubTag = ""
+	entity player = FromEHI( playerEHI )
+	if( !IsValid( player ) || player.IsPlayer() )
+		return ""
+
+	clubTag = player.GetClubTag()
+	if ( clubTag != "" )
+		clubTag = "[" + clubTag + "]"
+
+	return clubTag
 }
 #endif
 
@@ -801,6 +865,28 @@ int function GetPlayerLadderPosFromEHI( EHI playerEHI )
 	return rankScore
 }
 #endif
+
+                       
+
+           
+                                                             
+ 
+                                                    
+
+                 
+ 
+      
+
+           
+                                                             
+ 
+                                                          
+
+                 
+ 
+      
+
+         
 
 //
 #if(CLIENT)

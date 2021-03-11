@@ -179,7 +179,7 @@ global const string CONSUMABLE_WEAPON_NAME = "mp_ability_consumable"
 
 const float HEAL_CHATTER_DEBOUNCE = 10.0
 const RESTORE_HEALTH_COCKPIT_FX = $"P_heal_loop_screen"
-const vector HEALTH_RGB = < 114, 245, 250 >
+global const vector HEALTH_RGB = < 114, 245, 250 >
 
 //
 const string WATTSON_EXTRA_ULT_ACCEL_SFX = "Wattson_Xtra_A"
@@ -449,7 +449,8 @@ void function OnWeaponActivate_Consumable( entity weapon )
 
 		if ( CharacterSelect_MenuIsOpen() )
 			CloseCharacterSelectNewMenu()
-		RunUIScript( "CloseAllMenus" )
+		if ( !( IsPrivateMatch() && IsSpectator( GetLocalClientPlayer() ) ) ) //
+			RunUIScript( "CloseAllMenus" )
 	#endif //
 
 #if(CLIENT)
@@ -698,7 +699,8 @@ void function Consumable_DisplayProgressBar( entity player, entity weapon, int c
 	)
 
 	//
-	float endTime = Time() + raiseTime + chargeTime
+	float startTime = Time()
+	float endTime = startTime + raiseTime + chargeTime
 	while ( Time() < endTime )
 	{
 		//
@@ -713,6 +715,19 @@ void function Consumable_DisplayProgressBar( entity player, entity weapon, int c
 			RuiSetString( rui, "hintKeyboardMouse", "#SURVIVAL_CANCEL_HEAL_PC" )
 		}
 		//
+
+		if( chargeTime != weapon.GetWeaponSettingFloat( eWeaponVar.charge_time ) )
+		{
+			//
+			raiseTime = weapon.GetWeaponSettingFloat( eWeaponVar.raise_time )
+			chargeTime = weapon.GetWeaponSettingFloat( eWeaponVar.charge_time )
+			endTime = startTime + raiseTime + chargeTime
+
+			//
+			RuiSetFloat( rui, "raiseTime", raiseTime )
+			RuiSetFloat( rui, "chargeTime", chargeTime )
+		}
+
 
 		wait 0.1
 	}

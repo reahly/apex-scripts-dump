@@ -57,6 +57,10 @@ global function UICodeCallback_EadpFriendsChanged
 global function UICodeCallback_EadpClubMemberPresence
 global function UICodeCallback_EadpInviteDataChanged
 
+#if(NX_PROG)
+global function UICodeCallback_LobbyAllowStaticScene
+#endif
+
 global function TryRunDialogFlowThread
 global function ShouldShowPremiumCurrencyDialog
 global function ShowPremiumCurrencyDialog
@@ -578,6 +582,10 @@ void function UICodeCallback_FullyConnected( string levelname )
 	ShSkydiveTrails_LevelInit()
 	Sh_Ranked_ItemRegistrationInit()
 	Sh_Ranked_Init()
+                        
+                                        
+                        
+       
 	ShWeapons_LevelInit()
 	ShWeaponCosmetics_LevelInit()
 	ShGladiatorCards_LevelInit()
@@ -598,9 +606,6 @@ void function UICodeCallback_FullyConnected( string levelname )
 	ShPing_Init()
 	ShQuickchat_Init()
 	ShChallenges_LevelInit_PreStats()
-                        
-                 
-       
 	ShItems_LevelInit_Finish()
 	ShItemPerPlayerState_LevelInit()
 	UserInfoPanels_LevelInit()
@@ -907,6 +912,13 @@ void function UICodeCallback_AcceptInvite( string accesstoken, string fromxid, s
 	printt( "UICodeCallback_AcceptInvite '" + accesstoken + "' from '" + fromxid + "' " + from_hardware )
 	thread    UICodeCallback_AcceptInviteThread( accesstoken, fromxid, from_hardware )
 }
+
+#if(NX_PROG)
+bool function UICodeCallback_LobbyAllowStaticScene()
+{
+	return IsPlayPanelCurrentlyTopLevel() || IsClubLandingPanelCurrentlyTopLevel() || IsSeaonPanelCurrentlyTopLevel() || IsModeSelectMenuOpen()
+}
+#endif
 
 
 void function AdvanceMenu( var newMenu )
@@ -1303,6 +1315,10 @@ void function UICodeCallback_ClubRequestFinished( int operation, int errorCode, 
 {
 	if ( errorCode != 0 )
 	{
+		Warning( format( "ClubsError: Operation %i returned error code %i", operation, errorCode ) )
+		ClubSetLastQueryError( errorCode )
+		Clubs_SetClubQueryState( operation, eClubQueryState.FAILED )
+
 		if ( errorMsg == "ALREADY_A_MEMBER" )
 		{
 			if ( ClubIsValid() )
@@ -1329,15 +1345,22 @@ void function UICodeCallback_ClubRequestFinished( int operation, int errorCode, 
 		switch( operation )
 		{
 			case CLUB_OP_GET_CURRENT:
+				Warning( "ClubsError: CLUB_OP_GET_CURRENT failed. Attempting requery." )
 				thread Clubs_AttemptRequeryThread()
 				break
 		}
 		return
 	}
+	else
+	{
+		ClubClearLastQueryError()
+		Clubs_SetClubQueryState( operation, eClubQueryState.SUCCESSFUL )
+	}
 
 	switch( operation )
 	{
 		case CLUB_OP_GET_CURRENT:
+			Clubs_SetClubQueryState( operation, eClubQueryState.SUCCESSFUL )
 			Clubs_UpdateMyData()
 			thread Clubs_MonitorCrossplayChangeThread()
 			//
@@ -1346,13 +1369,11 @@ void function UICodeCallback_ClubRequestFinished( int operation, int errorCode, 
 
 		case CLUB_OP_CREATE:
 			//
-			Clubs_SetClubQueryCompleted( true )
 			Clubs_FinalizeNewClub()
 			break;
 
 		case CLUB_OP_JOIN:
 			//
-			Clubs_SetClubQueryCompleted( true )
 			Clubs_FinalizeJoinClub()
 			//
 			//
@@ -1376,8 +1397,7 @@ void function UICodeCallback_ClubRequestFinished( int operation, int errorCode, 
 			break;
 
 		case CLUB_OP_KICKED:
-			thread Clubs_FinalizeLeaveClub()
-			Clubs_OpenClubKickedDialog()
+			thread Clubs_FinalizeLeaveClub( true )
 			break;
 
 		case CLUB_OP_SET_MEMBERRANK:
@@ -1536,11 +1556,10 @@ void function ShowGameSummaryIfNeeded()
 				OpenRankedSummary( true )
 			}
 
-
                           
-                                                                 
+                                                             
      
-                              
+                                    
      
          
 		}
@@ -1649,65 +1668,16 @@ void function DialogFlow()
 
 		DialogFlow_DidCausePotentiallyInterruptingPopup()
 	}
-	else if ( Ranked_HasRankedPeriodMarkedForRewardAcknowledgement() )
+	else if ( Ranked_ManageDialogFlow() )
 	{
-		string earliestRankedPeriod = Ranked_GetRankedPeriodToAcknowledgReward()
-		Remote_ServerCallFunction( "ClientCallback_rankedPeriodRewardAcknowledged", earliestRankedPeriod )
-		Ranked_MarkRankedRewardsGivenNotified( earliestRankedPeriod )
-
-		ItemFlavor rankedPeriodToAcknowledgeReward                = GetItemFlavorByGUID( ConvertItemFlavorGUIDStringToGUID( earliestRankedPeriod ) )
-		ItemFlavor followingRankedPeriod                          = expect ItemFlavor( GetFollowingRankedPeriod( rankedPeriodToAcknowledgeReward ) )
-		RankedDivisionData rankedDivisionForFollowingRankedPeriod = Ranked_GetNewDivisionForNewSeasonReset( GetUIPlayer(), followingRankedPeriod )
-
-		string unlockMessage
-		Assert( persistenceAvailable )
-		/*
-
-
-
-
-
-
-*/
-		{
-			unlockMessage = Localize( "#RANKED_REWARDS_GIVEN_DIALOG_MESSAGE", Localize( ItemFlavor_GetShortName( rankedPeriodToAcknowledgeReward ) ),
-				Localize( rankedDivisionForFollowingRankedPeriod.divisionName ), Localize( ItemFlavor_GetShortName( followingRankedPeriod ) ) )
-		}
-
-		PlayLobbyCharacterDialogue( "glad_rankNewSeason", 1.7 ) //
-		PromoDialog_OpenHijacked( "<p|ranked_rewards|" + Localize( "#RANKED_REWARDS_GIVEN_DIALOG_HEADER" ) + "|" + unlockMessage + ">" )
-		IncrementNumDialogFlowDialogsDisplayed()
-
-		DialogFlow_DidCausePotentiallyInterruptingPopup()
+		//
 	}
-	else if ( Ranked_NeedToNotifySplitReset() )
-	{
-		string rankedSplitResetAcknowledgePersistenceField = Ranked_GetSplitResetAcknowledgePersistenceField()
-		SetDialogFlowPersistenceTables( "starterAcknowledged", true )
-		Remote_ServerCallFunction( "ClientCallback_rankedSplitResetAcknowledged" )
-
-		ItemFlavor ornull activeRankedPeriod = GetActiveRankedPeriod( GetUnixTimestamp() )
-		expect ItemFlavor ( activeRankedPeriod )
-		Assert( RankedPeriod_HasSplits( activeRankedPeriod ) && RankedPeriod_IsSecondSplitActive( activeRankedPeriod ) )
-		RankedDivisionData newRankedDivisionAfterSplit = GetCurrentRankedDivisionFromScore( GetPlayerRankScore( GetUIPlayer() ) )
-		string resetMessage                            = Localize( "#RANKED_SPLIT_RESET_DIALOG_MESSAGE", Localize( newRankedDivisionAfterSplit.divisionName ) )
-
-		PlayLobbyCharacterDialogue( "glad_rankNewSplit", 1.7 ) //
-		PromoDialog_OpenHijacked( "<p|ranked_split|" + Localize( "#RANKED_SPLIT_RESET_DIALOG_HEADER" ) + "|" + resetMessage + ">" )
-
-		IncrementNumDialogFlowDialogsDisplayed()
-
-		DialogFlow_DidCausePotentiallyInterruptingPopup()
-	}
-	/*
-
-
-
-
-
-
-
-*/
+                       
+                                            
+  
+    
+  
+      
 	else if ( Clubs_ShouldShowClubJoinedDialog() )
 	{
 		Clubs_OpenClubJoinedDialog( ClubGetHeader().name )
@@ -2138,6 +2108,11 @@ void function InitMenus()
 	AddMenu( "RankedInfoMoreMenu", $"resource/ui/menus/ranked_info_more.menu", InitRankedInfoMoreMenu )
 	AddMenu( "AboutGameModeMenu", $"resource/ui/menus/about_game_mode.menu", InitAboutGameModeMenu )
 
+                        
+                                                                                                                        
+                                                                                                           
+       
+
 	var inventoryMenu = AddMenu( "SurvivalInventoryMenu", $"resource/ui/menus/survival_inventory.menu", InitSurvivalInventoryMenu )
 	AddPanel( inventoryMenu, "SurvivalQuickInventoryPanel", InitSurvivalQuickInventoryPanel )
 	//
@@ -2177,6 +2152,11 @@ void function InitMenus()
 	AddMenu( "CharacterSkillsDialog", $"resource/ui/menus/dialogs/character_skills.menu", InitCharacterSkillsDialog )
 	AddMenu( "LaunchMissionDialog", $"resource/ui/menus/dialogs/launch_mission_dialog.menu", InitLaunchMissionDialog )
 	AddMenu( "ConfirmDialog", $"resource/ui/menus/dialogs/confirm_dialog.menu", InitConfirmDialog )
+
+                        
+                                                                                             
+       
+
 	AddMenu( "OKDialog", $"resource/ui/menus/dialogs/ok_dialog.menu", InitOKDialog )
 	AddMenu( "ConfirmExitToDesktopDialog", $"resource/ui/menus/dialogs/confirm_dialog.menu", InitConfirmExitToDesktopDialog )
 	AddMenu( "ConfirmLeaveMatchDialog", $"resource/ui/menus/dialogs/confirm_dialog.menu", InitConfirmLeaveMatchDialog )
@@ -2198,6 +2178,10 @@ void function InitMenus()
 	AddMenu( "ReportPlayerDialog", $"resource/ui/menus/dialog_report_player.menu", InitReportPlayerDialog )
 	AddMenu( "ReportPlayerReasonPopup", $"resource/ui/menus/dialog_report_player_reason.menu", InitReportReasonPopup )
 	AddMenu( "ProcessingDialog", $"resource/ui/menus/dialog_processing.menu", InitProcessingDialog )
+
+                        
+                                                                                                               
+       
 
 	AddMenu( "RewardPurchaseDialog", $"resource/ui/menus/dialogs/pass_dialog.menu", InitRewardPurchaseDialog )
 	AddMenu( "PassPurchaseMenu", $"resource/ui/menus/pass_purchase.menu", InitPassPurchaseMenu )
@@ -2221,9 +2205,9 @@ void function InitMenus()
           
 
                         
-                                                                                                               
-                                                                                                     
+                                                                                                        
                                                                                                                     
+                                                                                                                      
        
 
 	#if(PC_PROG)
@@ -2620,12 +2604,14 @@ const array<string> WORKAROUND_UI_MUSIC_SOUND_LIST = [
 	"mainmenu_music_Horizon", "Music_Lobby_Horizon",
 	"mainmenu_music_Season8", "Music_Lobby_Season8",
 	"mainmenu_music_Fuse", "Music_Lobby_Fuse",
+	"mainmenu_music_Season8_1", "Music_Lobby_Season8_1",
 	//
 	"SQ_Music_Lobby_Silence", "SQ_S5_Music_9_44p", "SQ_S5_Music_EP", "SQ_S6_Page_1_01", "SQ_S6_Page_1_02", "SQ_S6_Page_2_01", "SQ_S6_Page_2_02", "SQ_S6_Page_2_03", "SQ_S6_Page_3_01", "SQ_S6_Page_3_02"
 	"SQ_S6_Page_4_01", "SQ_S6_Page_4_02", "SQ_S6_Page_4_03", "SQ_S6_Page_5_01", "SQ_S6_Page_5_02", "SQ_S6_Page_5_03", "SQ_S6_Page_6_01", "SQ_S6_Page_6_02", "SQ_S6_Page_7_01", "SQ_S6_Page_7_02", "SQ_S6_Page_7_03"
 	"SQ_S6_Page_6_03", "SQ_S7_Page_1_01", "SQ_S7_Page_1_02", "SQ_S7_Page_1_03", "SQ_S7_Page_2_01", "SQ_S7_Page_2_02", "SQ_S7_Page_2_03", "SQ_S7_Page_3_01"
 	"SQ_S7_Page_3_02", "SQ_S7_Page_3_03", "SQ_S7_Page_4_01", "SQ_S7_Page_4_02", "SQ_S7_Page_4_03", "SQ_S7_Page_5_01", "SQ_S7_Page_5_02", "SQ_S7_Page_5_03", "SQ_S6_Page_7_01", "SQ_S7_Page_6_02", "SQ_S7_Page_6_03"
-	"SQ_S7_Page_7_01", "SQ_S7_Page_7_02", "SQ_S7_Page_7_03", "SQ_S8_Page_2_09", "SQ_S8_Page_2_13", "SQ_S8_Page_2_16", "SQ_S8_Page_2_17", "SQ_S8_Page_3_19", "SQ_S8_Page_3_28", "SQ_S8_Page_3_27", "SQ_S8_Page_1_1",
+	"SQ_S7_Page_7_01", "SQ_S7_Page_7_02", "SQ_S7_Page_7_03", "SQ_S8_Page_2_09", "SQ_S8_Page_2_13", "SQ_S8_Page_2_16", "SQ_S8_Page_2_17", "SQ_S8_Page_3_19", "SQ_S8_Page_3_28", "SQ_S8_Page_3_27", "SQ_S8_Page_1_1"
+	"SQ_S8_Page_4_29", "SQ_S8_Page_5_38", "SQ_S8_Page_5_43", "SQ_S8_Page_6_45", "SQ_S8_Page_6_53", "SQ_S8_Page_7_54", "SQ_S8_Page_7_59", 
 	LOOT_CEREMONY_MUSIC_P1,
 	LOOT_CEREMONY_MUSIC_P2
 ]

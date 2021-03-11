@@ -201,11 +201,11 @@ void function SURVIVAL_LootTypes_InitShared()
 
 	//
                     
-                                           
-                                 
-                                        
-                                                 
-                                                       
+		lt = RegisterLootType( eLootType.GADGET )
+		lt.equipmentSlot = "gadgetslot"
+		lt.equipmentAction = eLootAction.EQUIP
+		lt.groundActionFunc = GroundAction_ForEquipment
+		lt.groundAltActionFunc = GroundAltAction_ForEquipment
        
 }
 
@@ -321,44 +321,44 @@ LootActionStruct function GroundAction_ForEquipment( entity player, LootRef loot
          
       
                    
-                                                  
-  
-                     
-   
-                                
-   
-                                                 
-   
-                               
-   
-         
-   
-              
-                                        
-    
-                                
-             
-    
-         
+	/**/if  ( lootData.lootType == eLootType.GADGET )
+	{
+		if ( tier == 0 ) //
+		{
+			as.action = eLootAction.EQUIP
+		}
+		else if ( lootData.ref != equippedData.ref ) //
+		{
+			as.action = eLootAction.SWAP
+		}
+		else //
+		{
+			#if(CLIENT)
+			if ( player != GetLocalViewPlayer() )
+			{
+				as.action = eLootAction.NONE
+				return as
+			}
+			#endif
 
-                                                                               
-                                
-    
-                                                       
-                                                             
-                      
-     
-                                 
-              
-     
-                           
-     
-                                   
-     
-    
-   
-  
-         
+			entity gadgetWeapon = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_GADGET )
+			if( IsValid( gadgetWeapon ) )
+			{
+				int ammo = gadgetWeapon.GetWeaponPrimaryClipCount()
+				int maxAmmo = gadgetWeapon.GetWeaponPrimaryClipCountMax()
+				if( ammo == 0 ) //
+				{
+					as.action = eLootAction.NONE
+					return as
+				}
+				if( ammo < maxAmmo ) //
+				{
+					as.action = eLootAction.PICKUP
+				}
+			}
+		}
+	}
+	else/**/
       
 	/**/if ( lootData.tier > tier || (lootData.ref != equippedData.ref && lootData.tier == tier && hasPerk) )
 	{

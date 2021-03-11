@@ -62,7 +62,7 @@ WeaponData
 
 	"damage_type" 									"bullet"
 
-	"ammo_clip_size"   								"5"
+	"ammo_clip_size"   								"6"
 
 	"dof_zoom_focusArea_horizontal"					"0.06"
 	"dof_zoom_focusArea_top"						"0.070"
@@ -260,23 +260,55 @@ WeaponData
 			"fire_sound_1_player_3p"		"weapon_wingman_fire_skull_3p"
 			"fire_sound_1_npc"				"weapon_wingman_fire_skull_3p"
         }
+                        
+                        
+   
+                                                                 
+                                                                                  
+   
 
+                          
+         
+                                              
+
+                               
+
+                                     
+                                                
+                                           
+                                             
+                                         
+
+                                    
+                                 
+                                     
+                                          
+                                          
+                                              
+                                
+
+                                          
+                                                   
+
+                                                        
+   
+      
         highcal_mag_l1
-		{
-			"ammo_clip_size"   							"6"
-		}
-		highcal_mag_l2
 		{
 			"ammo_clip_size"   							"7"
 		}
-		highcal_mag_l3
+		highcal_mag_l2
 		{
 			"ammo_clip_size"   							"8"
+		}
+		highcal_mag_l3
+		{
+			"ammo_clip_size"   							"9"
 		}
                      
         highcal_mag_l4
         {
-            "ammo_clip_size"   							"8"
+            "ammo_clip_size"   							"9"
         }
       
 

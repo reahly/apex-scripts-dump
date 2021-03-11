@@ -574,10 +574,10 @@ void function DeathScreenUpdateHeader( var headerElem )
 
 	int respawnStyle = GetRespawnStyle()
                            
-                                                                                                  
-   
-                                               
-   
+		if ( IsSecondChanceGameMode() && ShGameMode_SecondChance_CanPlayerStillRespawn( clientPlayer ) )
+		{
+			respawnStyle = eRespawnStyle.SKYDIVE_RESPAWN
+		}
        
 
 	int respawnStatus  = GetRespawnStatus( clientPlayer )
@@ -1396,8 +1396,30 @@ void function PopulatePlayerStatsRui( var gladCardRui, int index, bool connected
 	else
 	{
 		//
-		RuiSetString( gladCardRui, "title1", "#DEATH_SCREEN_SUMMARY_KILLS" )
-		RuiSetString( gladCardRui, "value1", string( data.kills ) )
+		#if(NX_PROG)
+			//
+			//
+			string matchStatsStringCombined = Localize( "#DEATH_SCREEN_SUMMARY_KILLS" )
+			matchStatsStringCombined += "  /  " + Localize( "#DEATH_SCREEN_SUMMARY_ASSISTS" )
+			matchStatsStringCombined += "  /  " + Localize( "#DEATH_SCREEN_SUMMARY_KNOCKDOWNS" )
+			RuiSetString( gladCardRui, "title1", matchStatsStringCombined )
+			RuiSetString( gladCardRui, "title1a", "" ) //
+			RuiSetString( gladCardRui, "title1b", "" ) //
+			//
+			RuiSetString( gladCardRui, "value1", string( data.kills ) )
+			RuiSetString( gladCardRui, "value1a", "  /  " + string( data.assists ) )
+			RuiSetString( gladCardRui, "value1b", "  /  " + string( data.knockdowns ) )
+		#else
+			//
+			RuiSetString( gladCardRui, "title1", "#DEATH_SCREEN_SUMMARY_KILLS" )
+			RuiSetString( gladCardRui, "value1", string( data.kills ) )
+			//
+			RuiSetString( gladCardRui, "title1a", "  /  " + Localize( "#DEATH_SCREEN_SUMMARY_ASSISTS" ) )
+			RuiSetString( gladCardRui, "value1a", "  /  " + string( data.assists ) )
+			//
+			RuiSetString( gladCardRui, "title1b", "  /  " + Localize( "#DEATH_SCREEN_SUMMARY_KNOCKDOWNS" ) )
+			RuiSetString( gladCardRui, "value1b", "  /  " + string( data.knockdowns ) )
+		#endif
 
 		//
 		RuiSetString( gladCardRui, "title2", "#DEATH_SCREEN_SUMMARY_DAMAGE_DEALT" )
@@ -2106,6 +2128,10 @@ asset function GetGladCardReplacementImageForDamageSourceID( int damageSourceID 
 			return $"rui/death_recap/icon_deathrecap_specialcase_restriczone"
 
 		case eDamageSourceId.deathField:
+                              
+		//
+		case eDamageSourceId.ringcollapsemode_ring_fissure:
+      
 			return $"rui/death_recap/icon_deathrecap_specialcase_outCircle"
 
 		case eDamageSourceId.fall:
@@ -2121,6 +2147,11 @@ asset function GetGladCardReplacementImageForDamageSourceID( int damageSourceID 
 
 		case eDamageSourceId.burn:
 			return $"rui/death_recap/icon_deathrecap_specialcase_burn"
+
+                  
+		case eDamageSourceId.caustic_toxin:
+			return $"rui/death_recap/icon_deathrecap_specialcase_toxin"
+         
 
 		case eDamageSourceId.prowler_melee:
 			return $"rui/death_recap/icon_deathrecap_specialcase_prowler"

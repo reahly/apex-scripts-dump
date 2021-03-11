@@ -188,7 +188,28 @@ void function CreateTeaseRui( entity prop, asset ruiAsset )
 	prop.RenderWithViewModels( true )
 
 	entity viewPlayer = GetLocalViewPlayer()
-	prop.SetSkin( 1 )
+
+	string screenText = ""
+	int phase = 0
+
+                     
+	if ( IsFiringRangeGameMode() )
+	{
+		screenText = Localize("#S08E04_DROPSHIP_INTERACT_KEYCARD_TEXT")
+		phase = 3
+	}
+	else if ( viewPlayer.GetPersistentVar( "s08StoryEvent.hasStep2Completed" ) )
+	{
+		int percentage = ChallengeCompletionPercentage ( viewPlayer )
+		screenText = Localize("#S08E04_CHALLENGE_KEYCARD_TEXT", percentage)
+		phase = 2
+	}
+	else
+	{
+		screenText = Localize("#S08E04_KEYCARD_PICK_UP_TEXT")
+		phase = 1
+	}
+       
 
 	if ( !IsValid( viewPlayer ) || !IsValid( prop ) )
 		return
@@ -207,6 +228,8 @@ void function CreateTeaseRui( entity prop, asset ruiAsset )
 	RuiTopology_SetParent( topo, prop )
 
 	var rui = RuiCreate( ruiAsset, topo, RUI_DRAW_VIEW_MODEL, MINIMAP_Z_BASE + 10 )
+	RuiSetString ( rui, "screenText", screenText )
+	RuiSetInt ( rui, "phase", phase )
 
 	OnThreadEnd (
 		void function() : ( topo, rui )

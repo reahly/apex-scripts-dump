@@ -734,6 +734,7 @@ void function InitStoreCharactersPanel( var panel )
 
 	AddPanelEventHandler_FocusChanged( panel, CharactersPanel_OnFocusChanged )
 	AddPanelFooterOption( panel, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
+	AddPanelFooterOption( panel, LEFT, BUTTON_A, false, "#A_BUTTON_UNLOCK", "#A_BUTTON_UNLOCK", null, AnyLegendsLocked )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_TOGGLE_LOADOUT", "#X_BUTTON_TOGGLE_LOADOUT", OpenFocusedCharacterSkillsDialog, AnyLegendsLocked )
 }
 
@@ -1213,6 +1214,12 @@ void function InitOffersPanel( var panel )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_HIDE, OffersPanel_OnHide )
 
 	AddPanelFooterOption( panel, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
+
+                        
+                                                                                                                                     
+                                                   
+     
+       
 }
 
 

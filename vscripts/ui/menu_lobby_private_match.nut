@@ -30,6 +30,7 @@ struct
 	var teamSwapButton
 	var teamRenameButton
 	var adminOnlyButton
+	var kickTarget
 
 	var textChat
 	var chatInputLine
@@ -118,6 +119,8 @@ void function InitPrivateMatchLobbyMenu( var newMenuArg )
 	adminOnlyToolTip.descText = "#ADMIN_ONLY_CHAT_OFF"
 	Hud_SetToolTipData( file.adminOnlyButton, adminOnlyToolTip )
 	Hud_AddEventHandler( file.adminOnlyButton, UIE_CLICK, AdminOnlyButton_OnActivate )
+	
+	file.kickTarget = Hud_GetChild( menu, "KickButton")
 
 	AddMenuVarChangeHandler( "isFullyConnected", UpdateFooterOptions )
 	AddMenuVarChangeHandler( "isPartyLeader", UpdateFooterOptions )
@@ -153,7 +156,9 @@ void function OnPrivateMatchLobbyMenu_Show()
 
 	Chroma_Lobby()
 
-	if ( HasMatchAdminRole() )
+	bool hasAdminRole = HasMatchAdminRole()
+
+	if ( hasAdminRole )
 	{
 		HudElem_SetRuiArg( file.readyLaunchButton, "buttonText", Localize( "#TOURNAMENT_START_MATCH" ) )
 	}
@@ -162,10 +167,10 @@ void function OnPrivateMatchLobbyMenu_Show()
 		HudElem_SetRuiArg( file.readyLaunchButton, "buttonText", Localize( "#READY" ) )
 	}
 
-	Hud_SetEnabled( file.modeButton, HasMatchAdminRole() )
-	Hud_SetEnabled( file.teamSwapButton, HasMatchAdminRole() )
-
-	//
+	Hud_SetEnabled( file.modeButton, hasAdminRole )
+	Hud_SetEnabled( file.teamSwapButton, hasAdminRole )
+	Hud_SetEnabled( file.kickTarget, hasAdminRole )
+	Hud_SetVisible( file.kickTarget, hasAdminRole )
 
 	thread OnPrivateMatchLobbyThink()
 }
