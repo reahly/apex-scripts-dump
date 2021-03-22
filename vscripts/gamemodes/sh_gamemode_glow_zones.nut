@@ -30,7 +30,6 @@ void function ShGameMode_GlowZones_Init()
 
 	#if(false)
 
-
 #endif
 
 	AddCallback_EntitiesDidLoad( GlowZones_EntitiesDidLoad )
@@ -57,14 +56,6 @@ void function ShGameMode_GlowZones_RegisterNetworking()
 }
 
 #if(false)
-
-
-
-
-
-
-
-
 
 
 

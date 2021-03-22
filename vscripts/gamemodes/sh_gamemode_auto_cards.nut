@@ -65,7 +65,6 @@ void function ShGameMode_AutoCards_Init()
 	#if(false)
 
 
-
 #endif
 
 	AddCallback_EntitiesDidLoad( AutoCards_EntitiesDidLoad )
@@ -112,14 +111,6 @@ void function ShGameMode_AutoCards_RegisterNetworking()
 
 
 //
-
-
-
-
-
-
-
-
 
 
 

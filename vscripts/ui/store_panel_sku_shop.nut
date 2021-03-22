@@ -77,6 +77,7 @@ struct
 #if(NX_PROG)
 	var	taxNoticeMessage
 #endif
+	bool waitForDLCReady
 } file
 
 #if(NX_PROG)
@@ -100,6 +101,7 @@ void function SKUShopPanel_Init( var panel )
 #if(NX_PROG)
 	file.taxNoticeMessage = Hud_GetChild( panel, "TaxNoticeMessage" )
 #endif
+	file.waitForDLCReady = false
 }
 
 
@@ -146,6 +148,26 @@ void function SKUShopPanel_OnShow( var panel )
 
 	SKUShopPanel_UpdateGRXDependentElements()
 	OnOpenDLCStore()
+
+	if ( !IsDLCStoreReady() )
+	{
+		file.waitForDLCReady = true
+
+		printt( "SKU DISABLE BUTTONS" )
+		//
+		var scrollPanel = Hud_GetChild( file.skuButtonList, "ScrollPanel" )
+		int buttonIdx = 0
+		for ( int skuID; skuID < SKU_ID.COUNT; skuID++ )
+		{
+			if ( !file.enumToSKUData[skuID].isVisible )
+				continue
+
+			var skuButton = Hud_GetChild( scrollPanel, "GridButton" + buttonIdx )
+			printt( "SKU DISABLE " + skuButton )
+			Hud_SetLocked( skuButton, true )
+			buttonIdx++
+		}
+	}
 
 	thread SKUShopPanel_Think( panel )
 }
@@ -323,6 +345,13 @@ void function SKUShopPanel_Think( var panel )
 				HudElem_SetRuiArg( discountPanel, "isPs4", true )
 			#endif
 		#endif
+
+		if ( file.waitForDLCReady && IsDLCStoreReady() )
+		{
+			file.waitForDLCReady = false
+			SKUShopPanel_UpdateGRXDependentElements()
+		}
+
 
 		WaitFrame()
 	}

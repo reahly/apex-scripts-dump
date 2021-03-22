@@ -88,7 +88,6 @@ void function ShGameMode_ShieldRegen_Init()
 
 
 
-
 #endif
 
 	RegisterSignal( "ShieldRegen_OnDamaged" )
@@ -253,14 +252,6 @@ void function ShGameMode_ShieldRegen_RegisterNetworking()
 
 
 //
-
-
-
-
-
-
-
-
 
 
 

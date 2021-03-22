@@ -680,6 +680,12 @@ void function OnProjectileBounce( entity projectile, DeployableCollisionParams c
 
 
 
+
+
+
+
+
+
 #endif
 
 #if(CLIENT)
@@ -1111,6 +1117,11 @@ void function ServerToClient_Translocation_TeleportFailed( entity weapon )
 
 
 
+
+
+
+
+
 //
 
 
@@ -1123,6 +1134,11 @@ void function ServerToClient_Translocation_TeleportFailed( entity weapon )
 //
 
 //
+
+
+
+
+
 
 
 

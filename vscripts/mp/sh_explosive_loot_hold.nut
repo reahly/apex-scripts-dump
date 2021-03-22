@@ -2,10 +2,8 @@
 global function ShExplosiveHold_Init
 global function ExplosiveHold_IsOpen
 global function ExplosiveHold_PlayerHasGrenadeInInventory
-global function ShMapToy_ExplosiveHold_RegisterNetworking
 
 #if(CLIENT)
-global function ShMapToy_ExplosiveHold_ServerCallback_SetHoldOpen
 global function ExplosiveHold_IsPlayerPlantingGrenade
 #endif
 
@@ -112,7 +110,6 @@ struct ExplosiveHoldData
 	entity rightDoor
 	entity leftDoor
 	array<entity> ventFXHelpers
-	bool holdOpen
 	entity holdProxy
 }
 
@@ -149,11 +146,6 @@ void function ShExplosiveHold_Init()
 #endif
 }
 
-void function ShMapToy_ExplosiveHold_RegisterNetworking()
-{
-	Remote_RegisterClientFunction( "ShMapToy_ExplosiveHold_ServerCallback_SetHoldOpen", "entity" )
-}
-
 void function EntitiesDidLoad()
 {
 	#if(false)
@@ -163,7 +155,6 @@ void function EntitiesDidLoad()
 	foreach ( entity explosiveHold in GetEntArrayByScriptName( EXPLOSIVE_HOLD_SCRIPTNAME ) )
 	{
 		ExplosiveHoldData  				data
-		data.holdOpen = false
 
 		#if(false)
 //
@@ -308,10 +299,7 @@ string function GetExplosiveHoldUseTextOverride( entity panel )
 
 	if ( DotProduct( panel.GetForwardVector(), playerToPanel ) < 0 )
 	{
-		entity explosiveHold = panel.GetParent()
-		ExplosiveHoldData data = file.explosiveHoldDataGroups[ ToEHI( explosiveHold ) ]
-
-		if ( data.holdOpen == false )
+		if ( !ExplosiveHold_IsOpen( panel ) )
 		{
 			if ( !ExplosiveHold_PlayerHasGrenadeInInventory( player ) )
 				return "#EXPLOSIVEHOLD_HINT_MISSING_GRENADE"
@@ -329,12 +317,10 @@ string function GetExplosiveHoldUseTextOverride( entity panel )
 void function ExplosiveHoldDoor_OnUse( entity panel, entity player, int useInputFlags )
 {
 	vector playerToPanel = panel.GetOrigin() - player.GetOrigin()
-	entity explosiveHold = panel.GetParent()
-	ExplosiveHoldData data = file.explosiveHoldDataGroups[ ToEHI( explosiveHold ) ]
 
 	if ( DotProduct( panel.GetForwardVector(), playerToPanel ) < 0 )
 	{
-		if ( data.holdOpen == false )
+		if ( !ExplosiveHold_IsOpen( panel ) )
 		{
 			if ( useInputFlags & USE_INPUT_LONG )
 			{
@@ -512,21 +498,17 @@ void function ExplosiveHoldDoor_DisplayRui( entity ent, entity player, var rui, 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -812,13 +794,12 @@ bool function ExplosiveHold_PlayerHasGrenadeInInventory( entity player )
 bool function ExplosiveHold_IsOpen( entity explosiveHoldEnt )
 {
 	entity explosiveHold = explosiveHoldEnt.GetParent()
+	bool isOpen = false
 
-	EHI explosiveHoldEHI = ToEHI( explosiveHold )
-	if ( explosiveHoldEHI in file.explosiveHoldDataGroups )
-		return file.explosiveHoldDataGroups[ ToEHI( explosiveHold ) ].holdOpen
+	if ( IsValid( explosiveHold ) )
+		isOpen = StatusEffect_GetSeverity( explosiveHold, eStatusEffect.hold_is_open ) > 0.0
 
-	//
-	return false
+	return isOpen
 }
 
 #if(CLIENT)
@@ -831,17 +812,6 @@ bool function ExplosiveHold_IsPlayerPlantingGrenade( entity player )
 	}
 
 	return false
-}
-#endif
-
-#if(CLIENT)
-void function ShMapToy_ExplosiveHold_ServerCallback_SetHoldOpen( entity holdEntity )
-{
-	if ( IsValid( holdEntity ) )
-	{
-		ExplosiveHoldData data = file.explosiveHoldDataGroups[ ToEHI( holdEntity ) ]
-		data.holdOpen = true
-	}
 }
 #endif
 

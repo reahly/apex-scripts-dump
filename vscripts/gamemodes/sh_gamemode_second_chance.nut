@@ -684,7 +684,10 @@ void function SecondChance_OnPlayerDisconnected( entity player )
 
 	if ( IsPlayerOnTeam( player, GetLocalViewPlayer().GetTeam() ) && PlayerHasUnitFrame( player ) && GetUnitFrame( player ).index < file.SquadRespawnTokenRuis.len() )
 	{
-		RuiSetBool( file.SquadRespawnTokenRuis[GetUnitFrame( player ).index], "isVisible", false )
+		if ( file.SquadRespawnTokenRuis[GetUnitFrame( player ).index] != null )
+		{
+			RuiSetBool( file.SquadRespawnTokenRuis[GetUnitFrame( player ).index], "isVisible", false )
+		}
 	}
 }
 
@@ -729,11 +732,17 @@ void function SecondChance_HideRespawnTokenRUIs()
 		}
 	#endif
 
-	RuiSetBool( file.playerRespawnTokenRui, "isVisible", false )
+	if ( file.playerRespawnTokenRui != null )
+	{
+		RuiSetBool( file.playerRespawnTokenRui, "isVisible", false )
+	}
 
 	for ( int i = 0; i < GetMaxTeamPlayers()-1; ++i )
 	{
-		RuiSetBool( file.SquadRespawnTokenRuis[i], "isVisible", false )
+		if ( file.SquadRespawnTokenRuis[i] != null )
+		{
+			RuiSetBool( file.SquadRespawnTokenRuis[i], "isVisible", false )
+		}
 	}
 }
 
@@ -754,11 +763,17 @@ void function SecondChance_UpdateRespawnTokenRUIs( entity player )
 		{
 			if ( teammate == GetLocalViewPlayer() )
 			{
-				RuiSetBool( file.playerRespawnTokenRui, "isVisible", ( file.playerToRespawnState[teammateEHI] <= eSecondChancePlayerState.HAS_RESPAWN_TOKEN ? true : false ) )
+				if ( file.playerRespawnTokenRui != null )
+				{
+					RuiSetBool( file.playerRespawnTokenRui, "isVisible", (file.playerToRespawnState[teammateEHI] <= eSecondChancePlayerState.HAS_RESPAWN_TOKEN ? true : false) )
+				}
 			} else {
 				if ( PlayerHasUnitFrame( teammate ) && GetUnitFrame( teammate ).index < file.SquadRespawnTokenRuis.len() )
 				{
-					RuiSetBool( file.SquadRespawnTokenRuis[GetUnitFrame( teammate ).index], "isVisible", ( file.playerToRespawnState[teammateEHI] <= eSecondChancePlayerState.HAS_RESPAWN_TOKEN ? true : false ) )
+					if ( file.SquadRespawnTokenRuis[GetUnitFrame( teammate ).index] != null )
+					{
+						RuiSetBool( file.SquadRespawnTokenRuis[GetUnitFrame( teammate ).index], "isVisible", (file.playerToRespawnState[teammateEHI] <= eSecondChancePlayerState.HAS_RESPAWN_TOKEN ? true : false) )
+					}
 				}
 			}
 		}
@@ -802,6 +817,7 @@ void function SecondChance_DestroyRespawnTokenRUIs()
 	if ( file.playerRespawnTokenRui != null )
 	{
 		RuiDestroyIfAlive( file.playerRespawnTokenRui )
+		file.playerRespawnTokenRui = null
 	}
 
 	for ( int i = 0; i < GetMaxTeamPlayers()-1; ++i )
@@ -809,6 +825,7 @@ void function SecondChance_DestroyRespawnTokenRUIs()
 		if ( file.SquadRespawnTokenRuis[i] != null )
 		{
 			RuiDestroyIfAlive( file.SquadRespawnTokenRuis[i] )
+			file.SquadRespawnTokenRuis[i] = null
 		}
 	}
 }
@@ -1074,8 +1091,6 @@ void function ShGameMode_SecondChance_ServerCallback_ConfirmSelfReleasePressed()
 
 
 //
-
-
 
 
 

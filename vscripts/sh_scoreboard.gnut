@@ -21,6 +21,10 @@ global function ClientCodeCallback_ToggleScoreboard
 global function ClientToUI_ToggleScoreboard
 global function ClientToUI_ShowScoreboardWithTPPrompt
 global function ClientToUI_HideScoreboard
+
+                    
+global function ServerToClient_EnableCharacterSelect
+      
 #endif
 
 #if(false)
@@ -42,6 +46,9 @@ struct
 
 		bool wantsToShowScoreboard = false
 		bool scoreboardEnabled = true
+                      
+			bool enableFiringRangeCharacterSelect = true
+        
 	#endif
 } file
 
@@ -209,10 +216,18 @@ void function ClientToUI_ToggleScoreboard()
 
 	if ( ShouldShowCharSelectForScoreboard() )
 	{
-		printf( "%s() - Showing character select because we're in Firing Range.", FUNC_NAME() )
-		RunUIScript( "TryCloseSurvivalInventory", null )
-		EmitSoundOnEntity( GetLocalViewPlayer(), "UI_Menu_accept" )
-		OpenCharacterSelectNewMenu( true )
+                      
+		if ( file.enableFiringRangeCharacterSelect )
+		{
+        
+			printf( "%s() - Showing character select because we're in Firing Range.", FUNC_NAME() )
+			RunUIScript( "TryCloseSurvivalInventory", null )
+			EmitSoundOnEntity( GetLocalViewPlayer(), "UI_Menu_accept" )
+			OpenCharacterSelectNewMenu( true )
+                      
+		}
+        
+
 		return
 	}
 
@@ -240,6 +255,15 @@ void function ClientToUI_HideScoreboard()
 }
 #endif
 
+
+                    
+#if(CLIENT)
+void function ServerToClient_EnableCharacterSelect( bool enable )
+{
+	file.enableFiringRangeCharacterSelect = enable
+}
+#endif
+      
 
 #if(CLIENT)
 bool s_latestShowWasForTPPrompt = false

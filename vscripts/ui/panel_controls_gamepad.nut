@@ -74,6 +74,9 @@ void function InitControlsGamepadPanel( var panel )
 	SetupSettingsButton( Hud_GetChild( contentPanel, "SwchHoldToCrouch" ), "#HOLDTOCROUCH", "#GAMEPAD_MENU_HOLDTOCROUCH_DESC", $"rui/menu/settings/settings_gamepad" )
 	SetupSettingsButton( Hud_GetChild( contentPanel, "SwchTapToUse" ), "#TAPTOUSE", "#GAMEPAD_MENU_TAPTOUSE_DESC", $"rui/menu/settings/settings_gamepad" )
 	SetupSettingsButton( Hud_GetChild( contentPanel, "SwchToggleGamepadADS" ), "#GAMEPAD_TOGGLE_ADS", "#GAMEPAD_TOGGLE_ADS_DESC", $"rui/menu/settings/settings_gamepad" )
+                   
+	SetupSettingsButton( Hud_GetChild( contentPanel, "SwitchSurvivalSlotToWeaponInspect" ), "#GADGET_SLOT_BUTTON_SWAP", "#GADGET_SLOT_BUTTON_SWAP_DESC", $"rui/menu/settings/settings_gamepad" )
+      
 #if(!NX_PROG)
 	SetupSettingsButton( Hud_GetChild( contentPanel, "SwchTriggerDeadzone" ), "#GAMEPAD_TRIGGER_DEADZONES", "#GAMEPAD_TRIGGER_DEADZONES_DESC", $"rui/menu/settings/settings_gamepad" )
 #endif
@@ -130,6 +133,8 @@ void function InitControlsGamepadPanel( var panel )
 	file.conVarDataList.append( CreateSettingsConVarData( "gamepad_use_type", eConVarType.INT ) )
 	file.conVarDataList.append( CreateSettingsConVarData( "gamepad_custom_pilot", eConVarType.INT ) )
 	file.conVarDataList.append( CreateSettingsConVarData( "gamepad_stick_layout", eConVarType.INT ) )
+
+	file.conVarDataList.append( CreateSettingsConVarData( "gamepad_toggle_survivalSlot_to_weaponInspect", eConVarType.INT ) )
 }
 
 
@@ -234,6 +239,10 @@ void function RestoreGamepadDefaults()
 	SetConVarToDefault( "joy_rumble" )
 	SetConVarToDefault( "gamepad_use_type" )
 	RestoreADSDefaultsGamePad()
+
+                   
+	SetConVarToDefault( "gamepad_toggle_survivalSlot_to_weaponInspect" )
+      
 
 	SetConVarToDefault( "gamepad_button_layout" )
 	SetConVarToDefault( "gamepad_stick_layout" )

@@ -5006,7 +5006,7 @@ StatCalcFuncInfo function SetupGetRingFuryCombinedBadgeEarned( StatEntry calcEnt
 		int damage          	= GetStat_Int( player, ResolveStatEntry( CAREER_STATS.s08e01_ringfury_challenge_3 ), when )
 		int knockdowns			= GetStat_Int( player, ResolveStatEntry( CAREER_STATS.s08e01_ringfury_challenge_4 ), when )
 
-		if ( heatshield >= 5000 && damage >= 10000 && knockdowns >= 100 )
+		if ( heatshield >= 1000 && damage >= 10000 && knockdowns >= 100 )
 			count = 1
 
 		return count

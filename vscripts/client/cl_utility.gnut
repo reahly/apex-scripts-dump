@@ -731,9 +731,9 @@ AttackerDisplayNameStruct function GetAttackerDisplayNamesFromClassname( entity 
 	{
 		string clubTag = ""
 
-		clubTag = ent.GetClubTag()
-		if ( clubTag != "" )
-			clubTag = "[" + clubTag + "]"
+		//
+		//
+		//
 
 		string attackerName = isAttacker ? GetKillerName( ToEHI( ent ) ) : GetPlayerName( ToEHI( ent ) )
 		names.attackerName = clubTag + attackerName

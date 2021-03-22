@@ -77,9 +77,10 @@ const float MAX_FISSURE_SIZE = 29001.0 //
 const float INVALID_FISSURE_RADIUS = -1.0
 const float FISSURE_PING_SIZE_PERCENT_OFFSET = 0.88
 const float PING_TRACEBLOCKER_HEIGHT = 18000
-const float NEAR_FISSURE_MESSAGING_RADIUS_OFFSET = 4000.0
-const float FISSURE_DIALOGUE_COOLDOWN_LONG = 120.0
-const float FISSURE_DIALOGUE_COOLDOWN_SHORT = 90.0
+const float NEAR_FISSURE_MESSAGING_RADIUS_OFFSET = 2000.0
+const float FAR_FISSURE_MESSAGING_RADIUS_OFFSET = 4000.0
+const float FISSURE_DIALOGUE_COOLDOWN = 240.0
+const float FISSURE_DIALOGUE_COOLDOWN_LONG = 300.0
 const float DEATHFIELD_SIZE_PERCENT_OFFSET = 0.6
 const float MINIMAP_PINGRADIUS_PERCENT_OFFSET = 0.025 //
 const float MAP_PINGRADIUS_PERCENT_OFFSET = 0.38 //
@@ -283,7 +284,6 @@ void function RingCollapseMode_Init()
 	
 	AddCallback_EntitiesDidLoad( EntitiesDidLoad_RingCollapse )
 #if(false)
-
 
 
 //
@@ -973,6 +973,15 @@ void function __EntitiesDidLoad()
 
 
 //
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2285,34 +2294,6 @@ bool function RingCollapseMode_IsPositionWithinRadius( float radius, float modif
 
 
 
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
 #endif //
 
 #if(CLIENT)
@@ -2453,6 +2434,21 @@ void function RingCollapseMode_ServerCallback_AnnouncementSplash()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 

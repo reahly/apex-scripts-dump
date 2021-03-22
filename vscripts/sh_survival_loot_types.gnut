@@ -333,8 +333,11 @@ LootActionStruct function GroundAction_ForEquipment( entity player, LootRef loot
 		}
 		else //
 		{
+			//
+			//
+			//
 			#if(CLIENT)
-			if ( player != GetLocalViewPlayer() )
+			if ( player != GetLocalClientPlayer() )
 			{
 				as.action = eLootAction.NONE
 				return as

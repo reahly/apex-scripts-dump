@@ -170,11 +170,19 @@ global const table<int, int> GAMEPAD_BUTTON_INDECES =
 #if CLIENT || UI 
 void function ShGamepad_LevelInit()
 {
-	SetDefaultHeldBindings()
+                      
+	#if CLIENT || UI 
+		UpdateSettings()
+	#endif
+     
+                         
+      
 
-                    
-	SetHeldBindingsWithGadgetButton()
-       
+                   
+	#if(CLIENT)
+		AddCallback_OnSettingsUpdated( UpdateSettings )
+	#endif
+      
 }
 #endif
 
@@ -189,7 +197,7 @@ void function SetDefaultHeldBindings()
 			["reload", "use; use_long"],
 			["use", "reload; use_long"],
 			["reload; use", "use_long; use"],
-			["scriptCommand3", "scriptCommand6"],
+			["scriptCommand3", "weapon_inspect"],
 			["scriptCommand4", "scriptCommand2"],
 			["weaponselectordnance", "strafe"],
 			["scriptCommand5; chat_wheel", "scriptCommand1"],
@@ -216,6 +224,23 @@ void function SetHeldBindingsWithGadgetButton()
 	#endif
 }
 
+                   
+#if CLIENT || UI 
+void function UpdateSettings()
+{
+	int useSurvivalSlotButton = GetConVarInt("gamepad_toggle_survivalSlot_to_weaponInspect")
+
+	if ( useSurvivalSlotButton == 0 ) //
+	{
+		SetHeldBindingsWithGadgetButton()
+	}
+	else
+	{
+		SetDefaultHeldBindings()
+	}
+}
+#endif
+      
 
 #if CLIENT || UI 
 void function SetStandardAbilityBindingsForPilot( entity player )
@@ -543,6 +568,7 @@ array<string> function GetABBindsForBaseBind( string baseBind )
 		case "weaponSelectPrimary1":
 		case "weaponSelectPrimary2":
 		case "+scriptCommand3":
+		case "weapon_inspect":
 		case "toggle_inventory":
 		case "toggle_map":
 		case "chat_wheel":

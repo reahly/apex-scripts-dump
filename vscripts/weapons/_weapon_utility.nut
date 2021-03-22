@@ -1428,7 +1428,7 @@ bool function PlantStickyEntity( entity ent, DeployableCollisionParams cp, vecto
 		if ( !LegalOrigin( plantPosition ) )
 			return false
 
-		if ( trace.startSolid && ent.GetProjectileWeaponSettingBool( eWeaponVar.grenade_mover_destroy_when_planted ) )
+		if ( trace.startSolid && ent.GetProjectileWeaponSettingBool( eWeaponVar.grenade_mover_destroy_when_planted ) && IsValid( trace.hitEnt ) && !trace.hitEnt.IsWorld() )
 		{
 			#if(false)
 

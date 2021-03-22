@@ -379,6 +379,7 @@ void function RemoteFunctions_Init_Begin()
 
                     
 			Remote_RegisterUIFunction( "EnableCharacterChangeInFiringRange", "bool" )
+			Remote_RegisterClientFunction ( "ServerToClient_EnableCharacterSelect", "bool" )
       
 
                           
@@ -491,9 +492,6 @@ void function RemoteFunctions_Init_Begin()
       
                    
                                                                                     
-      
-                            
-			ShMapToy_ExplosiveHold_RegisterNetworking()
       
                   
 			Caustic_TT_RegisterNetworking()

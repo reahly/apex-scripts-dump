@@ -794,7 +794,8 @@ string function GetObsfuscatedName( EHI playerEHI )
 #if(CLIENT)
 string function GetKillerName( EHI playerEHI )
 {
-	string clubTag = GetPlayerClubName( playerEHI )
+	string clubTag = GetPlayerClubTag( playerEHI )
+
 	string playerName = EHI_GetName( playerEHI )
 	if ( (ShouldPlayerNameBeAnonymized( playerEHI ) || !DisplayKillerName()) && playerEHI != LocalClientEHI() && EHI_GetTeam( playerEHI ) != EHI_GetTeam( LocalClientEHI() ) )
 		return GetObsfuscatedName( playerEHI )
@@ -807,7 +808,7 @@ string function GetKillerName( EHI playerEHI )
 #if(CLIENT)
 string function GetPlayerName( EHI playerEHI )
 {
-	string clubTag = GetPlayerClubName( playerEHI )
+	string clubTag = GetPlayerClubTag( playerEHI )
 
 	string playerName = EHI_GetName( playerEHI )
 	if ( (ShouldPlayerNameBeAnonymized( playerEHI ) || !DisplayObituaryName()) && playerEHI != LocalClientEHI() && EHI_GetTeam( playerEHI ) != EHI_GetTeam( LocalClientEHI() ) )
@@ -819,7 +820,7 @@ string function GetPlayerName( EHI playerEHI )
 
 
 #if(CLIENT)
-string function GetPlayerClubName( EHI playerEHI )
+string function GetPlayerClubTag( EHI playerEHI )
 {
 	if ( Clubs_AreObituaryTagsEnabledByPlaylist() == false )
 	{

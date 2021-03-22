@@ -78,7 +78,7 @@ void function ClubJoinRequests_RefreshJoinRequests()
 		return
 	}
 
-	ClubLanding_RefreshLanding()
+	ClubLanding_BeginLandingRefresh()
 }
 
 //

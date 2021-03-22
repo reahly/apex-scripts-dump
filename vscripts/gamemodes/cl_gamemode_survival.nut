@@ -1403,6 +1403,14 @@ void function UpdateDpadHud( entity player )
 	RuiSetImage( file.dpadMenuRui, "gadgetIcon", gadgetIcon )
 	RuiSetInt( file.dpadMenuRui, "gadgetCount", ammo )
 	RuiSetInt( file.dpadMenuRui, "maxGadgetCount", maxAmmoCount )
+
+	int useSurvivalSlotButton = GetConVarInt("gamepad_toggle_survivalSlot_to_weaponInspect")
+	bool showGadgetButtonText = true
+	if ( useSurvivalSlotButton == 0 ) //
+		showGadgetButtonText = true
+	else
+		showGadgetButtonText = false
+	RuiSetBool( file.dpadMenuRui, "showGadgetButtonText", showGadgetButtonText )
        
 
                 
@@ -3793,13 +3801,15 @@ void function OnGameStateChanged(entity player, int oldVal, int newVal, bool act
 
 	if ( gamestate == eGameState.Playing && actuallyChanged )
 	{
-		array<entity> players = GetPlayerArray()
-		//
-		int myTeam = GetLocalClientPlayer().GetTeam()
-		foreach ( enemyPlayer in players )
+		if ( Clubs_AreDisabledByPlaylist() == false && Clubs_AreObituaryTagsEnabledByPlaylist() )
 		{
-			if ( enemyPlayer.GetTeam() != myTeam )
-				enemyPlayer.RequestClubData()
+			array<entity> players = GetPlayerArray()
+			int myTeam = GetLocalClientPlayer().GetTeam()
+			foreach ( otherPlayer in players )
+			{
+				if ( otherPlayer.GetTeam() != myTeam )
+					otherPlayer.RequestClubData()
+			}
 		}
 	}
 
@@ -5952,7 +5962,7 @@ void function EvolvingArmor_SetEvolutionRuiAnimTime()
 
 void function OnSettingsUpdated()
 {
-
+	ServerCallback_RefreshInventoryAndWeaponInfo()
 }
                           
 void function ShowTeamNameInHud()

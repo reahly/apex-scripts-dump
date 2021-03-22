@@ -2333,6 +2333,7 @@ void function WorkbenchThink( entity ent, entity playerUser )
 	settings.duration = 0.3
 
 	ent.EndSignal( "OnDestroy" )
+	playerUser.EndSignal( "StartPhaseShift" )
 
 	waitthread ExtendedUse( ent, playerUser, settings )
 }
@@ -2355,6 +2356,12 @@ ExtendedUseSettings function WorkbenchExtendedUseSettings( entity ent, entity pl
 }
 
 #if(false)
+
+
+
+
+
+
 
 
 

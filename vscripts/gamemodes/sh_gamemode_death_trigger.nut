@@ -73,7 +73,6 @@ void function ShGameMode_DeathTrigger_Init()
 
 
 
-
 //
 
 
@@ -279,14 +278,6 @@ void function DeathTrigger_OnGameState_Playing()
 
 
 //
-
-
-
-
-
-
-
-
 
 
 

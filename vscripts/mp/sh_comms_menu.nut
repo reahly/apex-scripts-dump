@@ -1933,6 +1933,7 @@ void function HandleWeaponInspectSelection( )
 		array<int> pagesAllowedToGoToInspect =
 		[
 			eChatPage.DEFAULT,
+			eChatPage.PING_MAIN_2,
 		]
 
 		if ( pagesAllowedToGoToInspect.contains( s_currentChatPage )  )

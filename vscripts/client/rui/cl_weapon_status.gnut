@@ -663,8 +663,8 @@ void function PrimaryWeapon_UpdateFireSelectHUD( entity weapon )
                                                                                                                                      
      
         
-      
-                        
+         
+                           
                                                              
      
                                                        
@@ -672,14 +672,19 @@ void function PrimaryWeapon_UpdateFireSelectHUD( entity weapon )
          
                                                                                                               
      
+        
          
-			if ( IsWeaponInBurstMode( weapon ) )
 			{
-				SetWeaponToggleHUD( $"rui/hud/weapon_toggle/burst", "#FIRE_MODE_BURST", 2, currentFireModeIndex )
+				SetWeaponToggleHUD( $"rui/hud/weapon_toggle/single_shot", "#FIRE_MODE_SINGLE", 2, currentFireModeIndex )
 			}
-			else if ( IsWeaponInAutomaticMode( weapon ) )
-			{
-                               
+		}
+		else if ( IsWeaponInBurstMode( weapon ) )
+		{
+			SetWeaponToggleHUD( $"rui/hud/weapon_toggle/burst", "#FIRE_MODE_BURST", 2, currentFireModeIndex )
+		}
+		else if ( IsWeaponInAutomaticMode( weapon ) )
+		{
+                                  
                                                                       
      
                                       
@@ -688,8 +693,8 @@ void function PrimaryWeapon_UpdateFireSelectHUD( entity weapon )
                                                                                                           
      
         
-      
-                 
+         
+                    
 				if ( DoesModExist( weapon, "hopup_paintball" ) && IsModActive( weapon, "hopup_paintball" ) )
 				{
 					if ( currentFireModeIndex == 0 )
@@ -710,15 +715,14 @@ void function PrimaryWeapon_UpdateFireSelectHUD( entity weapon )
 					}
 				}
 				else
-      
-				{
-					SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_AUTO", 2, currentFireModeIndex )
-				}
-			}
-			else
+         
 			{
-				ClearWeaponToggleHUD()
+				SetWeaponToggleHUD( $"rui/hud/weapon_toggle/automatic", "#FIRE_MODE_AUTO", 2, currentFireModeIndex )
 			}
+		}
+		else
+		{
+			ClearWeaponToggleHUD()
 		}
 	}
 	//

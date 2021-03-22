@@ -13,6 +13,7 @@ global function UpdateClubAdminButtons
 global function UpdateJoinRequestsButton
 global function ClubLanding_UpdateViewAnnouncementButton
 
+global function ClubLanding_BeginLandingRefresh
 global function ClubLanding_RefreshLanding
 global function ClubLanding_UpdateUIPresentation
 global function ClubLobby_TryUpdatingMemberListForPresence
@@ -410,14 +411,37 @@ void function ClubLanding_RefreshLandingThread()
 	Signal( uiGlobal.signalDummy, REFRESH_LANDING_SIGNAL )
 	EndSignal( uiGlobal.signalDummy, REFRESH_LANDING_SIGNAL )
 
-	while ( !IsFullyConnected() )
-		WaitFrame()
-
+	bool isFullyConnected = false
+	bool isItemFlavorRegFinished = false
 	int currentOPState = Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT )
-	if ( currentOPState == eClubQueryState.FAILED || currentOPState == eClubQueryState.PROCESSING )
-		WaitFrame()
 
-	ClubLanding_RefreshLanding()
+	while ( isFullyConnected == false )
+	{
+		isFullyConnected = IsFullyConnected()
+		WaitFrame()
+	}
+
+	while ( isItemFlavorRegFinished == false )
+	{
+		isItemFlavorRegFinished = IsItemFlavorRegistrationFinished()
+		WaitFrame()
+	}
+
+	while ( currentOPState == eClubQueryState.FAILED || currentOPState == eClubQueryState.PROCESSING )
+	{
+		currentOPState = Clubs_GetClubQueryState( CLUB_OP_GET_CURRENT )
+		WaitFrame()
+	}
+
+	OnThreadEnd(
+		function() : ( isFullyConnected, isItemFlavorRegFinished, currentOPState )
+		{
+			if ( isFullyConnected && isItemFlavorRegFinished && currentOPState != eClubQueryState.FAILED && currentOPState != eClubQueryState.PROCESSING )
+			{
+				ClubLanding_RefreshLanding()
+			}
+		}
+	)
 }
 
 

@@ -41,14 +41,15 @@ const vector VOID_RING_INVALID_PLACEMENT_MIN_AREA = <-15,-15,-50>
 const vector VOID_RING_INVALID_PLACEMENT_MAX_AREA = <15,15,50>
 
 const float VOID_RING_THROW_BACKSPIN = -600
-const int VOID_RING_RADIUS = 300 					//
-const int VOID_RING_AR_RADIUS_OFFSET = 15 			//
-const int VOID_RING_MIN_RADIUS = 120 				//
-const int VOID_RING_BELOW_RANGE = 2500 				//
-const int VOID_RING_WARNING_PULSE_COUNT = 2 		//
-const float VOID_RING_EXPAND_TIME = 0.4 			//
-const float VOID_RING_WP_HP_DRAW_DIST_MIN = 350 	//
-const float VOID_RING_WP_HP_DRAW_DIST_MAX = 2500 	//
+const int VOID_RING_RADIUS = 300 							//
+const int  VOID_RING_AR_RADIUS_OFFSET = 15 					//
+const int VOID_RING_MIN_RADIUS = 120 						//
+const int VOID_RING_BELOW_RANGE = 2500 						//
+const int VOID_RING_NORMAL_WARNING_PULSE_COUNT 		= 2 	//
+const int VOID_RING_FINAL_CIRCLE_WARNING_PULSE_COUNT= 0		//
+const float VOID_RING_EXPAND_TIME = 0.4 					//
+const float VOID_RING_WP_HP_DRAW_DIST_MIN = 350 			//
+const float VOID_RING_WP_HP_DRAW_DIST_MAX = 2500 			//
 
 const float VOID_RING_HEALTH = 100.0
 const float VOID_RING_MAX_HEALTH = 100.0
@@ -90,8 +91,8 @@ const string VOID_RING_SOUND_TIMEOUT = "VoidRing_Deactivate"
 const string VOID_RING_SOUND_INSIDE = "VoidRing_Inside_1P"
 const string VOID_RING_DEACTIVATE_1P_SOUND = "VoidRing_Holster_1P"
 const string VOID_RING_DEACTIVATE_3P_SOUND = "VoidRing_Holster_3P"
-const string SOUND_DEATHFIELD_START = "Survival_Circle_Enter"
-const string SOUND_DEATHFIELD_STOP = "Survival_Circle_Exit"
+const string SOUND_DEATHFIELD_START = "Survival_Circle_Enter_3p"
+const string SOUND_DEATHFIELD_STOP = "Survival_Circle_Exit_3p"
 
 //
 const float VOID_RING_DMG_TICK_R0 = 0.05 //
@@ -221,6 +222,13 @@ void function OnWeaponReadyToFire_void_ring (entity weapon )
 {
 	entity ownerPlayer = weapon.GetWeaponOwner()
 	Assert( ownerPlayer.IsPlayer() )
+
+	#if(false)
+
+
+
+#endif
+
 }
 
 void function OnWeaponTossPrep_void_ring( entity weapon, WeaponTossPrepParams prepParams )
@@ -241,12 +249,13 @@ void function OnWeaponTossPrep_void_ring( entity weapon, WeaponTossPrepParams pr
 var function OnWeaponTossReleaseAnimEvent_void_ring( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
 	int ammoReq = weapon.GetAmmoPerShot()
+	entity player = weapon.GetWeaponOwner()
+
 	weapon.EmitWeaponSound_1p3p( GetGrenadeThrowSound_1p( weapon ), GetGrenadeThrowSound_3p( weapon ) )
 
 	entity deployable = ThrowDeployable( weapon, attackParams, 1.0, OnVoidRingPlanted, null,  <0,VOID_RING_THROW_BACKSPIN,0> )
 	if ( deployable )
 	{
-		entity player = weapon.GetWeaponOwner()
 		PlayerUsedOffhand( player, weapon, true, deployable )
 
 		#if(false)
@@ -913,25 +922,6 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -939,13 +929,8 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 //
-//
-//
 
 
-
-
-//
 
 
 
@@ -969,32 +954,8 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 //
-
-
-
 //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //
-
-
 
 
 
@@ -1022,13 +983,7 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
-
-
-
-
-
-
-
+//
 
 
 
@@ -1040,12 +995,6 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
-
-
-
-
-
-//
 
 
 
@@ -1066,16 +1015,12 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 //
-//
-//
-//
-//
-//
-//
-//
 
 
-//
+
+
+
+
 
 
 
@@ -1115,18 +1060,7 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
-
-
-
-
-
-
-
-
-
 //
-//
-
 
 
 
@@ -1145,6 +1079,18 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
+
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+//
 
 
 
@@ -1193,6 +1139,8 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
+//
+//
 
 
 
@@ -1206,40 +1154,7 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//
 
 
 
@@ -1276,9 +1191,6 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
-//
-//
-//
 
 
 
@@ -1287,41 +1199,6 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-//
-
-
-//
-//
-//
 
 
 
@@ -1414,6 +1291,143 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
+//
+//
+//
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//
+
+
+
+
+//
+
+
+//
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
 
 
 
@@ -1442,7 +1456,6 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 
 
-
 //
 
 //
@@ -1489,7 +1502,6 @@ void function OnVoidRingPlanted( entity projectile, DeployableCollisionParams co
 
 //
 //
-
 
 
 
@@ -1710,7 +1722,10 @@ void function CL_VoidRingHintThread( entity player )
 				{
 					if( IsControllerModeActive() )
 					{
-						AnnouncementMessageRight( player, "#HINT_USE_VOID_RING_CONSOLE" , "Void Ring Warning", <1, 1, 1> )
+						int useSurvivalSlotButton = GetConVarInt("gamepad_toggle_survivalSlot_to_weaponInspect")
+
+						if ( useSurvivalSlotButton == 0 ) //
+							AnnouncementMessageRight( player, "#HINT_USE_VOID_RING_CONSOLE" , "Void Ring Warning", <1, 1, 1> )
 					}
 					else
 						AnnouncementMessageRight( player, "#HINT_USE_VOID_RING_PC" , "Void Ring Warning", <1, 1, 1> )
@@ -1770,6 +1785,7 @@ void function VoidRing_EnterDome( entity player, int statusEffect, bool actually
 {
 	if ( player != GetLocalViewPlayer() )
 		return
+	EmitSoundOnEntity( player, VOID_RING_SOUND_INSIDE )
 
 	thread CL_TrackVoidHP_Thread( player )
 
@@ -1779,6 +1795,8 @@ void function VoidRing_ExitDome( entity player, int statusEffect, bool actuallyC
 {
 	if ( player != GetLocalViewPlayer() )
 		return
+
+	StopSoundOnEntity( player, VOID_RING_SOUND_INSIDE )
 
 	//
 	if( file.voidRingHUDRui != null )
@@ -1802,6 +1820,7 @@ void function OnWaypointCreated( entity wp )
 	}
 
 }
+
 
 void function VoidRing_WaypointUI_Thread( entity wp )
 {

@@ -3304,7 +3304,7 @@ void function SURVIVAL_UpdateStringForEquipmentAction( entity player, string equ
 
 				bool canAttach = (IsValid( attachWeapon ) &&
 									SURVIVAL_Loot_IsRefValid( attachWeaponData.ref ) &&
-									CanAttachToWeapon( actionLoot.ref, attachWeaponData.baseWeapon ) )
+									CanAttachToWeapon( actionLoot.ref, attachWeaponData.ref ) )
 
 				if ( !canAttach )
 				{

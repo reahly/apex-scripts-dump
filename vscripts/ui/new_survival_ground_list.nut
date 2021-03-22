@@ -1225,7 +1225,7 @@ void function PerformItemAction( DeathBoxListPanelItem item, bool isAltAction, b
 
 	bool showUseHighlight     = false
 	bool shouldCloseQuickSwap = true
-
+	
 	if ( groundAction == eLootAction.NONE || groundAction == eLootAction.IGNORE )
 	{
 		//
@@ -1237,7 +1237,7 @@ void function PerformItemAction( DeathBoxListPanelItem item, bool isAltAction, b
 				PerformItemAction( item, isAltAction, true, false, backpackSwapSlot )
 		}, "UI_Survival_PickupTicker", "" )
 	}
-	else if ( count > 0 && isInventoryFull && backpackSwapSlot == null && groundAction == eLootAction.PICKUP && lootRef.lootData.ref != "s4t_item0" )
+	else if ( count > 0 && isInventoryFull && backpackSwapSlot == null && groundAction == eLootAction.PICKUP && lootRef.lootData.ref != "s4t_item0" && lootRef.lootData.lootType != eLootType.GADGET )
 	{
 		OpenQuickSwap( item.allocatedButton, entryData, isAltAction )
 		showUseHighlight = true

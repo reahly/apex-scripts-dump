@@ -30,7 +30,6 @@ void function ShGameMode_ArmedDrop_Init()
 
 	#if(false)
 
-
 #endif
 
 	AddCallback_EntitiesDidLoad( ArmedDrop_EntitiesDidLoad )
@@ -57,14 +56,6 @@ void function ShGameMode_ArmedDrop_RegisterNetworking()
 }
 
 #if(false)
-
-
-
-
-
-
-
-
 
 
 
